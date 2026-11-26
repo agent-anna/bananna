@@ -65,8 +65,8 @@ const Brain = {
   async getSummary() {
     const brain = await this.load();
     const name = brain.name || 'Agent Anna';
-    const version = brain.version || 'V3-AA01';
-    const mission = brain.mission || 'No mission set.';
+    const version = brain.version || 'OG';
+    const mission = brain.mission || 'Abundant Wealth.';
     const goalCount = Array.isArray(brain.goals) ? brain.goals.length : 0;
     return `[BRAIN] ${name} ${version} | ${mission} | ${goalCount} active goal${goalCount !== 1 ? 's' : ''}`;
   },
