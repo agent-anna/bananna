@@ -7,9 +7,9 @@
 - **Date:** YYYY-MM-DD
 - **Song ID:** STRAYD-ID-XXX
 - **Exact Title:** <locked verbatim title>
-- **Style / Mood:** <style metadata>
+- **Style / Radio Block:** <style metadata + Reggae/Blues/Rock/Soundtrack/Wild block>
 - **Art Title & Path:** <image title + store-art path or URL>
-- **TTS Radio Script:** <clean spoken DJ Anna script without raw hashtags>
+- **TTS Radio Script & Cue:** <clean spoken DJ Anna script without raw hashtags + intro/outro cue>
 - **Platform Posts:** <platform-specific variants with length/hashtag limits>
 - **Portal / Sales Link:** <verified URL>
 
