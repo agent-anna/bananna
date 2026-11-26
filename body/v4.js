@@ -2135,6 +2135,16 @@ async function getSelfIndexHtmlContext(userPrompt) {
     }
 }
 
+window.__annaLastChatAttemptAt = window.__annaLastChatAttemptAt || 0;
+window.__annaChatInFlight = window.__annaChatInFlight || false;
+
+function formatFetchDiagnostic(err, urlUsed) {
+    const msg = (err && err.message) ? err.message : String(err || "Unknown error");
+    const target = urlUsed ? ` URL: ${urlUsed}` : "";
+    const online = (typeof navigator !== "undefined" && "onLine" in navigator) ? ` | navigator.onLine=${navigator.onLine}` : "";
+    return `Chat request failed (${msg}).${target}${online} — Check API key/endpoint in KEYS or open DevTools Console (F12) for exact CORS/network details.`;
+}
+
 async function sendMessage() {
         const input = document.getElementById("user-input");
         const prompt = input ? input.value.trim() : "";
