@@ -2334,7 +2334,6 @@ async function sendMessage() {
             const gitbookContext = fastMode ? "" : getGitbookMirrorContext(prompt);
             const memoryFileContext = fastMode ? "" : await getRequestedMemoryContext(prompt);
             const systemPrompt = [getLiveClockHeader(), selfIndexContext, voiceHeader, liveIntelBlock, vaultContext, pillarContext, offlineHits, gitbookContext, memoryFileContext].filter(Boolean).join("\n\n");
-
             const result = await callDahlDirect(
                 [
                     { role: "system", content: systemPrompt },
