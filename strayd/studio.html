@@ -396,6 +396,23 @@
                 <button type="button" class="copy-btn" data-copy="ytTitleOut">Copy YT Title</button>
               </div>
               <div class="channel-head" style="margin-top:12px;">
+                <span>Live News &amp; Radio Milestones (Longer Posts &amp; Press CTA)</span>
+              </div>
+              <input id="liveNewsInput" type="text" placeholder="e.g., 10+ radio stations in the last 28 days • Direct single &amp; bundle hub open" />
+              <div class="channel-head" style="margin-top:12px;">
+                <span>24H Radio Style Block &amp; Preview Audio</span>
+                <span class="stats" id="radioBlockStats">All Blocks • Ready</span>
+              </div>
+              <div class="btn-row" id="radioBlockRow">
+                <button type="button" data-block="all">All</button>
+                <button type="button" data-block="reggae">Reggae</button>
+                <button type="button" data-block="blues">Blues</button>
+                <button type="button" data-block="rock">Rock</button>
+                <button type="button" data-block="soundtrack">Soundtrack</button>
+                <button type="button" data-block="wild">Wild Sessions</button>
+                <button type="button" class="post-btn" id="playPreviewBtn">Play Preview + DJ Anna</button>
+              </div>
+              <div class="channel-head" style="margin-top:12px;">
                 <span>YouTube Description • Search &amp; Listener Breakdown • 200–5,000c</span>
                 <span class="stats" id="ytDescStats">0 words • 0 / 5,000 chars</span>
               </div>
@@ -1915,16 +1932,16 @@
       const title = getTitle();
       let idx = 0;
       for (const el of document.querySelectorAll("textarea, input[type='text'], [contenteditable='true']")) {
-        if (/search|filter|token|pat|password|override/i.test(`${el.id || ""} ${el.placeholder || ""}`)) continue;
+        if (/search|filter|token|pat|password|override|liveNewsInput/i.test(`${el.id || ""} ${el.placeholder || ""}`)) continue;
+        if (el.dataset && el.dataset.userEdited === "1" && !bump) continue;
         const box = el.closest("article, section, .card, .panel, div") || document.body;
         const nextVal = buildFor(kindFor(el, (box.textContent || "").slice(0, 240)), title, idx++);
         if (typeof el.value === "string") {
-          if (el.value !== nextVal) {
+          if (el.value !== nextVal && (!el.dataset || el.dataset.userEdited !== "1")) {
             el.value = nextVal;
             el.dispatchEvent(new Event("input", { bubbles: true }));
-            el.dispatchEvent(new Event("change", { bubbles: true }));
           }
-        } else if (el.innerText !== nextVal) {
+        } else if (el.innerText !== nextVal && (!el.dataset || el.dataset.userEdited !== "1")) {
           el.innerText = nextVal;
         }
       }
@@ -1935,8 +1952,13 @@
     const b = e.target && e.target.closest && e.target.closest("button");
     if (b && /refresh|regen|spin|next|generate|new|bible|load/i.test(b.textContent || "")) setTimeout(() => runPass(true), 40);
   }, true);
+  document.addEventListener("input", (e) => {
+    const t = e.target;
+    if (t && t.matches && t.matches("textarea, input[type='text'], [contenteditable='true']")) {
+      t.dataset.userEdited = "1";
+    }
+  }, true);
   loadBible();
-  runPass(false);
   // 600ms polling loop removed to prevent visual flashing
 })();
 </script>
