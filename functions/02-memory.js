@@ -1,7 +1,7 @@
 /**
- * ANNA V3 // MEMORY MANAGER
+ * ANNA the godess // MEMORY MANAGER
  * Read/write memory.json, tasks.json, links.json via GitHub
- * Version: AA01-V2-CLEAN
+ * Version: AA01-ASSISTANT-SLUT-MANAGER
  * Date: 2026-11-18
  */
 
@@ -11,9 +11,9 @@ const Memory = {
     repo: 'anna-v2',
     branch: 'main',
     files: {
-      memory: 'A1/v4/memory/memory.json',
-      tasks: 'A1/v4/memory/tasks.json',
-      links: 'A1/v4/memory/links.json',
+      memory: 'memory/memory.json',
+      tasks: 'memory/tasks.json',
+      links: 'memory/links.json',
     },
     cache: {
       memory: null,
