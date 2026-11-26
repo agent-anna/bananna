@@ -2837,5 +2837,130 @@
   }
 })();
 </script>
+<style id="anna-clean-workspace-css">
+  #sceneBriefMeta, #visualRuleMeta, #gateStatus, #bibleBox { display: none !important; }
+  .card-title:has(+ #bibleBox),
+  [data-automate="cadence-badge"],
+  [data-automate="strategy-badge"] { display: none !important; }
+  .anna-edit-btn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.08);
+    color: inherit;
+    font-size: 0.76rem;
+    cursor: pointer;
+  }
+</style>
+<script>
+(() => {
+  // Hide any card whose title references docs/v4BIBLE on the main studio workspace
+  function hideClutterBlocks() {
+    document.querySelectorAll(".card-title, .badge, .hero-meta, .muted").forEach((el) => {
+      const t = (el.textContent || "").trim();
+      if (
+        /^3\.\s*docs\/v4BIBLE/i.test(t) ||
+        /^Live-action direction:/i.test(t) ||
+        /^Visual law:/i.test(t) ||
+        /^Approval gate:/i.test(t) ||
+        /^First in Catalog JSON$/i.test(t) ||
+        /TT\s*2–3\/d/i.test(t)
+      ) {
+        const card = el.closest("section, article, .card, .panel");
+        if (card && card.querySelector("#bibleBox")) {
+          card.style.display = "none";
+        } else {
+          el.style.display = "none";
+        }
+      }
+    });
+  }
+
+  // Add an explicit Edit button alongside Post on every platform card
+  function ensureEditButtons() {
+    document.querySelectorAll("button.post-btn[data-source]").forEach((postBtn) => {
+      const row = postBtn.parentElement;
+      const srcId = postBtn.getAttribute("data-source");
+      if (!row || !srcId) return;
+      if (row.querySelector(`.anna-edit-btn[data-edit-source="${srcId}"]`)) return;
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "anna-edit-btn";
+      editBtn.setAttribute("data-edit-source", srcId);
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => {
+        const target = document.getElementById(srcId);
+        if (!target) return;
+        target.removeAttribute("readonly");
+        target.dataset.userEdited = "1";
+        target.focus();
+        target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+      row.insertBefore(editBtn, postBtn);
+    });
+  }
+
+  // Clean spoken text so Anna never reads URLs, camera directions, catalog IDs, or '#'
+  function cleanForAnnaSpeech(raw) {
+    let s = String(raw || "");
+    s = s.replace(/Live-action direction:[^\n]*/gi, " ");
+    s = s.replace(/Visual law:[^\n]*/gi, " ");
+    s = s.replace(/https?:\/\/\S+/gi, " the artist hub ");
+    s = s.replace(/\bwww\.\S+/gi, " the artist hub ");
+    s = s.replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "");
+    s = s.replace(/\{\{TITLE\}\}/gi, "this single");
+    s = s.replace(/#/g, "");
+    s = s.replace(/[|•★☆►▪▸]+/g, ", ");
+    s = s.replace(/\s+/g, " ").trim();
+    return s;
+  }
+
+  function pickAnnaVoice(voices) {
+    if (!Array.isArray(voices) || !voices.length) return null;
+    const preferred = [
+      /anna/i, /samantha/i, /victoria/i, /aria/i, /jenny/i, /zira/i,
+      /google uk english female/i, /google us english/i, /female/i
+    ];
+    for (const rx of preferred) {
+      const hit = voices.find((v) => rx.test(v.name || ""));
+      if (hit) return hit;
+    }
+    const nonMale = voices.find((v) => !/\b(male|daniel|david|fred|alex|jorge|thomas)\b/i.test(v.name || ""));
+    return nonMale || voices[0];
+  }
+
+  // Wrap SpeechSynthesisUtterance globally so every TTS read uses clean spoken text + Anna-preferred voice
+  if (typeof window.SpeechSynthesisUtterance === "function" && !window.__annaUtteranceWrapped) {
+    const OrigUtterance = window.SpeechSynthesisUtterance;
+    function AnnaUtterance(text) {
+      const cleaned = cleanForAnnaSpeech(text);
+      const u = new OrigUtterance(cleaned);
+      u.rate = 0.98;
+      u.pitch = 1.06;
+      try {
+        const voices = ("speechSynthesis" in window && window.speechSynthesis.getVoices) ? window.speechSynthesis.getVoices() : [];
+        const chosen = pickAnnaVoice(voices);
+        if (chosen) u.voice = chosen;
+      } catch (_) {}
+      return u;
+    }
+    AnnaUtterance.prototype = OrigUtterance.prototype;
+    window.SpeechSynthesisUtterance = AnnaUtterance;
+    window.__annaUtteranceWrapped = true;
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      hideClutterBlocks();
+      ensureEditButtons();
+      setTimeout(() => { hideClutterBlocks(); ensureEditButtons(); }, 350);
+    });
+  } else {
+    hideClutterBlocks();
+    ensureEditButtons();
+    setTimeout(() => { hideClutterBlocks(); ensureEditButtons(); }, 350);
+  }
+})();
+</script>
 </body>
 </html>
