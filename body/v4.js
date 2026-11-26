@@ -2,8 +2,8 @@
     "use strict";
 
     const GITHUB_REPO_OWNER = "agent-anna";
-    const GITHUB_REPO_NAME = "anna-v2";
-    const WORKSPACE_ROOT = "A1/v4";
+    const GITHUB_REPO_NAME = "home";
+    const WORKSPACE_ROOT = "";
     const SCRAPE_WORKFLOW_FILE = "aa01-intel-feed.yml";
     const DAHL_ENDPOINT = "https://inference.dahl.global/v1/chat/completions";
     const DEFAULT_MODEL = "MiniMaxAI/MiniMax-M2.7";
