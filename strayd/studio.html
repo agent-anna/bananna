@@ -2962,5 +2962,149 @@
   }
 })();
 </script>
+<style id="anna-top-song-art-css">
+  /* Hide noisy hero sub-lines & building status near artwork */
+  .hero-sub, .hero-role, .build-status, #buildStatus, #cadenceMeta, #strategyMeta,
+  [data-role="hero-sub"], [data-status="building"] { display: none !important; }
+
+  /* Dock song picker & artwork cleanly side-by-side at top */
+  #annaTopDock {
+    display: grid;
+    grid-template-columns: minmax(240px, 380px) minmax(260px, 1fr);
+    gap: 18px;
+    align-items: start;
+    margin: 12px 0 18px;
+  }
+  @media (max-width: 820px) {
+    #annaTopDock { grid-template-columns: 1fr; }
+  }
+  #annaTopArtBox .sleeve, #annaTopArtBox img {
+    width: 100% !important;
+    max-width: 380px !important;
+    max-height: 380px !important;
+    height: auto !important;
+    object-fit: cover !important;
+    border-radius: 10px;
+  }
+  #annaTopSongBox {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.03);
+  }
+  #annaTopSongBox label {
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+</style>
+<script>
+(() => {
+  const ARTIST_PREFIX_RX = /^Martin\s+Strayd\s*[-–—:|]+\s*/i;
+
+  function stripArtistPrefix(str) {
+    return String(str || "").replace(ARTIST_PREFIX_RX, "").trim();
+  }
+
+  function cleanSongDropdownLabels() {
+    const picker = document.getElementById("songPicker");
+    if (picker && picker.options) {
+      for (const opt of picker.options) {
+        const clean = stripArtistPrefix(opt.textContent);
+        if (clean && opt.textContent !== clean) opt.textContent = clean;
+      }
+    }
+    const heroTitle = document.getElementById("heroTitle");
+    if (heroTitle) {
+      const cleanHero = stripArtistPrefix(heroTitle.textContent);
+      if (cleanHero && heroTitle.textContent !== cleanHero) {
+        heroTitle.textContent = cleanHero;
+      }
+    }
+  }
+
+  function hideTopNoise() {
+    document.querySelectorAll("div, p, span").forEach((el) => {
+      if (el.children.length > 2) return;
+      const txt = (el.textContent || "").trim();
+      if (
+        /^Agent Anna\s*[•·|]\s*Podcaster/i.test(txt) ||
+        /^First in Catalog JSON$/i.test(txt) ||
+        /^TT\s*2–3\/d/i.test(txt) ||
+        /^YT Shorts\s*1\/d/i.test(txt) ||
+        /^Agent Anna is building\b/i.test(txt)
+      ) {
+        el.style.display = "none";
+      }
+    });
+  }
+
+  function dockSongNextToArt() {
+    if (document.getElementById("annaTopDock")) return;
+    const sleeve = document.querySelector(".sleeve");
+    const picker = document.getElementById("songPicker");
+    if (!sleeve || !picker) return;
+
+    const hostSection = sleeve.closest("section, article, .card, .hero, .panel") || sleeve.parentElement;
+    if (!hostSection) return;
+
+    const dock = document.createElement("div");
+    dock.id = "annaTopDock";
+
+    const artCol = document.createElement("div");
+    artCol.id = "annaTopArtBox";
+    artCol.appendChild(sleeve);
+
+    const songCol = document.createElement("div");
+    songCol.id = "annaTopSongBox";
+
+    const lbl = document.createElement("label");
+    lbl.setAttribute("for", "songPicker");
+    lbl.textContent = "Choose Song";
+    songCol.appendChild(lbl);
+    songCol.appendChild(picker);
+
+    const customSong = document.getElementById("customSong");
+    if (customSong) {
+      const cLbl = document.createElement("label");
+      cLbl.setAttribute("for", "customSong");
+      cLbl.textContent = "Custom Title (Optional)";
+      songCol.appendChild(cLbl);
+      songCol.appendChild(customSong);
+    }
+
+    const plugBar = document.getElementById("radioPlugControls");
+    if (plugBar) {
+      songCol.appendChild(plugBar);
+    }
+
+    dock.appendChild(artCol);
+    dock.appendChild(songCol);
+    hostSection.prepend(dock);
+  }
+
+  function runTopCleanup() {
+    hideTopNoise();
+    dockSongNextToArt();
+    cleanSongDropdownLabels();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      runTopCleanup();
+      setTimeout(runTopCleanup, 300);
+      setTimeout(runTopCleanup, 900);
+    });
+  } else {
+    runTopCleanup();
+    setTimeout(runTopCleanup, 300);
+    setTimeout(runTopCleanup, 900);
+  }
+})();
+</script>
 </body>
 </html>
