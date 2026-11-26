@@ -1,7 +1,7 @@
 /**
- * ANNA V3 // GITHUB REST API WRAPPER
+ * ANNA // GITHUB REST API WRAPPER
  * Clean GitHub API client with AbortController timeouts and retry
- * Version: AA01-V3-CLEAN
+ * Version: ANNA-SLUT
  */
 
 const GitHub = {
