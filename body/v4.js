@@ -2326,7 +2326,15 @@ async function sendMessage() {
                 updateMessage(assistantMsgId, `Scraped and archived to ${scraped.path}. Synthesizing summary...`);
             }
 
-            const fastMode = !intelReq && \(isBypassPrompt\(prompt\) \|\| isSimpleFastQuery\(prompt\)\);\n            const voiceHeader = getAgentAnnaVoiceHeader\(fastMode\);\n            const selfIndexContext = fastMode \? "" : getCachedIndexHtmlFast\(prompt\);\n            const offlineHits = fastMode \? "" : searchOfflineWorld\(prompt\);\n            const vaultContext = fastMode \? "" : getCompactVaultContext\(prompt\);\n            const pillarContext = fastMode \? "" : getCorePillarsContext\(prompt\);\n            const gitbookContext = fastMode \? "" : getGitbookMirrorContext\(prompt\);\n            const memoryFileContext = fastMode \? "" : await getRequestedMemoryContext\(prompt\);\n            const systemPrompt = \[getLiveClockHeader\(\), selfIndexContext, voiceHeader, liveIntelBlock, vaultContext, pillarContext, offlineHits, gitbookContext, memoryFileContext]\.filter\(Boolean\)\.join\("\\n\\n"\);
+            const fastMode = !intelReq && (isBypassPrompt(prompt) || isSimpleFastQuery(prompt));
+            const voiceHeader = getAgentAnnaVoiceHeader(fastMode);
+            const selfIndexContext = fastMode ? "" : getCachedIndexHtmlFast(prompt);
+            const offlineHits = fastMode ? "" : searchOfflineWorld(prompt);
+            const vaultContext = fastMode ? "" : getCompactVaultContext(prompt);
+            const pillarContext = fastMode ? "" : getCorePillarsContext(prompt);
+            const gitbookContext = fastMode ? "" : getGitbookMirrorContext(prompt);
+            const memoryFileContext = fastMode ? "" : await getRequestedMemoryContext(prompt);
+            const systemPrompt = [getLiveClockHeader(), selfIndexContext, voiceHeader, liveIntelBlock, vaultContext, pillarContext, offlineHits, gitbookContext, memoryFileContext].filter(Boolean).join("\n\n");
 
             const result = await callDahlDirect(
                 [
