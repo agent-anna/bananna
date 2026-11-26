@@ -1,1 +1,14 @@
-
+{
+  "notes": [
+    {
+      "id": "anna-engine-complete",
+      "text": "annaengine build complete — github.js, brain.js, chat.js, memory.js, telemetry.js, and utils.js all locked in functions/",
+      "timestamp": "2026-11-26"
+    },
+    {
+      "id": "index-html-hard-lock",
+      "text": "body/index.html hard-locked — no further edits until next authorized dispatch",
+      "timestamp": "2026-11-26"
+    }
+  ]
+}
