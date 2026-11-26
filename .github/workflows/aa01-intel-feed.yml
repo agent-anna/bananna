@@ -1,165 +1,113 @@
-name: A1 Grounded Intel & Feed Sync
+name: AA01 Live Intel Feed
 
 on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "url (fetch target_or_query) or search (query HTML search feed)"
+        description: "search or url"
         required: true
-        default: "url"
+        default: "search"
       target_or_query:
-        description: "Target URL (for url mode) or search query (for search mode)"
+        description: "Search query or target URL"
         required: true
-        default: "https://martinstrayd.github.io/artist/"
       output_name:
-        description: "Output markdown filename inside bible/ (without .md)"
+        description: "Output slug without .md"
         required: true
-        default: "strayd-artist-live"
+        default: "intel-snapshot"
 
 permissions:
   contents: write
 
-concurrency:
-  group: aa01-intel-feed-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
-  fetch-grounded-intel:
+  fetch-intel:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
 
-      - name: Fetch verified snapshot into bible
+      - name: Run search or URL scrape
         env:
-          MODE: ${{ github.event.inputs.mode || 'url' }}
-          INPUT_VAL: ${{ github.event.inputs.target_or_query || 'https://martinstrayd.github.io/artist/' }}
-          OUT_NAME: ${{ github.event.inputs.output_name || 'strayd-artist-live' }}
+          INTEL_MODE: ${{ inputs.mode }}
+          INTEL_TARGET: ${{ inputs.target_or_query }}
+          INTEL_SLUG: ${{ inputs.output_name }}
         run: |
-          python3 - << 'EOF'
-          import os, re, time, urllib.parse, urllib.request
-          from html.parser import HTMLParser
-          from datetime import datetime, timezone
+          python3 - << 'PY'
+          import os, urllib.parse, urllib.request, re, html, datetime
 
-          mode = os.environ["MODE"].strip().lower()
-          val = os.environ["INPUT_VAL"].strip()
-          slug = re.sub(r"[^a-z0-9_-]+", "-", os.environ["OUT_NAME"].strip().lower()).strip("-") or "intel-snapshot"
-          now_iso = datetime.now(timezone.utc).isoformat()
-
-          def http_get(target_url, retries=2):
-              for attempt in range(retries + 1):
-                  req = urllib.request.Request(
-                      target_url,
-                      headers={
-                          "User-Agent": "Mozilla/5.0 (compatible; AgentAnnaV3/1.0)",
-                          "Accept": "text/html,application/json;q=0.9,*/*;q=0.8"
-                      }
-                  )
-                  try:
-                      with urllib.request.urlopen(req, timeout=25) as resp:
-                          return resp.status, resp.read().decode("utf-8", errors="replace")
-                  except urllib.error.HTTPError as e:
-                      if e.code == 429 and attempt < retries:
-                          time.sleep(12 * (attempt + 1))
-                          continue
-                      raise
-
-          class TextExtractor(HTMLParser):
-              def __init__(self):
-                  super().__init__()
-                  self.chunks = []
-                  self.links = []
-                  self._skip = False
-                  self._href = None
-                  self._label = []
-
-              def handle_starttag(self, tag, attrs):
-                  am = dict(attrs)
-                  if tag in ("script", "style", "noscript"):
-                      self._skip = True
-                  if tag == "a" and "href" in am:
-                      self._href = am["href"].strip()
-                      self._label = []
-
-              def handle_endtag(self, tag):
-                  if tag in ("script", "style", "noscript"):
-                      self._skip = False
-                  if tag == "a" and self._href is not None:
-                      lbl = " ".join("".join(self._label).split())
-                      self.links.append((lbl or "(link)", self._href))
-                      self._href = None
-                      self._label = []
-
-              def handle_data(self, data):
-                  if self._skip:
-                      return
-                  cleaned = " ".join(data.split())
-                  if cleaned:
-                      self.chunks.append(cleaned)
-                  if self._href is not None:
-                      self._label.append(cleaned)
-
+          mode = (os.environ.get("INTEL_MODE") or "search").strip().lower()
+          target = (os.environ.get("INTEL_TARGET") or "").strip()
+          slug = re.sub(r"[^a-zA-Z0-9_-]+", "-", (os.environ.get("INTEL_SLUG") or "intel")).strip("-") or "intel"
           os.makedirs("bible", exist_ok=True)
-          out_path = f"bible/{slug}.md"
+          out_path = os.path.join("bible", f"{slug}.md")
+          now_utc = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-          if mode == "search":
-              q_enc = urllib.parse.quote_plus(val)
-              ddg_url = f"https://html.duckduckgo.com/html/?q={q_enc}"
-              status, html_body = http_get(ddg_url)
-              parser = TextExtractor()
-              parser.feed(html_body)
-              filtered_links = [
-                  (lbl, href) for (lbl, href) in parser.links
-                  if href.startswith("http") and "duckduckgo.com" not in href
-              ][:15]
-              lines = [
-                  f"# AA01 SEARCH SNAPSHOT: {val}",
-                  f"- Query: {val}",
-                  f"- Source Feed: {ddg_url}",
-                  f"- HTTP Status: {status}",
-                  f"- Fetched At (UTC): {now_iso}",
-                  "",
-                  "## EXTRACTED RESULTS & LINKS"
-              ]
-              if filtered_links:
-                  for lbl, href in filtered_links:
-                      lines.append(f"- **{lbl}**: {href}")
-              else:
-                  lines.append("- No external result links returned in HTML response.")
-              lines.extend(["", "## EXTRACTED SNIPPET TEXT", "\n".join(parser.chunks[:120])])
+          def fetch_text(url, timeout=20):
+              req = urllib.request.Request(
+                  url,
+                  headers={
+                      "User-Agent": "Mozilla/5.0 (compatible; AnnaIntelBot/2.6; +https://github.com/agent-anna/home)",
+                      "Accept": "text/plain,text/html,application/xhtml+xml,*/*;q=0.8"
+                  }
+              )
+              with urllib.request.urlopen(req, timeout=timeout) as resp:
+                  raw = resp.read()
+              return raw.decode("utf-8", errors="replace")
+
+          body_md = ""
+          if mode == "url":
+              try:
+                  body_md = fetch_text("https://r.jina.ai/" + target)
+              except Exception as e1:
+                  try:
+                      raw_html = fetch_text(target)
+                      txt = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", raw_html, flags=re.S|re.I)
+                      txt = html.unescape(re.sub(r"<[^>]+>", " ", txt))
+                      body_md = re.sub(r"\s+", " ", txt).strip()[:12000]
+                  except Exception as e2:
+                      body_md = f"Fetch error: {e1} | {e2}"
           else:
-              status, html_body = http_get(val)
-              parser = TextExtractor()
-              parser.feed(html_body)
-              lines = [
-                  f"# A1 URL SNAPSHOT: {val}",
-                  f"- Source URL: {val}",
-                  f"- HTTP Status: {status}",
-                  f"- Fetched At (UTC): {now_iso}",
-                  f"- Extracted Links: {len(parser.links)}",
-                  "",
-                  "## EXTRACTED LINKS"
-              ]
-              for lbl, href in parser.links[:40]:
-                  lines.append(f"- {lbl}: {href}")
-              lines.extend(["", "## EXTRACTED TEXT", "\n".join(parser.chunks[:300])])
+              q = urllib.parse.quote_plus(target)
+              try:
+                  body_md = fetch_text(f"https://s.jina.ai/?q={q}")
+              except Exception as e1:
+                  try:
+                      ddg = fetch_text(f"https://html.duckduckgo.com/html/?q={q}")
+                      titles = re.findall(r'class="result__a"[^>]*>(.*?)</a>', ddg, flags=re.S)
+                      links = re.findall(r'class="result__url"[^>]*>(.*?)</a>', ddg, flags=re.S)
+                      snippets = re.findall(r'class="result__snippet"[^>]*>(.*?)</', ddg, flags=re.S)
+                      lines = []
+                      for i in range(min(8, max(len(titles), len(snippets)))):
+                          t = html.unescape(re.sub(r"<[^>]+>", "", titles[i] if i < len(titles) else "")).strip()
+                          l = html.unescape(re.sub(r"<[^>]+>", "", links[i] if i < len(links) else "")).strip()
+                          s = html.unescape(re.sub(r"<[^>]+>", "", snippets[i] if i < len(snippets) else "")).strip()
+                          lines.append(f"- **{t}** ({l})\n  {s}")
+                      body_md = "\n".join(lines) if lines else f"Search fallback empty: {e1}"
+                  except Exception as e2:
+                      body_md = f"Search error: {e1} | {e2}"
 
+          doc = f"""# AA01 Intel Snapshot: {target}
+
+- **Mode**: {mode}
+- **Captured UTC**: {now_utc}
+- **Archive Path**: `bible/{slug}.md`
+
+## Findings
+
+{body_md[:16000]}
+"""
           with open(out_path, "w", encoding="utf-8") as f:
-              f.write("\n".join(lines) + "\n")
-          print(f"Wrote {out_path} (HTTP {status})")
-          EOF
+              f.write(doc)
+          print(f"Wrote {out_path} ({len(doc)} chars)")
+          PY
 
-      - name: Commit grounded snapshot to bible
+      - name: Commit snapshot to bible/
         run: |
           git config user.name "Agent Anna Bot"
-          git config user.email "agent-anna@users.noreply.github.com"
-          git pull --rebase --autostash origin "${{ github.ref_name }}" || true
+          git config user.email "anna-bot@users.noreply.github.com"
           git add bible/
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
           else
-            git commit -m "A1 grounded intel sync into bible"
-            git push origin "${{ github.ref_name }}"
+            git commit -m "chore(intel): archive ${{ inputs.mode }} snapshot for ${{ inputs.output_name }}"
+            git push
           fi
