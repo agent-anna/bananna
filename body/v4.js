@@ -347,11 +347,12 @@
         if (!englishOnly.length) return null;
 
         const femaleHints = [
-            "google uk english female",
-            "google us english",
+            
             "microsoft zira",
             "microsoft aria",
             "microsoft jenny",
+            "google uk english female",
+            "google us english",
             "microsoft sonia",
             "microsoft libby",
             "samantha",
