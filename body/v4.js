@@ -198,6 +198,39 @@ function isV4CoreFile(path) {
         if (meta) meta.textContent = "Memory buffer: cleared.";
     }
 
+        async function normalizeDataUrlToPngBase64(dataUrl, maxDim = 1080) {
+        return await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                let w = img.naturalWidth || img.width;
+                let h = img.naturalHeight || img.height;
+                if (!w || !h) {
+                    const raw = String(dataUrl || "").split(",")[1] || "";
+                    return resolve({ base64: raw, width: 0, height: 0 });
+                }
+                if (maxDim && (w > maxDim || h > maxDim)) {
+                    const scale = Math.min(maxDim / w, maxDim / h);
+                    w = Math.max(1, Math.round(w * scale));
+                    h = Math.max(1, Math.round(h * scale));
+                }
+                const canvas = document.createElement("canvas");
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) {
+                    const raw = String(dataUrl || "").split(",")[1] || "";
+                    return resolve({ base64: raw, width: w, height: h });
+                }
+                ctx.drawImage(img, 0, 0, w, h);
+                const pngUrl = canvas.toDataURL("image/png");
+                const b64 = (pngUrl.split(",")[1] || "");
+                resolve({ base64: b64, width: w, height: h });
+            };
+            img.onerror = () => reject(new Error("Could not decode image for PNG normalization."));
+            img.src = dataUrl;
+        });
+    }
+
     async function saveVisionImageToRepo() {
         const metaEl = document.getElementById("v4-vision-meta");
         if (!ephemeralVisionDataUrl || !ephemeralVisionDataUrl.includes(",")) {
