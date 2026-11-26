@@ -23,3 +23,31 @@ Manual dispatch / 12h cron | Renders target URLs in headless Playwright Chromium
 
 `book-tree-sync.yml` | Push to `00-tree-of-life.md**` or manual | Scans all workflows and `bible` modules, updates `00-tree-of-life.md`,
 and optionally triggers a scrape refresh. | `00-tree-of-life.md` | check if this rle makes sense and edit it. thanks 
+
+# README
+
+> **A living blueprint for building an autonomous, grounded AI companion without losing sight of who you are.**
+
+## Why This Book Exists
+
+Most AI systems fail because they pile everything into one fragile front-end script, guess when data is missing, and bury the human operator in noise. **Agent Anna (AA01)** separates **thought** from **action**:
+
+{% stepper %}
+{% step %}
+## The Cockpit (`body/anna-ui.js`)
+
+Fast, voice-first, calm, single-shot interface. Zero CORS hacks, zero code read aloud, zero blind guessing.
+{% endstep %}
+
+{% step %}
+## The Workers (`.github/workflows/`)
+
+Headless Chromium scrapers, scheduled vault digests, and self-documenting Tree of Life builders running cleanly on GitHub runners.
+{% endstep %}
+
+{% step %}
+## The Living Book (`bible/`)
+
+Every chapter documents real, working functions—and updating this book triggers the system to verify and map itself.
+{% endstep %}
+{% endstepper %}
