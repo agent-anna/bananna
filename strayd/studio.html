@@ -225,19 +225,25 @@
     </header>
 
     <main>
-      <section class="hero" aria-label="Featured Cover Artwork">
-        <div class="sleeve">
-          <img id="artPreview" src="" alt="Cover Sleeve" />
+      <section class="hero" aria-label="Featured Cover Artwork and Song Selector" style="display:grid;grid-template-columns:minmax(220px,320px) minmax(260px,1fr);gap:20px;align-items:start;">
+        <div class="sleeve" style="width:100%;max-width:320px;">
+          <img id="artPreview" src="" alt="Cover Sleeve" style="width:100%;height:auto;display:block;border-radius:10px;" />
         </div>
-        <div>
-          <div class="eyebrow">365-Day Once-a-Day Single Release • Agent Anna Podcaster &amp; DJ Command</div>
-          <div class="hero-title" id="heroTitle"></div>
-          <div class="hero-meta" id="artFileMeta"></div>
-          <div class="hero-meta" id="sceneBriefMeta">Live-action direction: realistic live-action cinematography only.</div>
-          <div class="hero-meta" id="visualRuleMeta">Visual law: Strictly realistic live-action cinematography only.</div>
-          <div class="badges" id="statusBadges"></div>
-          <div class="muted" id="engineModeMeta" style="margin-top:8px;">Promo engine: Ready</div>
-          <div class="muted" id="gateStatus" style="margin-top:8px;">Approval gate: Browser-ready — review, copy or hit Post, or click OK To Post to stage JSON</div>
+        <div id="heroRightCol" style="display:flex;flex-direction:column;gap:10px;">
+          <div class="hero-title" id="heroTitle" style="margin:0;"></div>
+          <label for="songPicker" style="margin-top:4px;">Choose Song</label>
+          <select id="songPicker"></select>
+          <label for="customSong">Custom Single Title Override (Optional)</label>
+          <input id="customSong" type="text" placeholder="Type single title or leave blank..." />
+          <div id="heroHiddenMeta" style="display:none;" aria-hidden="true">
+            <div class="eyebrow"></div>
+            <div class="hero-meta" id="artFileMeta"></div>
+            <div class="hero-meta" id="sceneBriefMeta"></div>
+            <div class="hero-meta" id="visualRuleMeta"></div>
+            <div class="badges" id="statusBadges"></div>
+            <div class="muted" id="engineModeMeta"></div>
+            <div class="muted" id="gateStatus"></div>
+          </div>
         </div>
       </section>
 
@@ -253,11 +259,9 @@
               <option value="daily_az">Scheduled Single Roll (1/Day • 365-Day Loop)</option>
             </select>
 
-            <label for="songPicker">Select Single (Catalog JSON Order)</label>
-            <select id="songPicker"></select>
+            
 
-            <label for="customSong">Custom Single Title Override (Locked Verbatim)</label>
-            <input id="customSong" type="text" placeholder="Type single title or leave blank..." />
+            
 
             <label for="cadenceMode">Release Cadence</label>
             <select id="cadenceMode">
@@ -3043,7 +3047,7 @@
     });
   }
 
-  function dockSongNextToArt() {
+  function dockSongNextToArt() { return;
     if (document.getElementById("annaTopDock")) return;
     const sleeve = document.querySelector(".sleeve");
     const picker = document.getElementById("songPicker");
