@@ -1720,22 +1720,157 @@ function parseIntelRequest(rawPrompt) {
     return null;
 }
 
+function parseDuckDuckGoHtml(htmlStr, query) {
+    const doc = new DOMParser().parseFromString(String(htmlStr || ""), "text/html");
+    const results = [];
+    const items = doc.querySelectorAll(".result");
+    items.forEach((item) => {
+        if (results.length >= 8) return;
+        const linkEl = item.querySelector(".result__a");
+        const snipEl = item.querySelector(".result__snippet");
+        const urlEl = item.querySelector(".result__url");
+        const title = (linkEl ? linkEl.textContent : "").trim();
+        let href = (linkEl ? linkEl.getAttribute("href") : "") || "";
+        const uddgMatch = href.match(/[?&]uddg=([^&]+)/);
+        if (uddgMatch) {
+            try { href = decodeURIComponent(uddgMatch[1]); } catch (_) {}
+        }
+        const shownUrl = (urlEl ? urlEl.textContent : href).trim();
+        const snippet = (snipEl ? snipEl.textContent : "").trim();
+        if (title || snippet) {
+            results.push({ title: title || shownUrl || "Result", url: href || shownUrl, snippet });
+        }
+    });
+
+    if (!results.length) {
+        return `# Web Search Snapshot: ${query}\n\nNo public search snippets were returned by DuckDuckGo HTML for "${query}".`;
+    }
+
+    const lines = [`# Web Search Snapshot: ${query}`, ""];
+    results.forEach((r, idx) => {
+        lines.push(`${idx + 1}. **${r.title}**`);
+        if (r.url) lines.push(`   - Source: ${r.url}`);
+        if (r.snippet) lines.push(`   - Summary: ${r.snippet}`);
+        lines.push("");
+    });
+    return lines.join("\n");
+}
+
 async function fetchDirectWebIntel(intelReq) {
     const target = String(intelReq.target || "").trim();
     if (intelReq.mode === "url") {
-        const readerUrl = /^https?:\/\//i.test(target) ? `https://r.jina.ai/${target}` : `https://r.jina.ai/https://${target}`;
+        const cleanUrl = /^https?:\/\//i.test(target) ? target : `https://${target}`;
+        const readerUrl = `https://r.jina.ai/${cleanUrl}`;
         const r = await fetchWithTimeout(readerUrl, { cache: "no-store" }, 20000);
-        if (!r.ok) throw new Error(`Jina Reader HTTP ${r.status}`);
+        if (!r.ok) {
+            throw new Error(`Unable to read URL (${cleanUrl}) — Reader returned HTTP ${r.status}`);
+        }
         const md = await r.text();
-        return `# Live URL Snapshot: ${target}\n\n${md.slice(0, 14000)}`;
+        return `# Live URL Snapshot: ${cleanUrl}\n\n${md.slice(0, 14000)}`;
     } else {
-        const searchUrl = `https://s.jina.ai/?q=${encodeURIComponent(target)}`;
-        const r = await fetchWithTimeout(searchUrl, { cache: "no-store" }, 20000);
-        if (!r.ok) throw new Error(`Jina Search HTTP ${r.status}`);
-        const md = await r.text();
-        return `# Live Web Search Snapshot: ${target}\n\n${md.slice(0, 14000)}`;
+        const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(target)}`;
+        const r = await fetchWithTimeout(ddgUrl, { cache: "no-store" }, 20000);
+        if (r.ok) {
+            const htmlTxt = await r.text();
+            return parseDuckDuckGoHtml(htmlTxt, target);
+        }
+        const wikiApi = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(target)}&format=json&origin=*`;
+        const wr = await fetchWithTimeout(wikiApi, { cache: "no-store" }, 15000);
+        if (!wr.ok) {
+            throw new Error(`Live search failed (DDG HTTP ${r.status}, Wiki HTTP ${wr.status})`);
+        }
+        const wj = await wr.json();
+        const hits = (wj && wj.query && Array.isArray(wj.query.search)) ? wj.query.search : [];
+        if (!hits.length) {
+            return `# Web Search Snapshot: ${target}\n\nNo results found for "${target}".`;
+        }
+        const lines = [`# Web Search Snapshot: ${target}`, ""];
+        hits.slice(0, 6).forEach((h, i) => {
+            const cleanSnippet = String(h.snippet || "").replace(/<[^>]+>/g, "");
+            lines.push(`${i + 1}. **${h.title}**`);
+            lines.push(`   - Source: https://en.wikipedia.org/?curid=${h.pageid}`);
+            lines.push(`   - Summary: ${cleanSnippet}`);
+            lines.push("");
+        });
+        return lines.join("\n");
     }
 }
+
+function getSvgIconForPath(labelText) {
+    const t = String(labelText || "").trim();
+    const isFolder = t.endsWith("/") || /^(bible|body|character|functions|knowledge|logs|memory)\/$/i.test(t);
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("width", "14");
+    svg.setAttribute("height", "14");
+    svg.setAttribute("aria-hidden", "true");
+    svg.style.cssText = "flex:0 0 14px;margin-right:6px;vertical-align:-2px;display:inline-block;";
+
+    const path = document.createElementNS(svgNS, "path");
+    path.setAttribute("fill", "currentColor");
+
+    if (isFolder) {
+        svg.style.color = "#fbbf24";
+        path.setAttribute("d", "M1.75 2A1.75 1.75 0 0 0 0 3.75v8.5C0 13.216.784 14 1.75 14h12.5A1.75 1.75 0 0 0 16 12.25v-6.5A1.75 1.75 0 0 0 14.25 4H7.82l-1.2-1.4A1.75 1.75 0 0 0 5.29 2H1.75Z");
+    } else if (/\.md$/i.test(t)) {
+        svg.style.color = "#6ee7b7";
+        path.setAttribute("d", "M2 2.5A1.5 1.5 0 0 1 3.5 1h9A1.5 1.5 0 0 1 14 2.5v11A1.5 1.5 0 0 1 12.5 15h-9A1.5 1.5 0 0 1 2 13.5v-11ZM4.5 5v6h1.5V7.4l1.5 1.9L9 7.4V11h1.5V5H9L7.5 7 6 5H4.5Z");
+    } else if (/\.js$/i.test(t)) {
+        svg.style.color = "#facc15";
+        path.setAttribute("d", "M2 2.5A1.5 1.5 0 0 1 3.5 1h9A1.5 1.5 0 0 1 14 2.5v11A1.5 1.5 0 0 1 12.5 15h-9A1.5 1.5 0 0 1 2 13.5v-11ZM7.5 10.2c0 .7-.4 1.1-1.1 1.1-.5 0-.8-.2-1-.5l-.9.6c.3.6 1 1 1.9 1 1.3 0 2.2-.7 2.2-2.1V6.5H7.5v3.7Zm3.5 1.1c1.1 0 1.8-.6 1.8-1.5 0-.8-.5-1.2-1.4-1.5l-.4-.1c-.5-.2-.7-.3-.7-.6 0-.3.2-.5.6-.5.3 0 .6.1.8.4l.8-.6c-.4-.5-.9-.7-1.6-.7-1 0-1.7.6-1.7 1.4 0 .8.5 1.2 1.3 1.5l.4.1c.5.2.8.3.8.7 0 .3-.3.6-.8.6-.4 0-.8-.2-1-.5l-.8.6c.3.5 1 .9 1.8.9Z");
+    } else {
+        svg.style.color = "#93c5fd";
+        path.setAttribute("d", "M3.5 1A1.5 1.5 0 0 0 2 2.5v11A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V5.6a1.5 1.5 0 0 0-.44-1.06l-3.1-3.1A1.5 1.5 0 0 0 9.4 1H3.5Z");
+    }
+
+    svg.appendChild(path);
+    return svg;
+}
+
+function hydrateTreeAndGridIcons() {
+    try {
+        const containers = document.querySelectorAll("[class*='tree'], [class*='grid'], [id*='tree'], [id*='grid'], #file-tree, #file-grid");
+        const targets = containers.length ? containers : [document.body];
+        targets.forEach((root) => {
+            const items = root.querySelectorAll("button, li, .file-item, .tree-item, .grid-item, [data-path]");
+            items.forEach((el) => {
+                if (el.querySelector("svg[data-v4-icon='1']")) return;
+                const txt = (el.getAttribute("data-path") || el.textContent || "").trim();
+                if (!txt || txt.length > 120) return;
+                if (/\b(VIEW:\s*GRID|VIEW:\s*TREE|SYNC|AUDIT|COMMIT|DELETE)\b/i.test(txt)) return;
+                if (txt.includes("/") || /\.(md|js|html|css|json|txt)$/i.test(txt)) {
+                    const icon = getSvgIconForPath(txt);
+                    icon.setAttribute("data-v4-icon", "1");
+                    el.insertBefore(icon, el.firstChild);
+                }
+            });
+        });
+    } catch (_) {}
+}
+
+if (!window.__v4IconObserverBound) {
+    window.__v4IconObserverBound = true;
+    const runIcons = () => hydrateTreeAndGridIcons();
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", runIcons);
+    } else {
+        runIcons();
+    }
+    const obs = new MutationObserver(() => {
+        clearTimeout(window.__v4IconDebounce);
+        window.__v4IconDebounce = setTimeout(runIcons, 80);
+    });
+    if (document.body) {
+        obs.observe(document.body, { childList: true, subtree: true });
+    } else {
+        document.addEventListener("DOMContentLoaded", () => {
+            if (document.body) obs.observe(document.body, { childList: true, subtree: true });
+            runIcons();
+        });
+    }
+}
+
 
 async function archiveIntelToBibleIfPossible(targetPath, snapshotMd, ghHeaders, branchName, repoOwner, repoName) {
     try {
