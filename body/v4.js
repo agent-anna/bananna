@@ -1,3 +1,12 @@
+function buildIntelSlug(mode, target) {
+    const stamp = new Date().toISOString().slice(0, 10);
+    const raw = mode === "url"
+        ? String(target || "").replace(/^https?:\/\//i, "").replace(/[^a-z0-9]+/gi, "-")
+        : String(target || "").replace(/[^a-z0-9]+/gi, "-");
+    const clean = raw.toLowerCase().replace(/^-+|-+$/g, "").slice(0, 36) || "intel";
+    return `${clean}-${stamp}`;
+}
+
 ﻿(function () {
     "use strict";
 
@@ -1709,6 +1718,115 @@ function parseIntelRequest(rawPrompt) {
     const searchMatch = text.match(/^(?:search\s+(?:the\s+)?(?:web|online|internet|duckduckgo|ddg)(?:\s+for)?|look\s+up\s+online)\s+(.+)$/i);
     if (searchMatch) return { mode: "search", target: searchMatch[1].trim(), briefSize };
     return null;
+}
+
+async function dispatchLiveIntelScrape(intelReq, assistantMsgId) {
+    const ghHeaders = typeof getGitHubHeaders === "function" ? getGitHubHeaders() : null;
+    if (!ghHeaders || !ghHeaders.Authorization) {
+        throw new Error("Missing GitHub PAT in settings. Add your PAT with repo + workflow scopes to run live web scraping.");
+    }
+
+    const wfFile = typeof SCRAPE_WORKFLOW_FILE !== "undefined" && SCRAPE_WORKFLOW_FILE
+        ? SCRAPE_WORKFLOW_FILE
+        : "web-scrape.yml";
+    const repoOwner = typeof GITHUB_REPO_OWNER !== "undefined" && GITHUB_REPO_OWNER
+        ? GITHUB_REPO_OWNER
+        : "agent-anna";
+    const repoName = typeof GITHUB_REPO_NAME !== "undefined" && GITHUB_REPO_NAME
+        ? GITHUB_REPO_NAME
+        : "home";
+    const branchName = (typeof activeBranch !== "undefined" && activeBranch) ? activeBranch : "main";
+
+    const slug = buildIntelSlug(intelReq.mode, intelReq.target);
+    const targetPath = `bible/${slug}.md`;
+    const dispatchStartedAt = Date.now() - 5000;
+
+    if (typeof setActionsStatus === "function") setActionsStatus("DISPATCHING", "busy");
+    if (typeof updateMessage === "function") {
+        updateMessage(
+            assistantMsgId,
+            `Dispatching live ${intelReq.mode.toUpperCase()} intel job (${intelReq.target})...` + "\n" + `Target archive: ${targetPath}`
+        );
+    }
+
+    const dispatchUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${encodeURIComponent(wfFile)}/dispatches`;
+    const dispRes = await fetchWithTimeout(dispatchUrl, {
+        method: "POST",
+        headers: { ...ghHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify({
+            ref: branchName,
+            inputs: {
+                mode: intelReq.mode,
+                target_or_query: intelReq.target,
+                output_name: slug
+            }
+        })
+    }, 20000);
+
+    if (!dispRes.ok && dispRes.status !== 204) {
+        const errTxt = await dispRes.text().catch(() => "");
+        if (typeof setActionsStatus === "function") setActionsStatus("ERROR", "error");
+        throw new Error(`Workflow dispatch failed (HTTP ${dispRes.status}). Ensure PAT has workflow scope. ${errTxt.slice(0, 140)}`);
+    }
+
+    let runId = null;
+    let conclusion = null;
+    for (let attempt = 1; attempt <= 25; attempt++) {
+        await new Promise((r) => setTimeout(r, 3000));
+        if (typeof setActionsStatus === "function") setActionsStatus(`SCRAPING (${attempt * 3}s)`, "busy");
+        if (typeof updateMessage === "function") {
+            updateMessage(
+                assistantMsgId,
+                `Running live ${intelReq.mode.toUpperCase()} scraper via GitHub Actions (${attempt * 3}s)...` + "\n" + `Query/URL: ${intelReq.target}` + "\n" + `Saving to: ${targetPath}`
+            );
+        }
+
+        const runsUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${encodeURIComponent(wfFile)}/runs?branch=${encodeURIComponent(branchName)}&per_page=5`;
+        const runsRes = await fetchWithTimeout(runsUrl, { headers: ghHeaders, cache: "no-store" }, 15000);
+        if (!runsRes.ok) continue;
+
+        const runsJson = await runsRes.json();
+        const runs = Array.isArray(runsJson.workflow_runs) ? runsJson.workflow_runs : [];
+        const matchedRun = runId
+            ? runs.find((r) => r.id === runId)
+            : runs.find((r) => r.event === "workflow_dispatch" && new Date(r.created_at).getTime() >= dispatchStartedAt);
+
+        if (matchedRun) {
+            runId = matchedRun.id;
+            if (matchedRun.status === "completed") {
+                conclusion = matchedRun.conclusion;
+                break;
+            }
+        }
+    }
+
+    if (!conclusion) {
+        if (typeof setActionsStatus === "function") setActionsStatus("TIMEOUT", "error");
+        throw new Error(`Scraper workflow timed out waiting for completion. Check Actions tab and run SYNC shortly for ${targetPath}.`);
+    }
+    if (conclusion !== "success") {
+        if (typeof setActionsStatus === "function") setActionsStatus("FAILED", "error");
+        throw new Error(`Scraper workflow finished with status: ${conclusion}. Check GitHub Actions logs for ${wfFile}.`);
+    }
+
+    if (typeof setActionsStatus === "function") setActionsStatus("READING", "busy");
+    const fileUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${targetPath}?ref=${encodeURIComponent(branchName)}`;
+    const fileRes = await fetchWithTimeout(fileUrl, { headers: ghHeaders, cache: "no-store" }, 15000);
+    if (!fileRes.ok) {
+        if (typeof setActionsStatus === "function") setActionsStatus("DONE", "");
+        throw new Error(`Workflow succeeded, but ${targetPath} could not be read yet (HTTP ${fileRes.status}). Hit SYNC to refresh.`);
+    }
+
+    const fileJson = await fileRes.json();
+    const binStr = atob(String(fileJson.content || "").replace(/\s/g, ""));
+    const snapshotMd = new TextDecoder().decode(Uint8Array.from(binStr, (m) => m.codePointAt(0)));
+
+    if (typeof repoVaultFiles === "object" && repoVaultFiles) repoVaultFiles[targetPath] = snapshotMd;
+    if (typeof registerCreatedMarkdownFile === "function") registerCreatedMarkdownFile(targetPath, snapshotMd);
+    if (typeof setActionsStatus === "function") setActionsStatus("IDLE", "");
+    if (typeof fetchRepoTree === "function") await fetchRepoTree();
+
+    return { path: targetPath, content: snapshotMd };
 }
 
 async function sendMessage() {
