@@ -1,0 +1,30 @@
+[
+  {
+    "id": "kunda-cafe",
+    "url": "https://kundacafe.com",
+    "label": "Kunda Cafe",
+    "tags": ["brand", "kunda", "cafe"],
+    "added": "2026-11-18"
+  },
+  {
+    "id": "cool-hot-sauce",
+    "url": "https://coolhotsauce.com",
+    "label": "Cool Hot Sauce",
+    "tags": ["brand", "merch", "kunda"],
+    "added": "2026-11-18"
+  },
+    {
+    "id": "buymeacoffee-strayd",
+    "url": "https://buymeacoffee.com/martinstrayd",
+    "label": "Martin Strayd / Strayd Music",
+    "tags": ["support", "music", "strayd"],
+    "added": "2026-11-18"
+  },
+  {
+    "id": "buymeacoffee-kunda",
+    "url": "https://buymeacoffee.com/kundacafe",
+    "label": "Kunda Cafe / Strayd Music",
+    "tags": ["support", "music", "strayd"],
+    "added": "2026-11-18"
+  }
+]
