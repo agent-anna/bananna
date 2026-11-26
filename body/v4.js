@@ -2249,6 +2249,22 @@ async function handleExplicitLogCommandIfAny(rawText, assistantMsgId) {
     return true;
 }
 
+function getCachedIndexHtmlFast(userPrompt) {
+    const q = String(userPrompt || "").toLowerCase();
+    if (!/\b(index\.html|your html|own html|page|ui|layout|button|buttons|clock|console|header|modal|screen)\b/i.test(q)) {
+        return "";
+    }
+    if (typeof repoVaultFiles === "object" && repoVaultFiles && typeof repoVaultFiles["index.html"] === "string") {
+        return `[SELF_INDEX_HTML_SNAPSHOT]\n${repoVaultFiles["index.html"].slice(0, 6000)}`;
+    }
+    return "";
+}
+
+function isSimpleFastQuery(userPrompt) {
+    const q = String(userPrompt || "").trim().toLowerCase();
+    return /^(what time|time\??|what day|what date|date\??|hi|hello|hey|yo|sup|test|ping)\b/.test(q) && q.length < 45;
+}
+
 async function sendMessage() {
         const input = document.getElementById("user-input");
         const prompt = input ? input.value.trim() : "";
@@ -2278,15 +2294,7 @@ async function sendMessage() {
                 updateMessage(assistantMsgId, `Scraped and archived to ${scraped.path}. Synthesizing summary...`);
             }
 
-            const bypassMode = !intelReq && isBypassPrompt(prompt);
-            const voiceHeader = getAgentAnnaVoiceHeader(bypassMode);
-            const offlineHits = bypassMode ? "" : searchOfflineWorld(prompt);
-            const vaultContext = bypassMode ? "" : getCompactVaultContext(prompt);
-            const pillarContext = bypassMode ? "" : getCorePillarsContext(prompt);
-            const gitbookContext = bypassMode ? "" : getGitbookMirrorContext(prompt);
-            const memoryFileContext = bypassMode ? "" : await getRequestedMemoryContext(prompt);
-            const selfIndexContext = await getSelfIndexHtmlContext(prompt);
-            const systemPrompt = [getLiveClockHeader(), selfIndexContext, voiceHeader, liveIntelBlock, vaultContext, pillarContext, offlineHits, gitbookContext, memoryFileContext].filter(Boolean).join("\n\n");
+            const fastMode = !intelReq && \(isBypassPrompt\(prompt\) \|\| isSimpleFastQuery\(prompt\)\);\n            const voiceHeader = getAgentAnnaVoiceHeader\(fastMode\);\n            const selfIndexContext = fastMode \? "" : getCachedIndexHtmlFast\(prompt\);\n            const offlineHits = fastMode \? "" : searchOfflineWorld\(prompt\);\n            const vaultContext = fastMode \? "" : getCompactVaultContext\(prompt\);\n            const pillarContext = fastMode \? "" : getCorePillarsContext\(prompt\);\n            const gitbookContext = fastMode \? "" : getGitbookMirrorContext\(prompt\);\n            const memoryFileContext = fastMode \? "" : await getRequestedMemoryContext\(prompt\);\n            const systemPrompt = \[getLiveClockHeader\(\), selfIndexContext, voiceHeader, liveIntelBlock, vaultContext, pillarContext, offlineHits, gitbookContext, memoryFileContext]\.filter\(Boolean\)\.join\("\\n\\n"\);
 
             const result = await callDahlDirect(
                 [
