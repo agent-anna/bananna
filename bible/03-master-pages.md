@@ -17,3 +17,12 @@
 - Vary DJ Anna's hooks, delivery tone, time-of-day cues, and listener questions across all 365 days of the year so no two days feel mechanical.
 - Inject fresh daily news, new radio station pickups, tour stops, and release milestones into press copy, long-form descriptions, and periodic DJ Anna TTS breaks.
 - Keep continuous end-to-end studio music blocks paired with randomized PRE/POST TTS plugs and clean automation toggles (data-automate) for both manual control and future workflow automation.
+---
+
+## INTERNAL SONG BRIEF & EDITORIAL DIRECTION (BIBLE-ONLY — NEVER PRINT RAW IN POSTS)
+A place for everything and everything in its place: internal planning frameworks live here in the Bible to guide Agent Anna's writing and must never appear as raw labels or prompt instructions inside public press releases, social posts, or TTS readouts.
+- **Curiosity & Hook Angle**: Open with tension, contrast, or a specific detail from the track that stops a scroll without template boilerplate.
+- **Host & Artist Context**: Frame through DJ Veg Anna / DJ Anna's late-night broadcast voice and Martin Strayd's decades of original songwriting and 100+ song catalog.
+- **Live-Action Visual Treatment**: Strictly realistic live-action spaces, natural or practical lighting, and real human presence—zero cartoon aesthetics.
+- **Search & Discovery Angle**: Weave clear song title, artist name, and listener prompts naturally into titles and opening lines.
+- **Direct Release & Support Rails**: Keep direct hub and streaming links clean and placed purposefully rather than repeated across paragraphs.
