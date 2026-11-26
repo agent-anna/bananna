@@ -29,7 +29,7 @@
     }
     .hero {
       display: grid;
-      grid-template-columns: 200px 1fr;
+      grid-template-columns: 205px 1fr;
       gap: 20px;
       background: var(--card);
       border: 1px solid var(--border);
@@ -91,8 +91,31 @@
       font-family: inherit;
     }
     textarea {
-      min-height: 130px;
+      min-height: 145px;
       resize: vertical;
+    }
+    .link-toggles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      font-size: 0.84rem;
+    }
+    .link-toggles label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .link-toggles input[type="checkbox"] {
+      width: auto;
+      margin: 0;
     }
     .hero-actions {
       display: flex;
@@ -125,6 +148,9 @@
     }
     .press-top {
       margin-bottom: 16px;
+    }
+    .press-top textarea {
+      min-height: 210px;
     }
     .posts-grid {
       display: grid;
@@ -188,7 +214,7 @@
       </div>
       <div>
         <h1 id="songHeading" class="song-title">Loading song database...</h1>
-        <div id="djMeta" class="meta-line">DJ Veg Anna • Martin Strayd Daily Single Radio Launch</div>
+        <div id="djMeta" class="meta-line">DJ Veg Anna • 24/7 / 365 Daily Single Radio & Social Launch</div>
         <div class="controls-grid">
           <div>
             <label for="songSelect">1. Pick Song from Catalog</label>
@@ -199,16 +225,24 @@
             <input id="customTitle" type="text" placeholder="Type a song title..." />
           </div>
           <div>
-            <label for="hubUrl">Sales Portal / Artist Hub</label>
+            <label for="hubUrl">Artist Hub / Sales Portal</label>
             <input id="hubUrl" type="text" value="https://martinstrayd.github.io/artist/" />
           </div>
           <div>
-            <label for="noteInput">DJ Hook / Angle / Note (Optional)</label>
-            <input id="noteInput" type="text" placeholder="Add a DJ hook, story angle, or note..." />
+            <label for="noteInput">Story / Mood / Hook Note (Optional)</label>
+            <input id="noteInput" type="text" placeholder="Add a mood, story, or hook..." />
           </div>
         </div>
+
+        <div class="link-toggles" aria-label="Optional links to append">
+          <label><input type="checkbox" id="chkHub" checked /> Artist Hub</label>
+          <label><input type="checkbox" id="chkCoffee" /> Buy Me a Coffee</label>
+          <label><input type="checkbox" id="chkPaypal" /> PayPal</label>
+          <label><input type="checkbox" id="chkWise" /> Wise (200 THB)</label>
+        </div>
+
         <div class="hero-actions">
-          <button id="makePostsBtn" class="primary" type="button">Make Social Posts</button>
+          <button id="makePostsBtn" class="primary" type="button">Make / Refresh Posts</button>
           <button id="stopSpeakBtn" type="button">Stop Voice</button>
           <button id="exportHistoryBtn" type="button">Save History JSON</button>
           <span id="statusText" class="status-pill">Loading bible & song database...</span>
@@ -237,13 +271,44 @@
     const BIBLE_STATE = {
       loadedFiles: [],
       hubUrl: "https://martinstrayd.github.io/artist/",
+      coffeeUrl: "https://buymeacoffee.com/martinstrayd",
       paypalUrl: "https://www.paypal.com/paypalme/martinstrayd",
-      wiseUrl: "https://wise.com/pay/r/xGmJi9kSdap4lKo",
-      coffeeUrl: "https://buymeacoffee.com/martinstrayd"
+      wiseUrl: "https://wise.com/pay/r/xGmJi9kSdap4lKo"
     };
+
+    const HOOK_ANGLES = [
+      {
+        tag: "Late-Night Radio",
+        xLead: (t, a) => `Why is "${t}" by ${a} hitting so hard right now? DJ Veg Anna put it on heavy rotation—`,
+        ttLead: (t, a) => `If you haven't heard "${t}" by ${a} yet, stop scrolling. DJ Veg Anna just dropped it on the 365 daily single run—`,
+        igLead: (t, a) => `Some songs pull you in on the first bar. "${t}" by ${a} is locked into DJ Veg Anna's daily single radio rotation—`,
+        fbLead: (t, a) => `DJ Veg Anna spinning "${t}" by ${a} on the daily single launch. What's the first line or hook that grabs you?`,
+        ytTag: "Daily Single Drop",
+        pressLead: (t, a) => `Martin Strayd releases "${t}" as part of the ongoing daily single launch hosted by DJ Veg Anna, pairing raw songwriting with direct listener ownership.`
+      },
+      {
+        tag: "Songwriter Confession",
+        xLead: (t, a) => `The hook in "${t}" (${a}) won't leave my head. Hear why DJ Veg Anna called it essential—`,
+        ttLead: (t, a) => `Plot twist: "${t}" by ${a} is the kind of track you play once and immediately replay. DJ Veg Anna's daily radio pick—`,
+        igLead: (t, a) => `Honest songwriting cuts straight through the noise. "${t}" by ${a} is live on DJ Veg Anna's daily single broadcast—`,
+        fbLead: (t, a) => `Ever hear a song and feel like it was written for the exact room you're sitting in? "${t}" by ${a} on DJ Veg Anna's daily single feed—`,
+        ytTag: "DJ Veg Anna Pick",
+        pressLead: (t, a) => `Featured on DJ Veg Anna's daily single broadcast, "${t}" showcases Martin Strayd's direct songwriting voice and 365-day release cadence.`
+      },
+      {
+        tag: "24/7 Crate Dig",
+        xLead: (t, a) => `24/7 radio crate dig: "${t}" by ${a} is built for replay. Grab the MP3 + cover art bundle—`,
+        ttLead: (t, a) => `365 days, one fresh single at a time. DJ Veg Anna just queued up "${t}" by ${a}—own the MP3 + art and pass it to friends—`,
+        igLead: (t, a) => `From crate dig to daily broadcast: "${t}" by ${a} is live with DJ Veg Anna. Own the MP3 + cover art bundle to keep and share freely with friends—`,
+        fbLead: (t, a) => `Running 24/7 across 365 daily drops: "${t}" by ${a} with DJ Veg Anna. Own the MP3 + cover art bundle and share freely with friends for non-commercial enjoyment—`,
+        ytTag: "365 Daily Singles",
+        pressLead: (t, a) => `As part of a 365-day single-a-day rollout, "${t}" by Martin Strayd arrives with DJ Veg Anna radio framing and direct MP3 + cover art bundles listeners can own and share with friends for non-commercial enjoyment.`
+      }
+    ];
 
     let CATALOG_SONGS = [];
     let CURRENT_ART = "";
+    let ANGLE_CURSOR = 0;
 
     const $ = (id) => document.getElementById(id);
 
@@ -318,17 +383,27 @@
           BIBLE_STATE.loadedFiles.push(path.replace("../", ""));
           const hubMatch = txt.match(/https:\/\/martinstrayd\.github\.io\/artist\/[^\s)]*/i);
           if (hubMatch) BIBLE_STATE.hubUrl = hubMatch[0];
+          const coffeeMatch = txt.match(/https:\/\/buymeacoffee\.com\/martinstrayd[^\s)]*/i);
+          if (coffeeMatch) BIBLE_STATE.coffeeUrl = coffeeMatch[0];
           const ppMatch = txt.match(/https:\/\/www\.paypal\.com\/paypalme\/martinstrayd[^\s)]*/i);
           if (ppMatch) BIBLE_STATE.paypalUrl = ppMatch[0];
           const wiseMatch = txt.match(/https:\/\/wise\.com\/pay\/r\/[^\s)]*/i);
           if (wiseMatch) BIBLE_STATE.wiseUrl = wiseMatch[0];
-          const bmcMatch = txt.match(/https:\/\/buymeacoffee\.com\/martinstrayd[^\s)]*/i);
-          if (bmcMatch) BIBLE_STATE.coffeeUrl = bmcMatch[0];
         } catch {}
       }
       if (!$("hubUrl").value.trim()) {
         $("hubUrl").value = BIBLE_STATE.hubUrl;
       }
+    }
+
+    function getSelectedLinks() {
+      const hub = $("hubUrl").value.trim() || BIBLE_STATE.hubUrl;
+      const chosen = [];
+      if ($("chkHub")?.checked && hub) chosen.push(`Artist Hub: ${hub}`);
+      if ($("chkCoffee")?.checked) chosen.push(`Buy Me a Coffee: ${BIBLE_STATE.coffeeUrl}`);
+      if ($("chkPaypal")?.checked) chosen.push(`PayPal: ${BIBLE_STATE.paypalUrl}`);
+      if ($("chkWise")?.checked) chosen.push(`Wise (200 THB): ${BIBLE_STATE.wiseUrl}`);
+      return { hub, chosen };
     }
 
     function createCardElement(ch) {
@@ -474,7 +549,7 @@
     }
 
     function openShareTarget(chId, text) {
-      const hub = $("hubUrl").value.trim() || BIBLE_STATE.hubUrl;
+      const { hub } = getSelectedLinks();
       if (chId === "x") {
         window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text.slice(0, 280))}`, "_blank", "noopener");
       } else {
@@ -484,31 +559,38 @@
       $("statusText").textContent = `Prepared ${chId}`;
     }
 
-    function buildPostsFromInput() {
+    function buildPostsFromInput(advanceAngle = false) {
+      if (advanceAngle) {
+        ANGLE_CURSOR = (ANGLE_CURSOR + 1) % HOOK_ANGLES.length;
+      }
+      const angleObj = HOOK_ANGLES[ANGLE_CURSOR];
+
       const idx = Number($("songSelect").value || 0);
       const songObj = CATALOG_SONGS[idx] || {};
       const chosenOptionTitle = cleanTitle(songObj.title || songObj.name || songObj.track || "");
       const title = cleanTitle($("customTitle").value) || chosenOptionTitle || "Featured Single";
       const artist = cleanTitle(songObj.artist) || "Martin Strayd";
-      const hub = $("hubUrl").value.trim() || songObj.portalUrl || songObj.portal || BIBLE_STATE.hubUrl;
       const note = cleanTitle($("noteInput").value);
       const dateStr = pressDateString();
+      const { hub, chosen } = getSelectedLinks();
 
       CURRENT_ART = resolveArtUrl(songObj, title);
       $("songHeading").textContent = title;
-      $("djMeta").textContent = `DJ Veg Anna • ${artist} Daily Single Radio Launch (${CATALOG_SONGS.length || 1} songs in DB)`;
+      $("djMeta").textContent = `DJ Veg Anna • ${artist} (${angleObj.tag} • ${CATALOG_SONGS.length || 1} songs in DB)`;
       syncArtwork(title);
 
-      const angle = note || "Fresh daily single drop spinning on air now.";
+      const extraNote = note ? ` ${note}` : "";
+      const linkBlock = chosen.length ? `\n\n${chosen.join("\n")}` : "";
+      const shortLink = chosen.length ? ` ${chosen[0].replace(/^[^:]+:\s*/, "")}` : "";
 
       const values = {
-        press: `OFFICIAL MARTIN STRAYD SINGLES PARTY BY DJ VEG ANNA\n${dateStr}\n\n"${title}" — ${artist}\n${angle}\n\nTune in to DJ Veg Anna's daily single radio launch and own the MP3 + cover art bundle (share freely with friends for non-commercial enjoyment): ${hub}`,
-        x: `"${title}" by ${artist} — DJ Anna daily drop! ${angle} Own MP3 + art: ${hub} #MartinStrayd #DJAnna`.trim().slice(0, 280),
-        tiktok: `DJ Veg Anna on air with today's new single drop: "${title}" by ${artist}! ${angle} Tap ${hub} to listen & grab the MP3 + cover art bundle you own and can share with friends. #MartinStrayd #DJAnna #DailySingle #IndieMusic`.trim().slice(0, 2200),
-        instagram: `ON AIR WITH DJ VEG ANNA: "${title}" by ${artist}\n\n${angle}\n\nEvery day brings a fresh single on the radio launch. Own the MP3 + cover art bundle and share freely with friends for non-commercial enjoyment: ${hub}\n\n#MartinStrayd #DJAnna #DailySingle #Songwriting #IndieMusic`.trim().slice(0, 2200),
-        facebook: `DJ Veg Anna is spinning "${title}" by ${artist} on the daily single radio launch!\n\n${angle}\n\nListen now and pick up the MP3 + cover art bundle to own and share with friends for non-commercial enjoyment: ${hub}\n\n#MartinStrayd #DJAnna #DailySingle #IndieMusic`.trim().slice(0, 63206),
-        ytTitle: `"${title}" — ${artist} | DJ Veg Anna Daily Single Radio Drop #MartinStrayd`.slice(0, 100),
-        ytDesc: `DJ Veg Anna presents "${title}" by ${artist} on the daily single radio launch.\n\n${angle}\n\nOwn the MP3 + cover art bundle (share freely with friends for non-commercial enjoyment):\nArtist Hub: ${hub}\nPayPal: ${BIBLE_STATE.paypalUrl}\nWise (200 THB): ${BIBLE_STATE.wiseUrl}\nBuy Me a Coffee: ${BIBLE_STATE.coffeeUrl}\n\n#MartinStrayd #DJAnna #DailySingle #Songwriting #IndieMusic`.trim().slice(0, 5000)
+        press: `FOR IMMEDIATE RELEASE — ${dateStr}\nOFFICIAL MARTIN STRAYD SINGLES PARTY BY DJ VEG ANNA\n\n"${title}" — ${artist}\n\n${angleObj.pressLead(title, artist)}${extraNote}\n\nListeners can grab the MP3 + cover art bundle to own and share freely with friends for non-commercial enjoyment.${linkBlock}`,
+        x: `${angleObj.xLead(title, artist)}${extraNote}${shortLink} #MartinStrayd #DJAnna`.trim().slice(0, 280),
+        tiktok: `${angleObj.ttLead(title, artist)}${extraNote}${linkBlock}\n\n#MartinStrayd #DJAnna #DailySingle #IndieMusic`.trim().slice(0, 2200),
+        instagram: `${angleObj.igLead(title, artist)}${extraNote}${linkBlock}\n\n#MartinStrayd #DJAnna #DailySingle #Songwriting #IndieMusic`.trim().slice(0, 2200),
+        facebook: `${angleObj.fbLead(title, artist)}${extraNote}${linkBlock}\n\n#MartinStrayd #DJAnna #DailySingle #IndieMusic`.trim().slice(0, 63206),
+        ytTitle: `"${title}" — ${artist} | ${angleObj.ytTag} w/ DJ Veg Anna #MartinStrayd`.slice(0, 100),
+        ytDesc: `${angleObj.igLead(title, artist)}${extraNote}\n\nHosted by DJ Veg Anna for Martin Strayd's daily single launch. Own the MP3 + cover art bundle and share freely with friends for non-commercial enjoyment.${linkBlock}\n\n#MartinStrayd #DJAnna #DailySingle #Songwriting #IndieMusic`.trim().slice(0, 5000)
       };
 
       ALL_CHANNELS.forEach((ch) => {
@@ -519,8 +601,7 @@
         }
       });
 
-      const bibleNote = BIBLE_STATE.loadedFiles.length ? ` | ${BIBLE_STATE.loadedFiles.length} bible files` : "";
-      $("statusText").textContent = `Built press + socials for "${title}"${bibleNote}`;
+      $("statusText").textContent = `Built (${angleObj.tag}) for "${title}"`;
     }
 
     async function loadCatalog() {
@@ -570,12 +651,15 @@
         select.appendChild(opt);
       });
 
-      buildPostsFromInput();
+      buildPostsFromInput(false);
     }
 
     renderCards();
-    $("makePostsBtn").addEventListener("click", buildPostsFromInput);
-    $("songSelect").addEventListener("change", buildPostsFromInput);
+    $("makePostsBtn").addEventListener("click", () => buildPostsFromInput(true));
+    $("songSelect").addEventListener("change", () => buildPostsFromInput(false));
+    ["chkHub", "chkCoffee", "chkPaypal", "chkWise"].forEach((id) => {
+      $(id)?.addEventListener("change", () => buildPostsFromInput(false));
+    });
     $("exportHistoryBtn").addEventListener("click", exportHistoryJson);
     $("stopSpeakBtn").addEventListener("click", () => {
       if ("speechSynthesis" in window) window.speechSynthesis.cancel();
