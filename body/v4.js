@@ -1714,7 +1714,12 @@ async function sendMessage() {
             if (intelReq) {
                 const scraped = await dispatchLiveIntelScrape(intelReq, assistantMsgId);
                 savedIntelPath = scraped.path;
-                liveIntelBlock = `[LIVE_INTERNET_SCRAPE_RESULT saved at ${scraped.path}]\n${scraped.content.slice(0, 6500)}`;
+                const lengthRule = intelReq.briefSize === "half"
+                    ? "Target length: HALF A4 PAGE (strictly 180 to 230 words). Be concise, balanced, factual, and grounded—never exhaustive and never exaggerated."
+                    : intelReq.briefSize === "full"
+                    ? "Target length: FULL A4 PAGE (strictly 380 to 460 words). Cover key facts, context, and verified takeaways cleanly—never exhaustive and never exaggerated."
+                    : "Target length: HALF A4 PAGE (180-230 words) for narrow/simple topics, or FULL A4 PAGE (380-460 words) for broad/multi-part topics. Keep it factual, balanced, non-exhaustive, and non-exaggerated.";
+                liveIntelBlock = `[LIVE_INTERNET_SCRAPE_RESULT saved at ${scraped.path}]\nBRIEFING INSTRUCTIONS: Synthesize the retrieved findings below into a clear, readable brief. ${lengthRule} Cite key source URLs at the bottom. Do not invent facts beyond the retrieved text.\n\n${scraped.content.slice(0, 7500)}`;
                 updateMessage(assistantMsgId, `Scraped and archived to ${scraped.path}. Synthesizing summary...`);
             }
 
@@ -1827,6 +1832,265 @@ async function sendMessage() {
         await syncAll();
     });
 
+    let lastFocusedBeforeModal = null;
+
+    function injectIntelSearchModalAndButton() {
+        if (!document.getElementById("v4-intel-modal-style")) {
+            const style = document.createElement("style");
+            style.id = "v4-intel-modal-style";
+            style.textContent = `
+                .v4-intel-trigger-btn {
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    border: 1px solid rgba(110, 231, 183, 0.45);
+                    background: rgba(16, 36, 32, 0.9);
+                    color: #a7f3d0;
+                    font-weight: 700;
+                    font-size: 12px;
+                    letter-spacing: 0.06em;
+                    cursor: pointer;
+                    margin-left: 6px;
+                }
+                .v4-intel-trigger-btn:hover, .v4-intel-trigger-btn:focus {
+                    background: rgba(20, 60, 50, 1);
+                    outline: 2px solid #6ee7b7;
+                    outline-offset: 2px;
+                }
+                .v4-intel-backdrop {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(5, 10, 14, 0.82);
+                    backdrop-filter: blur(6px);
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                    padding: 16px;
+                }
+                .v4-intel-backdrop[aria-hidden="false"] {
+                    display: flex;
+                }
+                .v4-intel-dialog {
+                    width: 100%;
+                    max-width: 520px;
+                    background: #0d161c;
+                    border: 1px solid rgba(110, 231, 183, 0.35);
+                    border-radius: 14px;
+                    padding: 22px;
+                    color: #e6f4f1;
+                    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+                }
+                .v4-intel-dialog h2 {
+                    margin: 0 0 6px 0;
+                    font-size: 18px;
+                    color: #a7f3d0;
+                }
+                .v4-intel-dialog p {
+                    margin: 0 0 16px 0;
+                    font-size: 13px;
+                    color: #9fb3be;
+                    line-height: 1.45;
+                }
+                .v4-intel-field {
+                    margin-bottom: 14px;
+                }
+                .v4-intel-field label {
+                    display: block;
+                    font-size: 12px;
+                    font-weight: 600;
+                    margin-bottom: 6px;
+                    color: #cde4df;
+                }
+                .v4-intel-field input, .v4-intel-field select {
+                    width: 100%;
+                    box-sizing: border-box;
+                    padding: 10px 12px;
+                    border-radius: 8px;
+                    border: 1px solid rgba(159, 179, 190, 0.35);
+                    background: #070d11;
+                    color: #ffffff;
+                    font-size: 14px;
+                }
+                .v4-intel-field input:focus, .v4-intel-field select:focus {
+                    outline: 2px solid #6ee7b7;
+                    border-color: #6ee7b7;
+                }
+                .v4-intel-row {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 10px;
+                }
+                .v4-intel-actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 10px;
+                    margin-top: 18px;
+                }
+                .v4-intel-btn-secondary {
+                    padding: 9px 14px;
+                    border-radius: 8px;
+                    border: 1px solid rgba(159, 179, 190, 0.35);
+                    background: transparent;
+                    color: #cde4df;
+                    cursor: pointer;
+                    font-weight: 600;
+                }
+                .v4-intel-btn-primary {
+                    padding: 9px 16px;
+                    border-radius: 8px;
+                    border: none;
+                    background: #10b981;
+                    color: #04130e;
+                    cursor: pointer;
+                    font-weight: 700;
+                }
+                .v4-intel-btn-secondary:focus, .v4-intel-btn-primary:focus {
+                    outline: 2px solid #a7f3d0;
+                    outline-offset: 2px;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        const userInput = document.getElementById("user-input");
+        if (userInput && userInput.parentElement && !document.getElementById("v4-open-search-btn")) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.id = "v4-open-search-btn";
+            btn.className = "v4-intel-trigger-btn";
+            btn.textContent = "SEARCH";
+            btn.setAttribute("aria-label", "Open live web search and research modal (Alt+S)");
+            btn.title = "Open live web search & research modal (Alt+S)";
+            btn.addEventListener("click", openIntelSearchModal);
+            userInput.parentElement.appendChild(btn);
+        }
+
+        if (!document.getElementById("v4-intel-backdrop")) {
+            const backdrop = document.createElement("div");
+            backdrop.id = "v4-intel-backdrop";
+            backdrop.className = "v4-intel-backdrop";
+            backdrop.setAttribute("aria-hidden", "true");
+            backdrop.innerHTML = `
+                <div class="v4-intel-dialog" role="dialog" aria-modal="true" aria-labelledby="v4-intel-title" aria-describedby="v4-intel-desc">
+                    <h2 id="v4-intel-title">Anna Live Web Research</h2>
+                    <p id="v4-intel-desc">Searches the web or reads a webpage, archives raw findings to bible/, and writes a balanced A4 or Half-A4 summary.</p>
+                    <form id="v4-intel-form">
+                        <div class="v4-intel-field">
+                            <label for="v4-intel-query">Search Topic or Full Website URL</label>
+                            <input id="v4-intel-query" type="text" placeholder="e.g. independent music distribution 2026 or https://..." required />
+                        </div>
+                        <div class="v4-intel-row">
+                            <div class="v4-intel-field">
+                                <label for="v4-intel-mode">Lookup Mode</label>
+                                <select id="v4-intel-mode">
+                                    <option value="auto" selected>Auto-detect (Search or URL)</option>
+                                    <option value="search">Web Search (DuckDuckGo)</option>
+                                    <option value="url">Read Specific URL</option>
+                                </select>
+                            </div>
+                            <div class="v4-intel-field">
+                                <label for="v4-intel-size">Summary Length</label>
+                                <select id="v4-intel-size">
+                                    <option value="auto" selected>Auto (Half or Full A4)</option>
+                                    <option value="half">Half A4 (~200 words)</option>
+                                    <option value="full">Full A4 (~420 words)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="v4-intel-actions">
+                            <button type="button" id="v4-intel-cancel" class="v4-intel-btn-secondary">Cancel</button>
+                            <button type="submit" id="v4-intel-submit" class="v4-intel-btn-primary">Run Research</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(backdrop);
+
+            backdrop.addEventListener("click", (e) => {
+                if (e.target === backdrop) closeIntelSearchModal();
+            });
+            document.getElementById("v4-intel-cancel").addEventListener("click", closeIntelSearchModal);
+            document.getElementById("v4-intel-form").addEventListener("submit", (e) => {
+                e.preventDefault();
+                submitIntelSearchModal();
+            });
+
+            backdrop.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    e.preventDefault();
+                    closeIntelSearchModal();
+                    return;
+                }
+                if (e.key === "Tab") {
+                    const focusables = backdrop.querySelectorAll("input, select, button");
+                    if (!focusables.length) return;
+                    const first = focusables[0];
+                    const last = focusables[focusables.length - 1];
+                    if (e.shiftKey && document.activeElement === first) {
+                        e.preventDefault();
+                        last.focus();
+                    } else if (!e.shiftKey && document.activeElement === last) {
+                        e.preventDefault();
+                        first.focus();
+                    }
+                }
+            });
+        }
+    }
+
+    function openIntelSearchModal() {
+        injectIntelSearchModalAndButton();
+        const backdrop = document.getElementById("v4-intel-backdrop");
+        const queryInput = document.getElementById("v4-intel-query");
+        if (!backdrop || !queryInput) return;
+        lastFocusedBeforeModal = document.activeElement;
+        backdrop.setAttribute("aria-hidden", "false");
+        queryInput.value = "";
+        setTimeout(() => queryInput.focus(), 20);
+    }
+
+    function closeIntelSearchModal() {
+        const backdrop = document.getElementById("v4-intel-backdrop");
+        if (backdrop) backdrop.setAttribute("aria-hidden", "true");
+        if (lastFocusedBeforeModal && typeof lastFocusedBeforeModal.focus === "function") {
+            lastFocusedBeforeModal.focus();
+        }
+    }
+
+    function submitIntelSearchModal() {
+        const queryInput = document.getElementById("v4-intel-query");
+        const modeSelect = document.getElementById("v4-intel-mode");
+        const sizeSelect = document.getElementById("v4-intel-size");
+        const raw = queryInput ? queryInput.value.trim() : "";
+        if (!raw) return;
+
+        const chosenMode = modeSelect ? modeSelect.value : "auto";
+        pendingIntelBriefSize = sizeSelect ? sizeSelect.value : "auto";
+
+        const isUrl = chosenMode === "url" || (chosenMode === "auto" && /^https?:\/\//i.test(raw));
+        const commandText = isUrl ? `/scrape ${raw}` : `/search ${raw}`;
+
+        closeIntelSearchModal();
+        const chatInput = document.getElementById("user-input");
+        if (chatInput) chatInput.value = commandText;
+        sendMessage();
+    }
+
+    document.addEventListener("keydown", (e) => {
+        if (e.altKey && (e.key === "s" || e.key === "S")) {
+            e.preventDefault();
+            openIntelSearchModal();
+        }
+    });
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", injectIntelSearchModalAndButton);
+    } else {
+        injectIntelSearchModalAndButton();
+    }
+
+    window.openIntelSearchModal = openIntelSearchModal;
+    window.closeIntelSearchModal = closeIntelSearchModal;
     window.setMoodState = setMoodState;
     window.updateActiveModel = updateActiveModel;
     window.updateRoomDecor = updateRoomDecor;
