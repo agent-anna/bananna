@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1736,12 +1736,10 @@
 <script id="annaV5ExampleEngine">
 (() => {
   const BIBLE_URLS = [
-    "https://raw.githubusercontent.com/agent-anna/baan/main/A1/docs/v5BIBLE",
-    "A1/docs/v5BIBLE",
     "../A1/docs/v5BIBLE",
+    "../docs/v5BIBLE",
     "../../A1/docs/v5BIBLE",
-    "docs/v5BIBLE",
-    "../docs/v5BIBLE"
+    "https://raw.githubusercontent.com/agent-anna/baan/main/A1/docs/v5BIBLE"
   ];
   const state = {
     source: "A1/docs/v5BIBLE",
@@ -1929,7 +1927,7 @@
   }, true);
   loadBible();
   runPass(false);
-  setInterval(() => runPass(false), 600);
+  // 600ms polling loop removed to prevent visual flashing
 })();
 </script>
 </body>
