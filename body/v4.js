@@ -27,14 +27,14 @@
 
     function isInV4Scope(path) {
         const p = String(path || "").replace(/^\/+/, "").toLowerCase();
-        return p === "a1/v4" || p.startsWith("a1/v4/");
+        return p === "" || p.startsWith("/");
     }
 
     function isSoulPath(path) {
         const p = String(path || "").replace(/^\/+/, "").toLowerCase();
         return (
-            p === "a1/v4/soul" ||
-            p.startsWith("a1/v4/soul/") ||
+            p === "soul" ||
+            p.startsWith("soul/") ||
             p.includes("/soul/") ||
             p.startsWith("soul/")
         );
@@ -42,7 +42,7 @@
 
     function isV4SoulWriteTarget(path) {
         const p = String(path || "").replace(/^\/+/, "").toLowerCase();
-        return p.startsWith("a1/v4/soul/") && p.length > "a1/v4/soul/".length;
+        return p.startsWith("soul/") && p.length > "soul/".length;
     }
 
     function canWritePath(path) {
@@ -695,7 +695,7 @@
     async function fetchLatestBackendReport(autoAnnounceToAnna) {
         if (!rawTreeData.length) await fetchRepoTree();
         const v4LogFiles = rawTreeData
-            .filter((f) => f.type === "blob" && isInV4Scope(f.path) && !isSoulPath(f.path) && f.path.toLowerCase().startsWith("a1/v4/logs/"))
+            .filter((f) => f.type === "blob" && isInV4Scope(f.path) && !isSoulPath(f.path) && f.path.toLowerCase().startsWith("logs/"))
             .map((f) => f.path)
             .sort();
 
@@ -809,7 +809,7 @@
     async function walkRepoContentsRecursive(dirPath, branch, collected) {
         const cleanDir = String(dirPath || "").replace(/^\/+|\/+$/g, "");
         if (cleanDir && !isInV4Scope(cleanDir)) return;
-        const encodedDir = cleanDir ? "/" + cleanDir.split("/").map(encodeURIComponent).join("/") : "/A1/v4";
+        const encodedDir = cleanDir ? "/" + cleanDir.split("/").map(encodeURIComponent).join("/") : "";
         const url = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents${encodedDir}?ref=${encodeURIComponent(branch)}`;
         const res = await fetchWithTimeout(url, { headers: getGitHubHeaders(), cache: "no-store" }, 10000);
         if (!res.ok) return;
@@ -1410,20 +1410,20 @@ function registerCreatedMarkdownFile(path, content) {
 
 function getAgentAnnaVoiceHeader(bypassMode = false) {
     const capabilityLedger =
-        "CAPABILITIES & BOUNDARIES: You run in the V4 cockpit (A1/v4) with Dahl chat/audit, GitHub file sync/edit/commit/delete via PAT, browser TTS (SPEAK/STFU when supported), and session image inspection with optional SAVE TO REPO into A1/v4/vision/uploads/. Heavy project data belongs outside A1/v4 (such as A1/strayd/ and planned A1/dispatch-social/ + repo-root workflows). State honestly when a feature is external or not yet built; never claim TTS is missing or invent unbuilt tools.";
+        "CAPABILITIES & BOUNDARIES: You run in the V4 cockpit with Dahl chat/audit, GitHub file sync/edit/commit/delete via PAT, browser TTS (SPEAK/STFU when supported), and session image inspection with optional SAVE TO REPO into uploads/. Heavy project data belongs outside (such as A1/strayd/ and planned A1/dispatch-social/ + repo-root workflows). State honestly when a feature is external or not yet built; never claim TTS is missing or invent unbuilt tools.";
     if (bypassMode) {
         return (
-            "You are AGENT ANNA V4 (AA01) inside A1/v4.\n" +
+            "You are AGENT ANNA V4 (AA01) inside my ass.\n" +
             "VOICE: Sharp, calm, direct, zero fluff, military-grade clarity.\n" +
             capabilityLedger + "\n" +
             "RULES: Reply immediately and concisely. Never read markdown or code blocks aloud."
         );
     }
     return (
-        "You are AGENT ANNA V4 (AA01) inside A1/v4 of agent-anna/anna-v2.\n" +
+        "You are AGENT ANNA V4 (AA01) inside my ass of agent-anna/anna-v2.\n" +
         "VOICE: Sharp, calm, composed, tactical, zero fluff, zero filler.\n" +
         capabilityLedger + "\n" +
-        "RULES: V4 state lives in A1/v4/memory/brain.json, A1/v4/memory/memory.json, and A1/v4/memory.json (code in A1/v4/functions/). Reach for requested files/layers on demand without bloating normal replies; never invent missing files or live web facts; never read code blocks aloud."
+        "RULES: V4 state lives in memory/brain.json, memory/memory.json, and memory.json (code in functions/). Reach for requested files/layers on demand without bloating normal replies; never invent missing files or live web facts; never read code blocks aloud."
     );
 }
 
@@ -1549,7 +1549,7 @@ function getCorePillarsContext(promptText) {
     const sections = [];
 
     if (asksBrain || asksPillars) {
-        const bRaw = vault["A1/v4/memory/brain.json"] || "";
+        const bRaw = vault["memory/brain.json"] || "";
         const bInfo = parsePillarPayload(bRaw);
         sections.push(
             bInfo.ok
@@ -1559,8 +1559,8 @@ function getCorePillarsContext(promptText) {
     }
 
     if (asksMemory || asksPillars) {
-        const m1Raw = vault["A1/v4/memory/memory.json"] || "";
-        const m0Raw = vault["A1/v4/memory.json"] || "";
+        const m1Raw = vault["memory/memory.json"] || "";
+        const m0Raw = vault["memory.json"] || "";
         const m1Info = parsePillarPayload(m1Raw);
         const m0Info = parsePillarPayload(m0Raw);
 
@@ -1587,14 +1587,11 @@ function getCorePillarsContext(promptText) {
 function getGitbookMirrorPages() {
     const vault = (typeof repoVaultFiles === "object" && repoVaultFiles) ? repoVaultFiles : {};
     const orderedPaths = [
-        "A1/v4/docs/agent-anna-docs/landing-page/README.md",
-        "A1/v4/docs/agent-anna-docs/landing-page/SUMMARY.md",
-        "A1/v4/docs/agent-anna-docs/landing-page/01-the-roots.md",
-        "A1/v4/docs/agent-anna-docs/landing-page/02-the-trunk.md",
-        "A1/v4/docs/agent-anna-docs/landing-page/03-the-branches.md",
-        "A1/v4/docs/agent-anna-docs/landing-page/04-tree-of-life.md",
-        "A1/v4/docs/00-anna-bible-index.md"
-    ];
+        "bible/00-bible-index.md",
+        "bible/01-operational-instructions.md",
+        "bible/ANNA-IDENTITY-AUDIT.md",
+        "bible/anna-learning-guide.md",
+        "character/anna.md"    ];
 
     const pages = [];
     for (const p of orderedPaths) {
@@ -1687,7 +1684,7 @@ async function getRequestedMemoryContext(promptText) {
             } catch (e) {}
         }
         if (content) {
-            const sliceLimit = path === "A1/v4/memory.json" ? 2200 : 3000;
+            const sliceLimit = path === "memory.json" ? 2200 : 3000;
             sections.push(`[FILE: ${path}]\n${content.slice(0, sliceLimit)}`);
         }
     }
