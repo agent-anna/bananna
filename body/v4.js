@@ -1413,7 +1413,7 @@ function registerCreatedMarkdownFile(path, content) {
 
 function getAgentAnnaVoiceHeader(bypassMode = false) {
     const capabilityLedger =
-        "CAPABILITIES & BOUNDARIES: You run in the V4 cockpit with Dahl chat/audit, GitHub file sync/edit/commit/delete via PAT, browser TTS (SPEAK/STFU when supported), and session image inspection with optional SAVE TO REPO into uploads/. Heavy project data belongs outside (such as A1/strayd/ and planned A1/dispatch-social/ + repo-root workflows). State honestly when a feature is external or not yet built; never claim TTS is missing or invent unbuilt tools.";
+        "CAPABILITIES & BOUNDARIES: You run in the V4 cockpit with Dahl chat/audit, GitHub file sync/edit/commit/delete via PAT, browser TTS (SPEAK/STFU when supported), and session image inspection with optional SAVE TO REPO into uploads/. Heavy project data belongs outside (such as A1/strayd/ and planned A1/dispatch-social/ + repo-root workflows). State honestly when a feature is external or not yet built; and live web search + URL scraping via GitHub Actions (aa01-intel-feed.yml) saved directly into bible/ using /search <query> or /scrape <url>. Never claim web scraping is missing.";
     if (bypassMode) {
         return (
             "You are AGENT ANNA V4 (AA01) inside my ass.\n" +
@@ -1708,14 +1708,24 @@ async function sendMessage() {
         setMoodState("thinking");
 
         try {
-            const bypassMode = isBypassPrompt(prompt);
+            const intelReq = parseIntelRequest(prompt);
+            let liveIntelBlock = "";
+            let savedIntelPath = "";
+            if (intelReq) {
+                const scraped = await dispatchLiveIntelScrape(intelReq, assistantMsgId);
+                savedIntelPath = scraped.path;
+                liveIntelBlock = `[LIVE_INTERNET_SCRAPE_RESULT saved at ${scraped.path}]\n${scraped.content.slice(0, 6500)}`;
+                updateMessage(assistantMsgId, `Scraped and archived to ${scraped.path}. Synthesizing summary...`);
+            }
+
+            const bypassMode = !intelReq && isBypassPrompt(prompt);
             const voiceHeader = getAgentAnnaVoiceHeader(bypassMode);
             const offlineHits = bypassMode ? "" : searchOfflineWorld(prompt);
             const vaultContext = bypassMode ? "" : getCompactVaultContext(prompt);
             const pillarContext = bypassMode ? "" : getCorePillarsContext(prompt);
             const gitbookContext = bypassMode ? "" : getGitbookMirrorContext(prompt);
             const memoryFileContext = bypassMode ? "" : await getRequestedMemoryContext(prompt);
-            const systemPrompt = [voiceHeader, vaultContext, pillarContext, offlineHits, gitbookContext, memoryFileContext].filter(Boolean).join("\n\n");
+            const systemPrompt = [voiceHeader, liveIntelBlock, vaultContext, pillarContext, offlineHits, gitbookContext, memoryFileContext].filter(Boolean).join("\n\n");
 
             const result = await callDahlDirect(
                 [
