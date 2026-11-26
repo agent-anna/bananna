@@ -1694,6 +1694,23 @@ async function getRequestedMemoryContext(promptText) {
     return sections.length ? `[REQUESTED_MEMORY_FILES]\n${sections.join("\n\n")}` : "";
 }
 
+let pendingIntelBriefSize = "auto";
+function parseIntelRequest(rawPrompt) {
+    const text = String(rawPrompt || "").trim();
+    if (!text) return null;
+    const briefSize = pendingIntelBriefSize || "auto";
+    pendingIntelBriefSize = "auto";
+    const slashSearch = text.match(/^\/search\s+(.+)$/i);
+    if (slashSearch) return { mode: "search", target: slashSearch[1].trim(), briefSize };
+    const slashScrape = text.match(/^\/scrape\s+(https?:\/\/\S+)/i);
+    if (slashScrape) return { mode: "url", target: slashScrape[1].trim(), briefSize };
+    const urlMatch = text.match(/\b(?:scrape|fetch|crawl|read\s+url|pull\s+page)\s+(https?:\/\/\S+)/i);
+    if (urlMatch) return { mode: "url", target: urlMatch[1].replace(/[),.;]+$/, ""), briefSize };
+    const searchMatch = text.match(/^(?:search\s+(?:the\s+)?(?:web|online|internet|duckduckgo|ddg)(?:\s+for)?|look\s+up\s+online)\s+(.+)$/i);
+    if (searchMatch) return { mode: "search", target: searchMatch[1].trim(), briefSize };
+    return null;
+}
+
 async function sendMessage() {
         const input = document.getElementById("user-input");
         const prompt = input ? input.value.trim() : "";
@@ -2062,7 +2079,10 @@ async function sendMessage() {
         const modeSelect = document.getElementById("v4-intel-mode");
         const sizeSelect = document.getElementById("v4-intel-size");
         const raw = queryInput ? queryInput.value.trim() : "";
-        if (!raw) return;
+        if (!raw) {
+            if (queryInput) queryInput.focus();
+            return;
+        }
 
         const chosenMode = modeSelect ? modeSelect.value : "auto";
         pendingIntelBriefSize = sizeSelect ? sizeSelect.value : "auto";
@@ -2072,8 +2092,16 @@ async function sendMessage() {
 
         closeIntelSearchModal();
         const chatInput = document.getElementById("user-input");
-        if (chatInput) chatInput.value = commandText;
-        sendMessage();
+        if (chatInput) {
+            chatInput.value = commandText;
+            chatInput.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        const sendBtn = document.getElementById("send-btn") || document.querySelector("button[onclick*='sendMessage']");
+        if (sendBtn) {
+            sendBtn.click();
+        } else if (typeof sendMessage === "function") {
+            sendMessage();
+        }
     }
 
     document.addEventListener("keydown", (e) => {
