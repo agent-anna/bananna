@@ -1851,7 +1851,7 @@
       out = out.replace(/Good evening\. Somewhere on Earth somebody is hearing [^\n]+? for the very first time\./i, hook);
     }
     return cleanText(
-      out.split("{{TITLE}}").join(t).split("{{HOOK}}").join(hook).split("{{STATION}}").join(station)
+      out.split("{{TITLE}}").join((t && !/\{\{TITLE\}\}/i.test(t)) ? t : "Daily Single").split("{{HOOK}}").join(hook).split("{{STATION}}").join(station)
         .split("{{CLOSER}}").join(closer).split("{{DATE}}").join(dateStr).split("{{BIBLE_SOURCE}}").join(state.source)
         .split("{{TAG}}").join(tag).split("{{IDENTITY}}").join(state.meta.IDENTITY || "")
         .split("{{RADIO_PROOF}}").join(state.meta.RADIO_PROOF || "").split("{{MOTTO}}").join(state.meta.MOTTO || "")
@@ -1920,7 +1920,7 @@
       }
     } finally { busy = false; }
   }
-  document.addEventListener("change", () => setTimeout(() => runPass(true), 25), true);
+  // change-event auto-rewrite disabled to stop prompt flashing
   document.addEventListener("click", (e) => {
     const b = e.target && e.target.closest && e.target.closest("button");
     if (b && /refresh|regen|spin|next|generate|new|bible|load/i.test(b.textContent || "")) setTimeout(() => runPass(true), 40);
