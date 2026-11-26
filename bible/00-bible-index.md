@@ -19,7 +19,7 @@
 - **Topic — Workflows & Automation:** Track workflow inputs, run notes, and desktop `.ps1` / GitHub habits here.
 - **Archived Anna Memory & Brain Snapshots:** Paste older `brain.json` / `memory.json` / session snapshots here when archiving so live `session/past/` stays lean.
 
-# BIBLE — Agent Anna (A1) V4 Operations Manual & Filter Gospel
+# BIBLE — Agent Anna (A1) Operations Manual & Filter Gospel
 
 Living build rules, offline reference, and web-search filter for Agent Anna  (agent-anna/home, ULTRA SLUTTY BY CHOICE).
 
