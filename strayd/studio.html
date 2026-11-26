@@ -719,7 +719,7 @@
     function buildWrappedSleeveUri(title, trackId, artistLabel) {
       const displayTitle = preserveTitle(title) || "Single Release";
       const lines = wrapTextLines(displayTitle, 22, 4);
-      const safeId = escapeXml(preserveTitle(trackId || "SINGLE-001").slice(0, 20));
+      const safeId = escapeXml(preserveTitle(trackId || "TRACK").slice(0, 20));
       const safeArtist = escapeXml(preserveTitle(artistLabel || "").slice(0, 36));
       const startY = lines.length <= 2 ? 250 : 210;
       const tspans = lines
@@ -1604,7 +1604,7 @@
 
     $("copyBundleBtn").addEventListener("click", async () => {
       const pack = [
-        `=== ${activeTrack.title || "Single"} (${activeTrack.id || "SINGLE-001"}) — Campaign Pack ===`,
+        `=== ${activeTrack.title || "Single"} (DJ Anna Edition) — Campaign Pack ===`,
         `[Press Release]\n${$("pressOut").value}`,
         `[Pitch Deck]\n${$("pitchDeckOut").value}`,
         `[TikTok]\n${$("ttOut").value}`,
@@ -2642,6 +2642,97 @@
     document.addEventListener("DOMContentLoaded", () => setTimeout(applyCleanPack, 150));
   } else {
     setTimeout(applyCleanPack, 150);
+  }
+})();
+</script>
+<script>
+(() => {
+  const LINK_FIELD_IDS = new Set([
+    "directLink", "paypalLink", "bmacLink", "wiseNote",
+    "keywordsInput", "webhookUrl", "chatInput", "customSong", "liveNewsInput"
+  ]);
+  const HUB_URL = "https://martinstrayd.github.io/artist/";
+  const SPOTIFY_URL = "https://open.spotify.com/artist/6aRM8IKV2HBUZRGnnDdrM0";
+
+  function isPollutedBlob(v) {
+    const s = String(v || "");
+    return /One artist\. One song per day|FirstIteminCatalogJSONon|\{\{TITLE\}\}|SINGLE-001|no waiting a year for a label rollout/i.test(s);
+  }
+
+  function cleanLinkInputs() {
+    for (const id of ["directLink", "paypalLink", "bmacLink", "wiseNote"]) {
+      const el = document.getElementById(id);
+      if (!el || typeof el.value !== "string") continue;
+      if (isPollutedBlob(el.value)) {
+        el.value = id === "directLink" ? HUB_URL : "";
+      }
+    }
+  }
+
+  function scrubOutFields() {
+    const titleEl = document.getElementById("heroTitle");
+    const title = ((titleEl && titleEl.textContent) || "Adhd I Can Do That (Travillen Disorder)").replace(/^Martin\s+Strayd\s*[-–—:]\s*/i, "").trim();
+    const news = (document.getElementById("liveNewsInput")?.value || "").trim()
+      || "Spinning across 10+ radio stations over the last 28 days as part of a 365-day daily release run.";
+
+    for (const id of ["pressOut", "pitchDeckOut", "ttOut", "igOut", "ytTitleOut", "ytDescOut", "fbOut", "xOut", "slotsOut", "repliesOut"]) {
+      const el = document.getElementById(id);
+      if (!el || typeof el.value !== "string") continue;
+      let s = el.value
+        .replace(/\{\{TITLE\}\}/gi, title)
+        .replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "")
+        .replace(/#FirstIteminCatalogJSONon\b/gi, "")
+        .replace(/#[A-Za-z0-9_]{35,}/g, "")
+        .replace(/[ \t]{2,}/g, " ")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+
+      if (id === "pressOut" && s && !/^PRESS RELEASE\b/i.test(s)) {
+        s = [
+          "PRESS RELEASE",
+          "",
+          `FOR IMMEDIATE RELEASE — MARTIN STRAYD & DJ ANNA SPOTLIGHT "${title.toUpperCase()}"`,
+          "",
+          `Independent songwriter Martin Strayd pairs decades of songwriting with late-night radio host DJ Anna across a daily single rollout.`,
+          "",
+          `Broadcast Note: ${news}`,
+          "",
+          `Listen & explore direct releases: ${HUB_URL} | Spotify: ${SPOTIFY_URL}`
+        ].join("\n");
+      }
+
+      if (s !== el.value) {
+        el.value = s;
+      }
+    }
+    cleanLinkInputs();
+  }
+
+  // Prevent non-output link/input controls from ever being filled with long social blobs
+  const origDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+  if (origDescriptor && origDescriptor.set && !HTMLInputElement.prototype.__annaGuarded) {
+    Object.defineProperty(HTMLInputElement.prototype, "__annaGuarded", { value: true });
+    Object.defineProperty(HTMLInputElement.prototype, "value", {
+      get: origDescriptor.get,
+      set(val) {
+        if (LINK_FIELD_IDS.has(this.id) && String(val || "").length > 180 && isPollutedBlob(val)) {
+          return origDescriptor.set.call(this, this.id === "directLink" ? HUB_URL : "");
+        }
+        return origDescriptor.set.call(this, val);
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      cleanLinkInputs();
+      setTimeout(scrubOutFields, 120);
+      setTimeout(scrubOutFields, 450);
+    });
+  } else {
+    cleanLinkInputs();
+    setTimeout(scrubOutFields, 120);
+    setTimeout(scrubOutFields, 450);
   }
 })();
 </script>
