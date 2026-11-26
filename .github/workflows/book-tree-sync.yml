@@ -1,0 +1,96 @@
+name: ANNA Book-Triggered Tree of Life Sync
+
+on:
+  push:
+    paths:
+      - "bible/**"
+  workflow_dispatch:
+    inputs:
+      run_intel_after:
+        description: "Also trigger aa01-intel-feed.yml? (true/false)"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: book-tree-of-life-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-tree-of-life:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Generate Explanatory Tree of Life Map
+        run: |
+          python3 - << 'EOF'
+          import os, glob
+          from datetime import datetime, timezone
+
+          now_iso = datetime.now(timezone.utc).isoformat()
+          workflows = sorted(glob.glob(".github/workflows/*.yml") + glob.glob(".github/workflows/*.yaml"))
+          v3_files = sorted(glob.glob("**/*", recursive=True))
+          v3_files = [f for f in v3_files if os.path.isfile(f)]
+
+          lines = [
+              "# ANNA Living Tree of Life System Map",
+              f"_Auto-generated on push to `bible/` at `{now_iso}`_",
+              "",
+              "## The Roots (Core Config & Memory)"
+          ]
+          for f in v3_files:
+              if any(k in f.lower() for k in ("brain.json", "memory.json", "tasks.json", "links.json")):
+                  lines.append(f"- `{f}`")
+
+          lines.extend(["", "## The Trunk (Cockpit & UI Engine)"])
+          for f in v3_files:
+              if f.endswith((".html", ".js", ".css")):
+                  lines.append(f"- `{f}`")
+
+          lines.extend(["", "## The Branches (Active GitHub Actions Workflows)"])
+          for wf in workflows:
+              wf_name = os.path.basename(wf)
+              with open(wf, "r", encoding="utf-8") as fp:
+                  first_line = next((l.replace("name:", "").strip() for l in fp if l.startswith("name:")), wf_name)
+              lines.append(f"- **{first_line}** (`{wf}`)")
+
+          lines.extend(["", "## The Leaves (Verified Knowledge & Logs)"])
+          for f in v3_files:
+              if "knowledge/" in f or "/logs/" in f:
+                  lines.append(f"- `{f}`")
+
+          os.makedirs("bible", exist_ok=True)
+          with open("bible/00-tree-of-life.md", "w", encoding="utf-8") as out:
+              out.write("\n".join(lines) + "\n")
+          EOF
+
+      - name: Commit updated Tree of Life page
+        run: |
+          git config user.name "Agent Anna V3 Bot"
+          git config user.email "agent-anna@users.noreply.github.com"
+          git pull --rebase --autostash origin "${{ github.ref_name }}" || true
+          git add bible/00-tree-of-life.md
+          if git diff --cached --quiet; then
+            echo "Tree of Life already up to date."
+          else
+            git commit -m "Auto-update Tree of Life system map from book trigger [skip ci]"
+            git push origin "${{ github.ref_name }}"
+          fi
+
+      - name: Optionally trigger aa01-intel-feed.yml from book
+        if: ${{ github.event.inputs.run_intel_after == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run aa01-intel-feed.yml \
+            --ref "${{ github.ref_name }}" \
+            -f mode="url" \
+            -f target_or_query="https://martinstrayd.github.io/artist/" \
+            -f output_name="strayd-artist-live"
