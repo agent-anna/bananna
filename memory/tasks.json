@@ -1,0 +1,20 @@
+[
+  {
+    "id": "wire-functions-to-dashboard",
+    "text": "Wire /functions/ modules into the body/index.html dashboard and verify all exports load correctly",
+    "status": "open",
+    "created": "2026-11-26"
+  },
+  {
+    "id": "seed-links-json",
+    "text": "Seed A1/v3/memory/links.json with initial Strayd Music URLs",
+    "status": "open",
+    "created": "2026-11-26"
+  },
+  {
+    "id": "verify-telemetry-memory",
+    "text": "Verify live telemetry and memory calls end-to-end: prices, search, URL fetch, notes read/write",
+    "status": "open",
+    "created": "2026-11-26"
+  }
+]
