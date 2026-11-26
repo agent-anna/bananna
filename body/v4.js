@@ -26,14 +26,11 @@
     let ephemeralVisionDataUrl = null;
 
 function isInV4Scope(path) {
-        const p = String(path || "").replace(/^\/+/, "").toLowerCase();
-        return p === "" || 
-               p.startsWith(WORKSPACE_ROOT.toLowerCase() + "/") || 
-               p.startsWith("bible/") || 
-               p.startsWith("soul/") || 
-               p.startsWith("knowledge/") || 
-               p.startsWith("logs/") || 
-               !p.includes("/");
+        // Accept everything in the repo dynamically, skipping only hidden system files like .git
+        const p = String(path || "").replace(/^\/+/, "");
+        if (!p) return false;
+        if (p.startsWith(".git") || p === ".gitignore" || p === "CNAME") return false;
+        return true;
     }
 
     function isSoulPath(path) {
