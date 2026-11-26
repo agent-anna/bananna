@@ -1,0 +1,29 @@
+{
+  "clone": "A1",
+  "status": "ACTIVE",
+  "version": "6.6.6",
+  "timestamp": "2026",
+  "folders": [
+    "character",
+    "knowledge",
+    "memory",
+    "body",
+    "bible",
+    "logs",
+    "promo-gate",
+    "strayd",
+    "tasks",
+    "functions",
+    "plans"
+  ],
+  "startup": [
+    "body/index.html",
+    "bible/anna-learning-guide.md",
+    "memory/brain.json",
+    "memory/memory.json",
+    "character/anna.md",
+    "knowledge/business.md"
+  ],
+  "execution_mode": "SOVEREIGN_HEADLESS_AND_UI",
+  "note": "Master API access governed by GitHub Repository Secrets for background runs and secure local cache for UI."
+}
