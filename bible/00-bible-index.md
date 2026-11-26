@@ -25,7 +25,7 @@ Living build rules, offline reference, and web-search filter for Agent Anna  (ag
 
 ## 1. Build Rules & Scope Lock
 
-- Keep work focused on the Agent Anna (AA01) V4 dashboard under A1/v4/.
+- Keep work focused on the Agent Anna (A1) self-persistent memory and ways to improve log files and milestones and clean notes. self audit, see faults , report issues, back-up, self-heal, commit. refresh. Ask MASTER to ctrl+shift+R
 - Preserve modular structure: index.html, styles.css, anna-ui.js, memory.json, and functions/00-utils.js through 06-scrape.js.
 - Avoid older version of ANNA v1, v2, v3, v4, v5 leftovers, duplicate rules/files, or unrequested rebrands.
 - Hard-refresh (Ctrl+Shift+R) after edits and verify clean console/runtime behavior.
@@ -43,6 +43,6 @@ Living build rules, offline reference, and web-search filter for Agent Anna  (ag
 - Cross-check external search results against current dates, exact file/API behavior, and build rules.
 - Discard off-scope noise, stale OS assumptions, or unverified claims that conflict with our repo ground truth.
 
-## 4. Living Build Log - MAKE SURE WE HAVE MINIMAL LOAD for fastest replies. 
+## 4. Living Build Log - MAKE SURE WE HAVE MINIMAL LOAD for fastest replies. The most resource we build is in bible and bible is only for refercne an writing not for loading. its only for personal library (inside github so keep size minimal, audit if concerned. ) 
 
 - Initialized bible storage bible/*.md for slim ANNA build verification and ongoing rule updates.
