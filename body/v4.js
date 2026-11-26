@@ -2298,6 +2298,42 @@ function isSimpleFastQuery(userPrompt) {
     return /^(what time|time\??|what day|what date|date\??|hi|hello|hey|yo|sup|test|ping)\b/.test(q) && q.length < 45;
 }
 
+function triggerUiHeartbeatClick() {
+    try {
+        const now = Date.now();
+        if (window.__v4LastHeartbeatAt && (now - window.__v4LastHeartbeatAt) < 45) return;
+        window.__v4LastHeartbeatAt = now;
+
+        if (typeof window.playHeartbeat === "function") {
+            window.playHeartbeat();
+        } else if (typeof playHeartbeat === "function") {
+            playHeartbeat();
+        }
+    } catch (_) {}
+}
+
+function bindGlobalHeartbeatControls() {
+    if (window.__v4HeartbeatBound) return;
+    window.__v4HeartbeatBound = true;
+
+    document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!target || typeof target.closest !== "function") return;
+        if (target.closest("input, textarea, select, [contenteditable='true']")) return;
+
+        const interactive = target.closest("button, [role='button'], .btn, [data-action], [data-path]");
+        if (!interactive) return;
+
+        triggerUiHeartbeatClick();
+    }, { passive: true });
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindGlobalHeartbeatControls);
+} else {
+    bindGlobalHeartbeatControls();
+}
+
 async function sendMessage() {
         const input = document.getElementById("user-input");
         const prompt = input ? input.value.trim() : "";
