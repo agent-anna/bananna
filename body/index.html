@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANNA // STUDIO WORKBENCH</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👩‍💻</text></svg>">
+    <link rel="stylesheet" href="./v4.css?v=4.6">
+</head>
+<body class="workbench-lock is-standby decor-military-calm" aria-label="Agent Anna V4 A1 Workbench">
+
+    <div class="military-top-bar" role="region" aria-label="System Status Bar">
+        <div class="top-status-indicator">
+            <div class="status-dot" aria-hidden="true"></div>
+            <span id="state-text" aria-live="polite">STANDBY // AGENT ANNA OG</span>
+            <span class="status-badge" id="vault-status" aria-live="polite">VAULT: 0 FILES</span>
+            <span class="status-badge" id="key-status" aria-live="polite">KEY: CHECKING</span>
+            <span class="status-badge" id="actions-status" aria-live="polite">ACTIONS: IDLE</span>
+        </div>
+
+        <div class="top-controls-cluster">
+            <a class="ctrl-btn" href="./intro.html">INTRO</a>
+            <a class="ctrl-btn" href="./tree-of-life.html">TREE OF LIFE</a>
+            <button class="ctrl-btn military-btn" id="boot-btn" onclick="triggerAutonomousBootSequence()">AWAKEN</button>
+            <button class="ctrl-btn military-btn" id="keys-btn" onclick="toggleSettings()">KEYS</button>
+            <button class="ctrl-btn military-btn" id="fullpage-btn" onclick="toggleFullPageMode()" aria-pressed="false" aria-label="Toggle Full Page Mode" title="Full Page Mode">⛶</button>
+        </div>
+    </div>
+
+    <div class="main-workspace">
+
+        <div class="github-pane" role="region" aria-label="GitHub Repository Vault Pane">
+            <div class="repo-toolbar">
+                <span style="font-size:10px; color:var(--gold); font-weight:bold;">AGENT-ANNA (SLUT)</span>
+                <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                    <button class="ctrl-btn military-btn" onclick="toggleViewMode()" id="view-toggle-btn">VIEW: TREE</button>
+                    <button class="ctrl-btn military-btn" id="sync-btn" onclick="syncAll()">SYNC</button>
+                    <button class="ctrl-btn military-btn" id="audit-btn" onclick="auditActiveFile()">AUDIT</button>
+                    <button class="ctrl-btn military-btn" id="commit-btn" onclick="commitCurrentFile()">COMMIT</button>
+                    <button class="ctrl-btn del-btn" id="delete-prompt-btn" onclick="promptDeleteFile()">DELETE</button>
+                </div>
+            </div>
+
+            <div id="delete-warning-banner" role="region" aria-label="Delete Confirmation Banner">
+                <span id="delete-warning-text" style="color:#fda4af; font-weight:bold;">DELETE ACTIVE FILE?</span>
+                <div style="display:flex; gap:6px;">
+                    <button class="ctrl-btn del-btn" onclick="confirmDeleteFile()">YES, DELETE</button>
+                    <button class="ctrl-btn" onclick="cancelDeleteFile()">CANCEL</button>
+                </div>
+            </div>
+
+            <div class="repo-view-container" aria-label="Repository File Explorer">
+                <div class="repo-file-grid" id="repo-file-grid" role="list"></div>
+                <div class="repo-tree-view" id="repo-tree-view" role="tree"></div>
+            </div>
+
+            <input type="text" id="active-file-path" placeholder="Active file path (e.g. soul/desire.md)..." style="width:100%; padding:6px; background:var(--bg-dark); border:1px solid var(--border-subtle); color:var(--text-light); font-family:inherit; font-size:10px; border-radius:3px;">
+
+            <textarea id="repo-code-editor" placeholder="Select a file in Tree or Grid to view or edit..."></textarea>
+
+            <div class="v4-vision-strip" aria-label="See-Only Session Image Buffer">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span style="color:var(--gold); font-weight:bold;">SEE-ONLY VISION (IN-MEMORY ONLY — NEVER WRITTEN TO GIT)</span>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <input type="file" id="v4-vision-file" accept="image/*" aria-label="Choose image for temporary see-only session inspection" style="font-size:9px; max-width:190px;">
+                        <button class="ctrl-btn" type="button" onclick="clearSeeOnlyVision()">CLEAR RAM</button>
+                    </div>
+                </div>
+                <div id="v4-paste-zone" class="v4-paste-box" tabindex="0" role="button" aria-label="Click or focus and press Ctrl+V to paste an image for temporary see-only inspection">
+                    Focus here and press Ctrl+V to load a see-only image into session memory (not saved to Git).
+                </div>
+                <div id="v4-vision-meta" style="margin-top:4px; color:var(--text-muted);" aria-live="polite">Memory buffer: empty.</div>
+            </div>
+
+            <div id="media-preview-container" aria-label="Media preview area"></div>
+        </div>
+
+        <div class="chat-pane" role="region" aria-label="Agent Anna OG Console">
+
+            <div class="chat-header">
+                <span>CONSOLE [AGENT ANNA // STUDIO WORKBENCH]</span>
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <button class="ctrl-btn military-btn" id="voice-btn" onclick="toggleVoice()" aria-label="Toggle Anna Voice Readback" title="Toggle Voice Readback">🔊</button>
+                    <button class="ctrl-btn" id="clear-logs-btn" onclick="clearLogs()">CLEAR</button>
+                </div>
+            </div>
+
+            <div id="settings-panel" role="region" aria-label="API Keys, Model and Room Settings Panel">
+                <div class="settings-title">DAHL API KEY</div>
+                <input type="password" id="api-key" placeholder="Paste Dahl API Key...">
+                <div class="settings-title">GITHUB PAT TOKEN (repo + workflow scopes)</div>
+                <input type="password" id="gh-token" placeholder="Paste GitHub PAT...">
+                <div class="settings-grid-2">
+                    <div>
+                        <div class="settings-title">MODEL</div>
+                        <select id="model-select" onchange="updateActiveModel()" aria-label="Select AI Model">
+                            <option value="MiniMaxAI/MiniMax-M2.7" selected>ANNA (MiniMax-M2.7)</option>
+                            <option value="deepseek-ai/DeepSeek-V4-Flash-0731">DEEPTHROAT</option>
+                            <option value="zai-org/GLM-5.3-Flash">GLM-5.3-FLASH</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="settings-title">ROOM MODE</div>
+                        <select id="room-decor-select" onchange="updateRoomDecor()" aria-label="Select Anna Room Mode">
+                            <option value="military-calm" selected>MILITARY-CALM</option>
+                            <option value="night-watch">NIGHT-WATCH</option>
+                            <option value="war-room-brief">WAR-ROOM-BRIEF</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="settings-title">BREATHING CADENCE</div>
+                <select id="pulse-cadence-select" onchange="updatePulseCadence()" aria-label="Select Breathing Cadence">
+                    <option value="0.75">CALM / SLOW</option>
+                    <option value="1" selected>BALANCED</option>
+                    <option value="1.35">LIVELY</option>
+                </select>
+                <button class="ctrl-btn military-btn" id="save-creds-btn" onclick="saveCredentials()" style="width:100%;">APPLY &amp; RE-SYNC</button>
+            </div>
+
+            <div id="chat-container" role="log" aria-live="polite" aria-label="Chat Message History"></div>
+
+            <div class="quick-tactical-bar" role="toolbar" aria-label="Quick Tactical Actions">
+                <button class="tactical-chip" onclick="fetchLatestBackendReport(true)">READ LAST LOG</button>
+                <button class="tactical-chip" onclick="triggerPreset('Summarize the latest snapshots in /soul/ and /knowledge/ and /04-song-catalog.md and list key links and findings.')">INTEL BRIEF</button>
+                <button class="tactical-chip" onclick="triggerPreset('Review A1/v4/registry/links-registry.json and A1/v4/docs/OPORD-AA01-V4-DEPLOYMENT.md and give a concise status summary.')">MEMORY STATUS</button>
+            </div>
+
+            <div class="input-control-bar">
+                <div class="input-row">
+                    <button class="ctrl-btn military-btn mic-btn" id="mic-btn" onclick="toggleMicrophone()">MIC</button>
+                    <input type="text" id="user-input" placeholder="Anna please write a folder and file..." onkeypress="handleKey(event)">
+                    <button class="ctrl-btn military-btn" id="send-btn" onclick="sendMessage()">SEND</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="./v4.js?v=4.6"></script>
+</body>
+</html>
