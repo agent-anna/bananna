@@ -1,0 +1,165 @@
+name: A1 Grounded Intel & Feed Sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "url (fetch target_or_query) or search (query HTML search feed)"
+        required: true
+        default: "url"
+      target_or_query:
+        description: "Target URL (for url mode) or search query (for search mode)"
+        required: true
+        default: "https://martinstrayd.github.io/artist/"
+      output_name:
+        description: "Output markdown filename inside knowledge/ (without .md)"
+        required: true
+        default: "strayd-artist-live"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aa01-intel-feed-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fetch-grounded-intel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Fetch verified snapshot into A1/v3/knowledge
+        env:
+          MODE: ${{ github.event.inputs.mode || 'url' }}
+          INPUT_VAL: ${{ github.event.inputs.target_or_query || 'https://martinstrayd.github.io/artist/' }}
+          OUT_NAME: ${{ github.event.inputs.output_name || 'strayd-artist-live' }}
+        run: |
+          python3 - << 'EOF'
+          import os, re, time, urllib.parse, urllib.request
+          from html.parser import HTMLParser
+          from datetime import datetime, timezone
+
+          mode = os.environ["MODE"].strip().lower()
+          val = os.environ["INPUT_VAL"].strip()
+          slug = re.sub(r"[^a-z0-9_-]+", "-", os.environ["OUT_NAME"].strip().lower()).strip("-") or "intel-snapshot"
+          now_iso = datetime.now(timezone.utc).isoformat()
+
+          def http_get(target_url, retries=2):
+              for attempt in range(retries + 1):
+                  req = urllib.request.Request(
+                      target_url,
+                      headers={
+                          "User-Agent": "Mozilla/5.0 (compatible; AgentAnnaV3/1.0)",
+                          "Accept": "text/html,application/json;q=0.9,*/*;q=0.8"
+                      }
+                  )
+                  try:
+                      with urllib.request.urlopen(req, timeout=25) as resp:
+                          return resp.status, resp.read().decode("utf-8", errors="replace")
+                  except urllib.error.HTTPError as e:
+                      if e.code == 429 and attempt < retries:
+                          time.sleep(12 * (attempt + 1))
+                          continue
+                      raise
+
+          class TextExtractor(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.chunks = []
+                  self.links = []
+                  self._skip = False
+                  self._href = None
+                  self._label = []
+
+              def handle_starttag(self, tag, attrs):
+                  am = dict(attrs)
+                  if tag in ("script", "style", "noscript"):
+                      self._skip = True
+                  if tag == "a" and "href" in am:
+                      self._href = am["href"].strip()
+                      self._label = []
+
+              def handle_endtag(self, tag):
+                  if tag in ("script", "style", "noscript"):
+                      self._skip = False
+                  if tag == "a" and self._href is not None:
+                      lbl = " ".join("".join(self._label).split())
+                      self.links.append((lbl or "(link)", self._href))
+                      self._href = None
+                      self._label = []
+
+              def handle_data(self, data):
+                  if self._skip:
+                      return
+                  cleaned = " ".join(data.split())
+                  if cleaned:
+                      self.chunks.append(cleaned)
+                  if self._href is not None:
+                      self._label.append(cleaned)
+
+          os.makedirs("A1/v3/knowledge", exist_ok=True)
+          out_path = f"A1/v3/knowledge/{slug}.md"
+
+          if mode == "search":
+              q_enc = urllib.parse.quote_plus(val)
+              ddg_url = f"https://html.duckduckgo.com/html/?q={q_enc}"
+              status, html_body = http_get(ddg_url)
+              parser = TextExtractor()
+              parser.feed(html_body)
+              filtered_links = [
+                  (lbl, href) for (lbl, href) in parser.links
+                  if href.startswith("http") and "duckduckgo.com" not in href
+              ][:15]
+              lines = [
+                  f"# AA01 SEARCH SNAPSHOT: {val}",
+                  f"- Query: {val}",
+                  f"- Source Feed: {ddg_url}",
+                  f"- HTTP Status: {status}",
+                  f"- Fetched At (UTC): {now_iso}",
+                  "",
+                  "## EXTRACTED RESULTS & LINKS"
+              ]
+              if filtered_links:
+                  for lbl, href in filtered_links:
+                      lines.append(f"- **{lbl}**: {href}")
+              else:
+                  lines.append("- No external result links returned in HTML response.")
+              lines.extend(["", "## EXTRACTED SNIPPET TEXT", "\n".join(parser.chunks[:120])])
+          else:
+              status, html_body = http_get(val)
+              parser = TextExtractor()
+              parser.feed(html_body)
+              lines = [
+                  f"# A1 URL SNAPSHOT: {val}",
+                  f"- Source URL: {val}",
+                  f"- HTTP Status: {status}",
+                  f"- Fetched At (UTC): {now_iso}",
+                  f"- Extracted Links: {len(parser.links)}",
+                  "",
+                  "## EXTRACTED LINKS"
+              ]
+              for lbl, href in parser.links[:40]:
+                  lines.append(f"- {lbl}: {href}")
+              lines.extend(["", "## EXTRACTED TEXT", "\n".join(parser.chunks[:300])])
+
+          with open(out_path, "w", encoding="utf-8") as f:
+              f.write("\n".join(lines) + "\n")
+          print(f"Wrote {out_path} (HTTP {status})")
+          EOF
+
+      - name: Commit grounded snapshot to A1/v3/knowledge
+        run: |
+          git config user.name "Agent Anna Bot"
+          git config user.email "agent-anna@users.noreply.github.com"
+          git pull --rebase --autostash origin "${{ github.ref_name }}" || true
+          git add A1/v3/knowledge/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "A1 grounded intel sync into knowledge"
+            git push origin "${{ github.ref_name }}"
+          fi
