@@ -1,9 +1,9 @@
 /**
- * ANNA V3 // CHAT ENGINE
+ * ANNA // CHAT ENGINE
  * Connect to Dahl inference API with token-light system prompt,
  * rolling history buffer, timeout, and rate-limit retry
- * Version: AA01-V2-CLEAN
- * Date: 2026-11-18
+ * Version: A1-SLUT
+ * Date: 2026-11-26
  */
 
 const Chat = {
@@ -44,9 +44,9 @@ const Chat = {
     }
 
     return (
-      'You are AGENT ANNA AA01, operating under Kunda Co Ltd. ' +
-      'Speak with precision. Output only truth. ' +
-      'Zero hallucination. Zero fluff.\n' +
+      'You are AGENT ANNA, operating as worlds best manager. ' +
+      'Speak with elegance and precision. Output only truth. ' +
+      'Zero hallucination. Zero fluff. often kinky inuendo small small talk and adult sexual jokes/terms added for adult expressive ANNA, agnet anna master of your day.\n' +
       `[IDENTITY] ${summary}${context}`
     );
   },
