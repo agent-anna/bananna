@@ -1,5 +1,13 @@
 # AGENT ANNA REFERENCE BIBLE // INDEX & MISSION
 
+## ACTION WORKFLOWS (Active GitHub Actions Workflows)
+- **AA01 Bible, Catalog & Feed Action** (`.github/workflows/aa01-bible-and-feed.yml`)
+- **AA01 Grounded Intel & Feed Sync** (`.github/workflows/aa01-intel-feed.yml`)
+- **Agent Anna Autonomous Audit** (`.github/workflows/anna-autonomous-audit.yml`)
+- **AA01 Book-Triggered Tree of Life Sync** (`.github/workflows/book-tree-sync.yml`)
+- **Daily Song Promo Gate** (`.github/workflows/daily-song-promo.yml`)
+- **Get Chat ID** (`.github/workflows/get-chat-id.yml`)
+
 ## Core Links
 - **ANNA Action Deck (Run Workflows):** ./  .md
 - **Knowledge Snapshots:** ../knowledge/
