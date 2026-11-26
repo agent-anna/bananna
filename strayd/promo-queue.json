@@ -1,0 +1,25 @@
+{
+  "dailyLimit": 1,
+  "items": [
+    {
+      "id": "STRAYD-ID-001",
+      "title": "Adhd I Can Do That (Travillen Disorder)",
+      "artist": "Martin Strayd",
+      "art": "store-art/Martin Strayd - Adhd I Can Do That (Travillen Disorder).png",
+      "link": "https://www.paypal.com/paypalme/martinstrayd",
+      "status": "awaiting_review",
+      "visualStyle": "Realistic live-action only (no cartoon)",
+      "preparedAt": "2026-11-21T13:33:28.227Z"
+    },
+    {
+      "id": "STRAYD-ID-003",
+      "title": "Andaman Escape",
+      "artist": "Martin Strayd",
+      "art": "store-art/Martin Strayd - Andaman Escape.png",
+      "link": "https://strayd.com",
+      "status": "pending",
+      "visualStyle": "Realistic live-action only (no cartoon)"
+    }
+  ],
+  "lastUpdated": "2026-11-21T13:33:28.227Z"
+}

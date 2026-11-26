@@ -1,0 +1,24 @@
+﻿{
+  "nodeId": "A1-STRAYD-RECORD-CMD",
+  "visibleToAnnaV4": true,
+  "role": "Record Company Promotional Command Center & 365-Day Catalog Engine",
+  "artist": "Martin Strayd (STRAYD)",
+  "cafeContext": "Music played at Kunda Cafe (distinct from the cafe itself)",
+  "salesPortal": "https://martinstrayd.github.io/artist/",
+  "paymentRails": {
+    "directMp3AndArt": "https://www.paypal.com/paypalme/martinstrayd",
+    "buyMeACoffee": "https://buymeacoffee.com/martinstrayd",
+    "wise": "Wise THB / Wise Pay direct transfer",
+    "dogecoin": "Dogecoin direct payment on sales portal"
+  },
+  "cadenceModes": [
+    "1_song_a_day_roll",
+    "multi_post_high_impact_burst"
+  ],
+  "visualLaw": "Strictly realistic live-action cinematography only (zero cartoon, zero anime, zero illustration)",
+  "titleLockLaw": "Preserve exact song titles verbatim without altering intentional word repetition",
+  "bibleTargets": [
+    "A1/docs/v4BIBLE",
+    "docs/1 v4BIBLE"
+  ]
+}
