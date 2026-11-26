@@ -1,8 +1,8 @@
 /**
- * ANNA V3 // UTILITY FUNCTIONS
+ * ANNA // UTILITY FUNCTIONS
  * Clean, reusable helpers for the Anna engine
- * Version: AA01-V2-CLEAN
- * Date: 2026-11-18
+ * Version: ANNA-CLEAN-UP-THE-HOUSE
+ * Date: 2026-11-26
  */
 
 const Utils = {
