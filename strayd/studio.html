@@ -2032,5 +2032,133 @@
   }
 })();
 </script>
+<script>
+(() => {
+  const HUB_URL = "https://martinstrayd.github.io/artist/";
+  const SPOTIFY_URL = "https://open.spotify.com/artist/6aRM8IKV2HBUZRGnnDdrM0";
+
+  function sanitizeText(raw, fallbackTitle) {
+    let s = String(raw || "");
+    s = s.replace(/\{\{TITLE\}\}/gi, fallbackTitle || "this track");
+    s = s.replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "");
+    s = s.replace(/#FirstIteminCatalogJSONon\b/gi, "");
+    s = s.replace(/#[A-Za-z0-9_]{35,}/g, "");
+    s = s.replace(/\s*\(\s*\)\s*/g, " ");
+    s = s.replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+    return s;
+  }
+
+  function currentSongTitle() {
+    const hero = document.getElementById("heroTitle");
+    const sel = document.querySelector("select[id*='song' i], select[id*='track' i], input[id*='song' i], input[id*='title' i]");
+    let raw = (hero && hero.textContent) || (sel && sel.value) || "";
+    raw = raw.replace(/^Martin\s+Strayd\s*[-–—:]\s*/i, "").trim();
+    raw = sanitizeText(raw, "");
+    return raw || "Adhd I Can Do That (Travillen Disorder)";
+  }
+
+  function buildCleanPack() {
+    const title = currentSongTitle();
+    const artist = "Martin Strayd";
+    const news = sanitizeText(document.getElementById("liveNewsInput")?.value, title)
+      || "Spinning across 10+ radio stations over the last 28 days as part of a 365-day daily release run.";
+
+    const pressRelease = [
+      "PRESS RELEASE",
+      "",
+      `FOR IMMEDIATE RELEASE — MARTIN STRAYD DROPS "${title.toUpperCase()}" AS DJ ANNA BROADCASTS DAILY SINGLE RUN`,
+      "",
+      `Independent songwriter and catalog builder ${artist}—drawing on decades of songwriting across rock, blues, reggae, soundtrack, and raw studio sessions—continues his daily single rollout alongside late-night host DJ Anna.`,
+      "",
+      `Unlike traditional release cycles that stretch a single track across months of silence, ${artist} pairs a steady stream of studio recordings with DJ Anna radio breaks, listener stories, and direct catalog access.`,
+      "",
+      `Latest Broadcast & Release Note: ${news}`,
+      "",
+      `Hear "${title}" and explore the full catalog directly at ${HUB_URL} or on Spotify at ${SPOTIFY_URL}.`
+    ].join("\n");
+
+    const xPost = sanitizeText(
+      `DJ Anna late night: why does "${title}" hit harder than half the over-polished playlists out right now? Four decades of ${artist} writing in one sharp cut. ${HUB_URL} #MartinStrayd #DJAnna`,
+      title
+    ).slice(0, 280);
+
+    const ttPost = sanitizeText(
+      `Wait till you hear what ${artist} just put into "${title}". DJ Anna spun it up and nobody in the room skipped past the first twenty seconds. Tell me what you hear first—and grab it straight from ${HUB_URL}. #MartinStrayd #DJAnna #DailySingle`,
+      title
+    );
+
+    const igPost = sanitizeText(
+      `Late night with DJ Anna: "${title}" carries the kind of weight you only get when a songwriter has lived inside the craft for decades. Real room, real tension, no fake polish.\n\nListen & get the release: ${HUB_URL}\n#MartinStrayd #DJAnna #Songwriting`,
+      title
+    );
+
+    const fbPost = sanitizeText(
+      `DJ Anna here—some songs sound like background noise, and some make you stop mid-sentence. "${title}" from ${artist} is one of those tracks people end up sending to a friend right away.\n\n${news}\n\nExplore the catalog & grab it here: ${HUB_URL}`,
+      title
+    );
+
+    const ytTitle = sanitizeText(
+      `"${title}" — ${artist} | DJ Anna Late-Night Session`,
+      title
+    ).slice(0, 100);
+
+    const ytDesc = sanitizeText(
+      `DJ Anna introduces "${title}" by ${artist}—part of a continuous daily single release run backed by decades of songwriting and multi-style studio sessions.\n\nIn this feature:\n• Why "${title}" stands out in today's rotation\n• ${news}\n• How each track connects to the wider ${artist} catalog\n\nCatalog & Direct Access: ${HUB_URL}\nSpotify: ${SPOTIFY_URL}`,
+      title
+    );
+
+    return { pressRelease, xPost, ttPost, igPost, fbPost, ytTitle, ytDesc };
+  }
+
+  function applyCleanPack() {
+    const pack = buildCleanPack();
+    const map = {
+      pressOut: pack.pressRelease,
+      xOut: pack.xPost,
+      ttOut: pack.ttPost,
+      igOut: pack.igPost,
+      fbOut: pack.fbPost,
+      ytTitleOut: pack.ytTitle,
+      ytDescOut: pack.ytDesc
+    };
+    for (const [id, val] of Object.entries(map)) {
+      const el = document.getElementById(id);
+      if (!el || typeof el.value !== "string") continue;
+      if (el.dataset.userEdited === "1") continue;
+      el.value = val;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+
+  // Expose clean TTS spoken helper without raw '#' or catalog IDs
+  window.annaSpeakClean = function(text) {
+    if (!("speechSynthesis" in window)) return;
+    const spoken = sanitizeText(text, currentSongTitle()).replace(/#/g, "");
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(spoken);
+      window.speechSynthesis.speak(u);
+    } catch (_) {}
+  };
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target && e.target.closest && e.target.closest("button");
+    if (!btn) return;
+    if (btn.id === "generateBtn" || btn.id === "reloadBtn") {
+      document.querySelectorAll("textarea, input[type='text']").forEach((el) => {
+        delete el.dataset.userEdited;
+      });
+      setTimeout(applyCleanPack, 80);
+      setTimeout(applyCleanPack, 320);
+    }
+  }, true);
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => setTimeout(applyCleanPack, 150));
+  } else {
+    setTimeout(applyCleanPack, 150);
+  }
+})();
+</script>
 </body>
 </html>
