@@ -25,9 +25,15 @@
     let isSyncing = false;
     let ephemeralVisionDataUrl = null;
 
-    function isInV4Scope(path) {
+function isInV4Scope(path) {
         const p = String(path || "").replace(/^\/+/, "").toLowerCase();
-        return p === "" || p.startsWith("/");
+        return p === "" || 
+               p.startsWith(WORKSPACE_ROOT.toLowerCase() + "/") || 
+               p.startsWith("bible/") || 
+               p.startsWith("soul/") || 
+               p.startsWith("knowledge/") || 
+               p.startsWith("logs/") || 
+               !p.includes("/");
     }
 
     function isSoulPath(path) {
