@@ -1720,21 +1720,60 @@ function parseIntelRequest(rawPrompt) {
     return null;
 }
 
+async function fetchDirectWebIntel(intelReq) {
+    const target = String(intelReq.target || "").trim();
+    if (intelReq.mode === "url") {
+        const readerUrl = /^https?:\/\//i.test(target) ? `https://r.jina.ai/${target}` : `https://r.jina.ai/https://${target}`;
+        const r = await fetchWithTimeout(readerUrl, { cache: "no-store" }, 20000);
+        if (!r.ok) throw new Error(`Jina Reader HTTP ${r.status}`);
+        const md = await r.text();
+        return `# Live URL Snapshot: ${target}\n\n${md.slice(0, 14000)}`;
+    } else {
+        const searchUrl = `https://s.jina.ai/?q=${encodeURIComponent(target)}`;
+        const r = await fetchWithTimeout(searchUrl, { cache: "no-store" }, 20000);
+        if (!r.ok) throw new Error(`Jina Search HTTP ${r.status}`);
+        const md = await r.text();
+        return `# Live Web Search Snapshot: ${target}\n\n${md.slice(0, 14000)}`;
+    }
+}
+
+async function archiveIntelToBibleIfPossible(targetPath, snapshotMd, ghHeaders, branchName, repoOwner, repoName) {
+    try {
+        if (typeof repoVaultFiles === "object" && repoVaultFiles) repoVaultFiles[targetPath] = snapshotMd;
+        if (typeof registerCreatedMarkdownFile === "function") registerCreatedMarkdownFile(targetPath, snapshotMd);
+        if (ghHeaders && ghHeaders.Authorization) {
+            const fileUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${targetPath}?ref=${encodeURIComponent(branchName)}`;
+            let existingSha = null;
+            const check = await fetchWithTimeout(fileUrl, { headers: ghHeaders, cache: "no-store" }, 10000);
+            if (check.ok) {
+                const j = await check.json();
+                existingSha = j.sha || null;
+            }
+            const bytes = new TextEncoder().encode(snapshotMd);
+            let bin = "";
+            for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+            const body = {
+                message: `feat(intel): save ${targetPath}`,
+                content: btoa(bin),
+                branch: branchName
+            };
+            if (existingSha) body.sha = existingSha;
+            await fetchWithTimeout(fileUrl, {
+                method: "PUT",
+                headers: { ...ghHeaders, "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            }, 15000);
+        }
+    } catch (_) {}
+}
+
 async function dispatchLiveIntelScrape(intelReq, assistantMsgId) {
     const ghHeaders = typeof getGitHubHeaders === "function" ? getGitHubHeaders() : null;
-    if (!ghHeaders || !ghHeaders.Authorization) {
-        throw new Error("Missing GitHub PAT in settings. Add your PAT with repo + workflow scopes to run live web scraping.");
-    }
-
-    const wfFile = typeof SCRAPE_WORKFLOW_FILE !== "undefined" && SCRAPE_WORKFLOW_FILE
+    const wfFile = (typeof SCRAPE_WORKFLOW_FILE !== "undefined" && SCRAPE_WORKFLOW_FILE)
         ? SCRAPE_WORKFLOW_FILE
-        : "web-scrape.yml";
-    const repoOwner = typeof GITHUB_REPO_OWNER !== "undefined" && GITHUB_REPO_OWNER
-        ? GITHUB_REPO_OWNER
-        : "agent-anna";
-    const repoName = typeof GITHUB_REPO_NAME !== "undefined" && GITHUB_REPO_NAME
-        ? GITHUB_REPO_NAME
-        : "home";
+        : "aa01-intel-feed.yml";
+    const repoOwner = (typeof GITHUB_REPO_OWNER !== "undefined" && GITHUB_REPO_OWNER) ? GITHUB_REPO_OWNER : "agent-anna";
+    const repoName = (typeof GITHUB_REPO_NAME !== "undefined" && GITHUB_REPO_NAME) ? GITHUB_REPO_NAME : "home";
     const branchName = (typeof activeBranch !== "undefined" && activeBranch) ? activeBranch : "main";
 
     const slug = buildIntelSlug(intelReq.mode, intelReq.target);
@@ -1745,90 +1784,84 @@ async function dispatchLiveIntelScrape(intelReq, assistantMsgId) {
     if (typeof updateMessage === "function") {
         updateMessage(
             assistantMsgId,
-            `Dispatching live ${intelReq.mode.toUpperCase()} intel job (${intelReq.target})...` + "\n" + `Target archive: ${targetPath}`
+            `Searching live web & dispatching workflow for (${intelReq.target})...\nSaved archive target: ${targetPath}`
         );
     }
 
-    const dispatchUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${encodeURIComponent(wfFile)}/dispatches`;
-    const dispRes = await fetchWithTimeout(dispatchUrl, {
-        method: "POST",
-        headers: { ...ghHeaders, "Content-Type": "application/json" },
-        body: JSON.stringify({
-            ref: branchName,
-            inputs: {
-                mode: intelReq.mode,
-                target_or_query: intelReq.target,
-                output_name: slug
+    let workflowDispatched = false;
+    if (ghHeaders && ghHeaders.Authorization) {
+        try {
+            const dispatchUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${encodeURIComponent(wfFile)}/dispatches`;
+            const dispRes = await fetchWithTimeout(dispatchUrl, {
+                method: "POST",
+                headers: { ...ghHeaders, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ref: branchName,
+                    inputs: {
+                        mode: intelReq.mode,
+                        target_or_query: intelReq.target,
+                        output_name: slug
+                    }
+                })
+            }, 15000);
+            if (dispRes.ok || dispRes.status === 204) {
+                workflowDispatched = true;
             }
-        })
-    }, 20000);
-
-    if (!dispRes.ok && dispRes.status !== 204) {
-        const errTxt = await dispRes.text().catch(() => "");
-        if (typeof setActionsStatus === "function") setActionsStatus("ERROR", "error");
-        throw new Error(`Workflow dispatch failed (HTTP ${dispRes.status}). Ensure PAT has workflow scope. ${errTxt.slice(0, 140)}`);
+        } catch (_) {}
     }
 
-    let runId = null;
-    let conclusion = null;
-    for (let attempt = 1; attempt <= 25; attempt++) {
-        await new Promise((r) => setTimeout(r, 3000));
-        if (typeof setActionsStatus === "function") setActionsStatus(`SCRAPING (${attempt * 3}s)`, "busy");
-        if (typeof updateMessage === "function") {
-            updateMessage(
-                assistantMsgId,
-                `Running live ${intelReq.mode.toUpperCase()} scraper via GitHub Actions (${attempt * 3}s)...` + "\n" + `Query/URL: ${intelReq.target}` + "\n" + `Saving to: ${targetPath}`
-            );
+    if (workflowDispatched && ghHeaders && ghHeaders.Authorization) {
+        let runId = null;
+        let conclusion = null;
+        for (let attempt = 1; attempt <= 20; attempt++) {
+            await new Promise((r) => setTimeout(r, 3000));
+            if (typeof setActionsStatus === "function") setActionsStatus(`SCRAPING (${attempt * 3}s)`, "busy");
+            if (typeof updateMessage === "function") {
+                updateMessage(
+                    assistantMsgId,
+                    `Running GitHub Actions live scraper (${attempt * 3}s)...\nTarget: ${intelReq.target}\nSaving to: ${targetPath}`
+                );
+            }
+            const runsUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${encodeURIComponent(wfFile)}/runs?branch=${encodeURIComponent(branchName)}&per_page=5`;
+            const runsRes = await fetchWithTimeout(runsUrl, { headers: ghHeaders, cache: "no-store" }, 12000).catch(() => null);
+            if (!runsRes || !runsRes.ok) continue;
+            const runsJson = await runsRes.json().catch(() => ({}));
+            const runs = Array.isArray(runsJson.workflow_runs) ? runsJson.workflow_runs : [];
+            const matched = runId
+                ? runs.find((r) => r.id === runId)
+                : runs.find((r) => r.event === "workflow_dispatch" && new Date(r.created_at).getTime() >= dispatchStartedAt);
+            if (matched) {
+                runId = matched.id;
+                if (matched.status === "completed") {
+                    conclusion = matched.conclusion;
+                    break;
+                }
+            }
         }
 
-        const runsUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${encodeURIComponent(wfFile)}/runs?branch=${encodeURIComponent(branchName)}&per_page=5`;
-        const runsRes = await fetchWithTimeout(runsUrl, { headers: ghHeaders, cache: "no-store" }, 15000);
-        if (!runsRes.ok) continue;
-
-        const runsJson = await runsRes.json();
-        const runs = Array.isArray(runsJson.workflow_runs) ? runsJson.workflow_runs : [];
-        const matchedRun = runId
-            ? runs.find((r) => r.id === runId)
-            : runs.find((r) => r.event === "workflow_dispatch" && new Date(r.created_at).getTime() >= dispatchStartedAt);
-
-        if (matchedRun) {
-            runId = matchedRun.id;
-            if (matchedRun.status === "completed") {
-                conclusion = matchedRun.conclusion;
-                break;
+        if (conclusion === "success") {
+            const fileUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${targetPath}?ref=${encodeURIComponent(branchName)}`;
+            const fileRes = await fetchWithTimeout(fileUrl, { headers: ghHeaders, cache: "no-store" }, 12000).catch(() => null);
+            if (fileRes && fileRes.ok) {
+                const fileJson = await fileRes.json();
+                const binStr = atob(String(fileJson.content || "").replace(/\s/g, ""));
+                const snapshotMd = new TextDecoder().decode(Uint8Array.from(binStr, (m) => m.codePointAt(0)));
+                if (typeof repoVaultFiles === "object" && repoVaultFiles) repoVaultFiles[targetPath] = snapshotMd;
+                if (typeof registerCreatedMarkdownFile === "function") registerCreatedMarkdownFile(targetPath, snapshotMd);
+                if (typeof setActionsStatus === "function") setActionsStatus("IDLE", "");
+                if (typeof fetchRepoTree === "function") await fetchRepoTree().catch(() => {});
+                return { path: targetPath, content: snapshotMd };
             }
         }
     }
 
-    if (!conclusion) {
-        if (typeof setActionsStatus === "function") setActionsStatus("TIMEOUT", "error");
-        throw new Error(`Scraper workflow timed out waiting for completion. Check Actions tab and run SYNC shortly for ${targetPath}.`);
-    }
-    if (conclusion !== "success") {
-        if (typeof setActionsStatus === "function") setActionsStatus("FAILED", "error");
-        throw new Error(`Scraper workflow finished with status: ${conclusion}. Check GitHub Actions logs for ${wfFile}.`);
-    }
-
-    if (typeof setActionsStatus === "function") setActionsStatus("READING", "busy");
-    const fileUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${targetPath}?ref=${encodeURIComponent(branchName)}`;
-    const fileRes = await fetchWithTimeout(fileUrl, { headers: ghHeaders, cache: "no-store" }, 15000);
-    if (!fileRes.ok) {
-        if (typeof setActionsStatus === "function") setActionsStatus("DONE", "");
-        throw new Error(`Workflow succeeded, but ${targetPath} could not be read yet (HTTP ${fileRes.status}). Hit SYNC to refresh.`);
-    }
-
-    const fileJson = await fileRes.json();
-    const binStr = atob(String(fileJson.content || "").replace(/\s/g, ""));
-    const snapshotMd = new TextDecoder().decode(Uint8Array.from(binStr, (m) => m.codePointAt(0)));
-
-    if (typeof repoVaultFiles === "object" && repoVaultFiles) repoVaultFiles[targetPath] = snapshotMd;
-    if (typeof registerCreatedMarkdownFile === "function") registerCreatedMarkdownFile(targetPath, snapshotMd);
+    // Live web fallback via Jina Reader / Search + repo archive commit if PAT allows contents write
+    if (typeof setActionsStatus === "function") setActionsStatus("LIVE WEB", "busy");
+    const liveMd = await fetchDirectWebIntel(intelReq);
+    await archiveIntelToBibleIfPossible(targetPath, liveMd, ghHeaders, branchName, repoOwner, repoName);
     if (typeof setActionsStatus === "function") setActionsStatus("IDLE", "");
-    if (typeof fetchRepoTree === "function") await fetchRepoTree();
-
-    return { path: targetPath, content: snapshotMd };
+    return { path: targetPath, content: liveMd };
 }
-
 async function sendMessage() {
         const input = document.getElementById("user-input");
         const prompt = input ? input.value.trim() : "";
