@@ -281,7 +281,7 @@
         document.body.classList.remove("is-standby", "is-thinking", "is-responding", "is-saving", "is-error", "is-speaking", "is-listening");
         document.body.classList.add(`is-${target}`);
         const stEl = document.getElementById("state-text");
-        if (stEl) stEl.innerText = `${target.toUpperCase()} // AGENT ANNA V4`;
+        if (stEl) stEl.innerText = `${target.toUpperCase()} // AGENT ANNA`;
     }
 
     function updateKeyBadge() {
