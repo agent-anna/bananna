@@ -23,19 +23,19 @@
       line-height: 1.5;
     }
     .wrap {
-      max-width: 1120px;
+      max-width: 1140px;
       margin: 0 auto;
       padding: 20px;
     }
     .hero {
       display: grid;
-      grid-template-columns: 220px 1fr;
+      grid-template-columns: 200px 1fr;
       gap: 20px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 18px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       align-items: start;
     }
     @media (max-width: 720px) {
@@ -91,7 +91,7 @@
       font-family: inherit;
     }
     textarea {
-      min-height: 125px;
+      min-height: 130px;
       resize: vertical;
     }
     .hero-actions {
@@ -123,9 +123,12 @@
       color: var(--accent);
       padding-left: 6px;
     }
+    .press-top {
+      margin-bottom: 16px;
+    }
     .posts-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
       gap: 14px;
     }
     .post-card {
@@ -135,19 +138,34 @@
       padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
     .post-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
       font-weight: 600;
       font-size: 0.95rem;
+    }
+    .head-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .thumb {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      flex: 0 0 auto;
     }
     .char-count {
       font-size: 0.76rem;
       color: var(--muted);
       font-weight: 400;
+      white-space: nowrap;
     }
     .btn-row {
       display: flex;
@@ -169,47 +187,52 @@
         <img id="coverImg" alt="Song cover art" />
       </div>
       <div>
-        <h1 id="songHeading" class="song-title">Loading track...</h1>
-        <div id="djMeta" class="meta-line">DJ Veg Anna • Martin Strayd Daily Singles</div>
+        <h1 id="songHeading" class="song-title">Loading song database...</h1>
+        <div id="djMeta" class="meta-line">DJ Veg Anna • Martin Strayd Daily Single Radio Launch</div>
         <div class="controls-grid">
           <div>
-            <label for="songSelect">1. Pick Track from Catalog</label>
+            <label for="songSelect">1. Pick Song from Catalog</label>
             <select id="songSelect"></select>
           </div>
           <div>
             <label for="customTitle">Custom Song Title (Optional)</label>
-            <input id="customTitle" type="text" placeholder="Type a single title to test..." />
+            <input id="customTitle" type="text" placeholder="Type a song title..." />
           </div>
           <div>
-            <label for="hubUrl">Artist Hub / Release Link</label>
+            <label for="hubUrl">Sales Portal / Artist Hub</label>
             <input id="hubUrl" type="text" value="https://martinstrayd.github.io/artist/" />
           </div>
           <div>
-            <label for="noteInput">Hook / Vibe / Radio Note (Optional)</label>
-            <input id="noteInput" type="text" placeholder="Add a hook, vibe, or DJ note..." />
+            <label for="noteInput">DJ Hook / Angle / Note (Optional)</label>
+            <input id="noteInput" type="text" placeholder="Add a DJ hook, story angle, or note..." />
           </div>
         </div>
         <div class="hero-actions">
           <button id="makePostsBtn" class="primary" type="button">Make Social Posts</button>
           <button id="stopSpeakBtn" type="button">Stop Voice</button>
-          <span id="statusText" class="status-pill">Reading bible & catalog...</span>
+          <button id="exportHistoryBtn" type="button">Save History JSON</button>
+          <span id="statusText" class="status-pill">Loading bible & song database...</span>
         </div>
       </div>
     </section>
 
+    <section id="pressTop" class="press-top"></section>
     <section id="postsGrid" class="posts-grid"></section>
   </div>
 
   <script>
-    const CHANNELS = [
+    const PRESS_CHANNEL = { id: "press", label: "Press Release (Dated)", max: 12000 };
+
+    const SOCIAL_CHANNELS = [
       { id: "x", label: "X", max: 280 },
       { id: "tiktok", label: "TikTok", max: 2200 },
       { id: "instagram", label: "Instagram", max: 2200 },
       { id: "facebook", label: "Facebook", max: 63206 },
       { id: "ytTitle", label: "YouTube Title", max: 100 },
-      { id: "ytDesc", label: "YouTube Description", max: 5000 },
-      { id: "press", label: "Press Release", max: 12000 }
+      { id: "ytDesc", label: "YouTube Description", max: 5000 }
     ];
+
+    const ALL_CHANNELS = [PRESS_CHANNEL, ...SOCIAL_CHANNELS];
 
     const BIBLE_STATE = {
       loadedFiles: [],
@@ -218,6 +241,9 @@
       wiseUrl: "https://wise.com/pay/r/xGmJi9kSdap4lKo",
       coffeeUrl: "https://buymeacoffee.com/martinstrayd"
     };
+
+    let CATALOG_SONGS = [];
+    let CURRENT_ART = "";
 
     const $ = (id) => document.getElementById(id);
 
@@ -242,14 +268,39 @@
     }
 
     function makeFallbackArt(title) {
-      const safe = (title || "Single").replace(/[<>&"]/g, "");
+      const safe = (title || "Martin Strayd Single").replace(/[<>&"]/g, "");
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
-        <rect width="600" height="600" fill="#121926"/>
-        <circle cx="300" cy="250" r="110" fill="#38bdf8" fill-opacity="0.16"/>
-        <text x="300" y="290" text-anchor="middle" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="30" font-weight="700">${safe.slice(0, 28)}</text>
-        <text x="300" y="335" text-anchor="middle" fill="#9fb0c8" font-family="system-ui,sans-serif" font-size="18">Martin Strayd • DJ Veg Anna</text>
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#132238"/>
+            <stop offset="100%" stop-color="#0b101b"/>
+          </linearGradient>
+        </defs>
+        <rect width="600" height="600" fill="url(#g)"/>
+        <circle cx="300" cy="235" r="105" fill="#38bdf8" fill-opacity="0.18"/>
+        <text x="300" y="255" text-anchor="middle" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="30" font-weight="700">${safe.slice(0, 26)}</text>
+        <text x="300" y="305" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="18" font-weight="600">DJ VEG ANNA • DAILY SINGLE</text>
+        <text x="300" y="340" text-anchor="middle" fill="#9fb0c8" font-family="system-ui,sans-serif" font-size="16">Martin Strayd</text>
       </svg>`;
       return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+    }
+
+    function resolveArtUrl(songOrRaw, title) {
+      const candidates = typeof songOrRaw === "object" && songOrRaw !== null
+        ? [songOrRaw.artUrl, songOrRaw.art, songOrRaw.artwork, songOrRaw.image, songOrRaw.coverArt]
+        : [songOrRaw];
+
+      for (const raw of candidates) {
+        const val = String(raw || "").trim();
+        if (!val) continue;
+        if (/^(https?:\/\/|data:image\/)/i.test(val)) return val;
+        if (/^store-art\//i.test(val)) {
+          return `https://martinstrayd.github.io/artist/${encodeURI(val)}`;
+        }
+        const cleaned = val.replace(/^(\.\/|\.\.\/)+/, "");
+        return `../${encodeURI(cleaned)}`;
+      }
+      return makeFallbackArt(title);
     }
 
     async function loadBibleRules() {
@@ -280,33 +331,41 @@
       }
     }
 
-    function renderCards() {
-      const grid = $("postsGrid");
-      grid.innerHTML = "";
-      CHANNELS.forEach((ch) => {
-        const card = document.createElement("article");
-        card.className = "post-card";
-        card.innerHTML = `
-          <div class="post-head">
+    function createCardElement(ch) {
+      const card = document.createElement("article");
+      card.className = "post-card";
+      card.innerHTML = `
+        <div class="post-head">
+          <div class="head-left">
+            <img class="thumb" data-art-thumb alt="" />
             <span>${ch.label}</span>
-            <span id="count-${ch.id}" class="char-count">0 / ${ch.max}</span>
           </div>
-          <textarea id="ta-${ch.id}" readonly></textarea>
-          <div class="btn-row">
-            <button type="button" data-act="speak" data-ch="${ch.id}">Speak</button>
-            <button type="button" data-act="edit" data-ch="${ch.id}">Edit</button>
-            <button type="button" data-act="save" data-ch="${ch.id}">Save</button>
-            <button type="button" data-act="copy" data-ch="${ch.id}">Copy</button>
-            <button type="button" data-act="post" data-ch="${ch.id}">Post</button>
-          </div>
-        `;
-        grid.appendChild(card);
+          <span id="count-${ch.id}" class="char-count">0 / ${ch.max}</span>
+        </div>
+        <textarea id="ta-${ch.id}" readonly></textarea>
+        <div class="btn-row">
+          <button type="button" data-act="speak" data-ch="${ch.id}">Speak</button>
+          <button type="button" data-act="edit" data-ch="${ch.id}">Edit</button>
+          <button type="button" data-act="save" data-ch="${ch.id}">Save</button>
+          <button type="button" data-act="copy" data-ch="${ch.id}">Copy</button>
+          <button type="button" data-act="post" data-ch="${ch.id}">Post</button>
+        </div>
+      `;
+      const ta = card.querySelector("textarea");
+      ta.addEventListener("input", () => updateCounter(ch.id, ch.max));
+      return card;
+    }
 
-        const ta = card.querySelector("textarea");
-        ta.addEventListener("input", () => updateCounter(ch.id, ch.max));
-      });
+    function renderCards() {
+      const pressContainer = $("pressTop");
+      const grid = $("postsGrid");
+      pressContainer.innerHTML = "";
+      grid.innerHTML = "";
 
-      grid.addEventListener("click", (e) => {
+      pressContainer.appendChild(createCardElement(PRESS_CHANNEL));
+      SOCIAL_CHANNELS.forEach((ch) => grid.appendChild(createCardElement(ch)));
+
+      const handleAction = (e) => {
         const btn = e.target.closest("button[data-act]");
         if (!btn) return;
         const act = btn.dataset.act;
@@ -316,6 +375,7 @@
 
         if (act === "speak") {
           speakForRadio(ta.value);
+          recordHistory(chId, "spoken", ta.value);
         } else if (act === "edit") {
           ta.readOnly = false;
           ta.focus();
@@ -323,13 +383,65 @@
         } else if (act === "save") {
           ta.readOnly = true;
           localStorage.setItem(`anna_post_${chId}`, ta.value);
+          recordHistory(chId, "saved", ta.value);
           $("statusText").textContent = `Saved ${chId}`;
         } else if (act === "copy") {
           navigator.clipboard?.writeText(ta.value).catch(() => {});
+          recordHistory(chId, "copied", ta.value);
           $("statusText").textContent = `Copied ${chId}`;
         } else if (act === "post") {
           openShareTarget(chId, ta.value);
+          recordHistory(chId, "posted", ta.value);
         }
+      };
+
+      pressContainer.addEventListener("click", handleAction);
+      grid.addEventListener("click", handleAction);
+    }
+
+    function recordHistory(channel, action, text) {
+      const title = $("songHeading").textContent || "Featured Single";
+      const key = "anna_strayd_release_history";
+      let list = [];
+      try { list = JSON.parse(localStorage.getItem(key) || "[]"); } catch { list = []; }
+      list.unshift({
+        timestamp: new Date().toISOString(),
+        date: pressDateString(),
+        song: title,
+        channel,
+        action,
+        preview: String(text || "").slice(0, 240)
+      });
+      localStorage.setItem(key, JSON.stringify(list.slice(0, 500)));
+    }
+
+    function exportHistoryJson() {
+      const key = "anna_strayd_release_history";
+      const raw = localStorage.getItem(key) || "[]";
+      const blob = new Blob([raw], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "strayd-release-history.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      $("statusText").textContent = "Downloaded strayd-release-history.json";
+    }
+
+    function syncArtwork(title) {
+      const fallback = makeFallbackArt(title);
+      const src = CURRENT_ART || fallback;
+      const heroImg = $("coverImg");
+      heroImg.src = src;
+      heroImg.onerror = () => {
+        if (heroImg.src !== fallback) heroImg.src = fallback;
+      };
+      document.querySelectorAll("img[data-art-thumb]").forEach((img) => {
+        img.alt = `${title} cover art`;
+        img.src = src;
+        img.onerror = () => {
+          if (img.src !== fallback) img.src = fallback;
+        };
       });
     }
 
@@ -358,7 +470,7 @@
       if (pref) utter.voice = pref;
       utter.rate = 0.98;
       window.speechSynthesis.speak(utter);
-      $("statusText").textContent = "DJ Veg Anna speaking post for radio filler...";
+      $("statusText").textContent = "DJ Veg Anna speaking radio filler...";
     }
 
     function openShareTarget(chId, text) {
@@ -369,82 +481,92 @@
         navigator.clipboard?.writeText(text).catch(() => {});
         window.open(hub, "_blank", "noopener");
       }
-      $("statusText").textContent = `Prepared ${chId} post`;
+      $("statusText").textContent = `Prepared ${chId}`;
     }
 
     function buildPostsFromInput() {
-      const sel = $("songSelect");
-      const chosenOptionTitle = sel.options[sel.selectedIndex]?.dataset?.cleanTitle || "";
+      const idx = Number($("songSelect").value || 0);
+      const songObj = CATALOG_SONGS[idx] || {};
+      const chosenOptionTitle = cleanTitle(songObj.title || songObj.name || songObj.track || "");
       const title = cleanTitle($("customTitle").value) || chosenOptionTitle || "Featured Single";
-      const artist = "Martin Strayd";
-      const hub = $("hubUrl").value.trim() || BIBLE_STATE.hubUrl;
+      const artist = cleanTitle(songObj.artist) || "Martin Strayd";
+      const hub = $("hubUrl").value.trim() || songObj.portalUrl || songObj.portal || BIBLE_STATE.hubUrl;
       const note = cleanTitle($("noteInput").value);
       const dateStr = pressDateString();
 
+      CURRENT_ART = resolveArtUrl(songObj, title);
       $("songHeading").textContent = title;
-      $("djMeta").textContent = `DJ Veg Anna • ${artist} Spotlight`;
-      const chosenArt = sel.options[sel.selectedIndex]?.dataset?.art || "";
-      $("coverImg").src = chosenArt || makeFallbackArt(title);
-      $("coverImg").onerror = () => { $("coverImg").src = makeFallbackArt(title); };
+      $("djMeta").textContent = `DJ Veg Anna • ${artist} Daily Single Radio Launch (${CATALOG_SONGS.length || 1} songs in DB)`;
+      syncArtwork(title);
 
-      const hookLine = note || `Can't stop spinning "${title}" — ${artist} brings a track you need on repeat.`;
+      const angle = note || "Fresh daily single drop spinning on air now.";
 
       const values = {
-        x: `"${title}" by ${artist} — ${hookLine} ${hub} #MartinStrayd #IndieMusic`.trim().slice(0, 280),
-        tiktok: `Wait till you hear "${title}" from ${artist}. ${hookLine} Grab the MP3 + cover art bundle at ${hub} #MartinStrayd #DJAnna #Songwriting #IndieMusic`.trim().slice(0, 2200),
-        instagram: `"${title}" — ${artist}\n\n${hookLine}\n\nOwn the MP3 + cover art bundle: ${hub}\n\n#MartinStrayd #DJAnna #Songwriting #IndieMusic`.trim().slice(0, 2200),
-        facebook: `DJ Veg Anna spinning "${title}" by ${artist} right now.\n\n${hookLine}\n\nCheck out the track and bundle here: ${hub}\n\n#MartinStrayd #DJAnna #IndieMusic`.trim().slice(0, 63206),
-        ytTitle: `"${title}" — ${artist} | DJ Veg Anna Spotlight #MartinStrayd`.slice(0, 100),
-        ytDesc: `"${title}" by ${artist}\n\n${hookLine}\n\nArtist Store & Hub: ${hub}\nPayPal: ${BIBLE_STATE.paypalUrl}\nWise (200 THB): ${BIBLE_STATE.wiseUrl}\nBuy Me a Coffee: ${BIBLE_STATE.coffeeUrl}\n\n#MartinStrayd #DJAnna #Songwriting #IndieMusic`.trim().slice(0, 5000),
-        press: `OFFICIAL MARTIN STRAYD SINGLES PARTY BY DJ VEG ANNA\n${dateStr}\n\n"${title}" — ${artist}\n\n${hookLine}\n\nArtist Store & Hub: ${hub}`
+        press: `OFFICIAL MARTIN STRAYD SINGLES PARTY BY DJ VEG ANNA\n${dateStr}\n\n"${title}" — ${artist}\n${angle}\n\nTune in to DJ Veg Anna's daily single radio launch and own the MP3 + cover art bundle (share freely with friends for non-commercial enjoyment): ${hub}`,
+        x: `"${title}" by ${artist} — DJ Anna daily drop! ${angle} Own MP3 + art: ${hub} #MartinStrayd #DJAnna`.trim().slice(0, 280),
+        tiktok: `DJ Veg Anna on air with today's new single drop: "${title}" by ${artist}! ${angle} Tap ${hub} to listen & grab the MP3 + cover art bundle you own and can share with friends. #MartinStrayd #DJAnna #DailySingle #IndieMusic`.trim().slice(0, 2200),
+        instagram: `ON AIR WITH DJ VEG ANNA: "${title}" by ${artist}\n\n${angle}\n\nEvery day brings a fresh single on the radio launch. Own the MP3 + cover art bundle and share freely with friends for non-commercial enjoyment: ${hub}\n\n#MartinStrayd #DJAnna #DailySingle #Songwriting #IndieMusic`.trim().slice(0, 2200),
+        facebook: `DJ Veg Anna is spinning "${title}" by ${artist} on the daily single radio launch!\n\n${angle}\n\nListen now and pick up the MP3 + cover art bundle to own and share with friends for non-commercial enjoyment: ${hub}\n\n#MartinStrayd #DJAnna #DailySingle #IndieMusic`.trim().slice(0, 63206),
+        ytTitle: `"${title}" — ${artist} | DJ Veg Anna Daily Single Radio Drop #MartinStrayd`.slice(0, 100),
+        ytDesc: `DJ Veg Anna presents "${title}" by ${artist} on the daily single radio launch.\n\n${angle}\n\nOwn the MP3 + cover art bundle (share freely with friends for non-commercial enjoyment):\nArtist Hub: ${hub}\nPayPal: ${BIBLE_STATE.paypalUrl}\nWise (200 THB): ${BIBLE_STATE.wiseUrl}\nBuy Me a Coffee: ${BIBLE_STATE.coffeeUrl}\n\n#MartinStrayd #DJAnna #DailySingle #Songwriting #IndieMusic`.trim().slice(0, 5000)
       };
 
-      CHANNELS.forEach((ch) => {
+      ALL_CHANNELS.forEach((ch) => {
         const ta = $(`ta-${ch.id}`);
         if (ta) {
           ta.value = values[ch.id] || "";
           updateCounter(ch.id, ch.max);
         }
       });
-      const bibleNote = BIBLE_STATE.loadedFiles.length ? ` (${BIBLE_STATE.loadedFiles.length} bible files read)` : "";
-      $("statusText").textContent = `Posts built for "${title}"${bibleNote}`;
+
+      const bibleNote = BIBLE_STATE.loadedFiles.length ? ` | ${BIBLE_STATE.loadedFiles.length} bible files` : "";
+      $("statusText").textContent = `Built press + socials for "${title}"${bibleNote}`;
     }
 
     async function loadCatalog() {
       await loadBibleRules();
       const select = $("songSelect");
       select.innerHTML = "";
+
       const sources = [
-        "../strayd/songs-db.json",
-        "../strayd/core-catalog.json",
         "songs-db.json",
-        "core-catalog.json"
+        "core-catalog.json",
+        "../strayd/songs-db.json",
+        "../strayd/core-catalog.json"
       ];
-      let tracks = [];
+
+      const byTitle = new Map();
       for (const url of sources) {
         try {
           const r = await fetch(url, { cache: "no-store" });
           if (!r.ok) continue;
           const data = await r.json();
           const list = Array.isArray(data) ? data : (data.songs || data.tracks || data.items || []);
-          if (list.length) {
-            tracks = list;
-            break;
-          }
+          list.forEach((item) => {
+            const tClean = cleanTitle(item.title || item.name || item.track || "");
+            if (!tClean) return;
+            const key = tClean.toLowerCase();
+            const prev = byTitle.get(key) || {};
+            byTitle.set(key, {
+              ...prev,
+              ...item,
+              title: tClean,
+              artUrl: item.artUrl || prev.artUrl || "",
+              art: item.art || prev.art || ""
+            });
+          });
         } catch {}
       }
 
-      if (!tracks.length) {
-        tracks = [{ title: "Featured Single" }];
+      CATALOG_SONGS = Array.from(byTitle.values());
+      if (!CATALOG_SONGS.length) {
+        CATALOG_SONGS = [{ title: "Featured Single", artist: "Martin Strayd" }];
       }
 
-      tracks.forEach((t, idx) => {
-        const tClean = cleanTitle(t.title || t.name || t.track || `Track ${idx + 1}`) || `Track ${idx + 1}`;
+      CATALOG_SONGS.forEach((t, idx) => {
         const opt = document.createElement("option");
         opt.value = String(idx);
-        opt.textContent = tClean;
-        opt.dataset.cleanTitle = tClean;
-        opt.dataset.art = t.cover || t.artwork || t.image || "";
+        opt.textContent = `${String(idx + 1).padStart(3, "0")} • ${t.title}`;
         select.appendChild(opt);
       });
 
@@ -454,6 +576,7 @@
     renderCards();
     $("makePostsBtn").addEventListener("click", buildPostsFromInput);
     $("songSelect").addEventListener("change", buildPostsFromInput);
+    $("exportHistoryBtn").addEventListener("click", exportHistoryJson);
     $("stopSpeakBtn").addEventListener("click", () => {
       if ("speechSynthesis" in window) window.speechSynthesis.cancel();
       $("statusText").textContent = "Voice stopped";
