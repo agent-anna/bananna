@@ -76,11 +76,11 @@ function isInV4Scope(path) {
             .trim();
     }
 
-    function isV4CoreFile(path) {
-        if (!path || !isInV4Scope(path) || isSoulPath(path)) return false;
+function isV4CoreFile(path) {
+        if (!path || !isInV4Scope(path)) return false;
         const lower = path.toLowerCase();
-        if (lower.includes("/logs/")) return false;
-        return /\.(md|json|txt|html)$/i.test(lower);
+        if (lower.includes("/logs/") || lower.startsWith("logs/")) return false;
+        return /\.(md|json|txt|html|css|js)$/i.test(lower);
     }
 
     function cleanHeaderToken(str) {
