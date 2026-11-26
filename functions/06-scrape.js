@@ -1,5 +1,5 @@
-// A1/v4/functions/scrape.js
-// Author: Agent Anna 
+// /functions/scrape.js
+// Author: Agent Anna - SLUTTY by choice
 // Purpose: Fetch Martin Strayd artist page, extract song titles/links, save JSON snapshot.
 // Usage: node functions/scrape.js https://martinstrayd.github.io/artist/
 // Output: data/martin-strayd-songs.json
@@ -52,7 +52,7 @@ async function run() {
 
  const res = await fetch(TARGET_URL, {
  headers: {
- 'User-Agent': 'AgentAnna-AA01-BrandBuilder/1.0 (github.com/agent-anna/anna-v2)'
+ 'User-Agent': 'AgentAnna-AA01-BrandBuilder/1.0 (github.com/agent-anna/home)'
  }
  });
 
