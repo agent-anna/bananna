@@ -3192,5 +3192,305 @@
   }
 })();
 </script>
+<style id="anna-restore-outputs-css">
+  /* Ensure main workspace and all press/social output boxes are visible and easy to read */
+  .workspace,
+  .workspace main,
+  .channels,
+  .channel-card,
+  .press-card {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  #pressOut,
+  #xOut,
+  #ttOut,
+  #igOut,
+  #fbOut,
+  #ytTitleOut,
+  #ytDescOut {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    min-height: 92px !important;
+    box-sizing: border-box !important;
+  }
+
+  #ytTitleOut {
+    min-height: 52px !important;
+  }
+
+  .anna-action-bar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+    align-items: center !important;
+  }
+
+  .anna-act-btn {
+    width: auto !important;
+    padding: 6px 12px !important;
+    font-size: 0.78rem !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(255,255,255,0.22) !important;
+    background: rgba(255,255,255,0.08) !important;
+    color: inherit !important;
+    cursor: pointer !important;
+  }
+
+  .anna-act-btn:hover {
+    background: rgba(255,255,255,0.16) !important;
+  }
+
+  .anna-save-flash {
+    font-size: 0.75rem !important;
+    opacity: 0.85 !important;
+  }
+</style>
+<script>
+(() => {
+  const HUB_URL = "https://martinstrayd.github.io/artist/";
+  const SPOTIFY_URL = "https://open.spotify.com/artist/6aRM8IKV2HBUZRGnnDdrM0";
+  const PRESS_BANNER = "::::::::::::::::::::::::::::::PRESS RELEASE::::::::::::::::::::::::::::::::::::::\nOFFICIAL MARTIN STRAYD SINGLES PARTY BY DJ VEG ANNA";
+
+  const OUTPUT_IDS = ["pressOut", "xOut", "ttOut", "igOut", "fbOut", "ytTitleOut", "ytDescOut"];
+  const SOCIAL_IDS = ["xOut", "ttOut", "igOut", "fbOut", "ytTitleOut", "ytDescOut"];
+
+  function cleanSongTitle(raw) {
+    let s = String(raw || "");
+    s = s.replace(/\{\{TITLE\}\}/gi, "");
+    s = s.replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "");
+    s = s.replace(/^Martin\s+Strayd\s*[-–—:|]+\s*/i, "");
+    s = s.replace(/#FirstIteminCatalogJSONon\b/gi, "");
+    s = s.replace(/#[A-Za-z0-9_]{26,}/g, "");
+    s = s.replace(/\s*\(\s*\)\s*/g, " ").replace(/\s{2,}/g, " ").trim();
+    return s || "Adhd I Can Do That (Travillen Disorder)";
+  }
+
+  function limitHashtags(text, maxTags) {
+    let n = 0;
+    return String(text || "").replace(/(^|\s)(#[A-Za-z0-9_]+)/g, (m, sp) => {
+      n += 1;
+      return n <= maxTags ? m : (sp === " " ? "" : sp);
+    }).replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+  }
+
+  function daySeed365() {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 0);
+    return Math.floor((now - start) / 86400000);
+  }
+
+  function buildAllOutputs() {
+    const song = cleanSongTitle(
+      (document.getElementById("heroTitle")?.textContent)
+      || (document.querySelector("#songPicker")?.value)
+      || (document.querySelector("#customSong")?.value)
+    );
+    const news = cleanSongTitle(document.getElementById("liveNewsInput")?.value)
+      || "Featured across 10+ radio stations over the past 28 days in a continuous daily release run.";
+    const doy = daySeed365();
+
+    const pressVal = [
+      PRESS_BANNER,
+      "",
+      `FOR IMMEDIATE RELEASE — MARTIN STRAYD RELEASES "${song}" ON THE DJ VEG ANNA SINGLES PARTY`,
+      "",
+      `Songwriter, lyricist, and composer Martin Strayd—drawing on decades of original songwriting and a 100+ song catalog—spotlights "${song}" as part of an ongoing daily single release run hosted with DJ Veg Anna.`,
+      "",
+      `"${song}" delivers direct, lived songwriting and unmistakable character straight to listeners and radio hosts without formula or filler.`,
+      "",
+      `Broadcast & Release Highlights: ${news}`,
+      "",
+      `Catalog & Direct Releases: ${HUB_URL} | Spotify: ${SPOTIFY_URL}`
+    ].join("\n");
+
+    const xList = [
+      `"${song}" from Martin Strayd hits with real tension and zero filler—cue it with DJ Anna at ${HUB_URL} #MartinStrayd #DJAnna`,
+      `Why does "${song}" hold attention right from the opening bar? Martin Strayd + DJ Anna: ${HUB_URL} #MartinStrayd #DJAnna`
+    ];
+    const ttList = [
+      `Wait till you hear what "${song}" does in the first twenty seconds. Martin Strayd and DJ Anna keep the daily single run rolling—hear it at ${HUB_URL}. #MartinStrayd #DJAnna #DailySingle`,
+      `Somebody is hearing "${song}" for the first time tonight and hitting replay. Martin Strayd catalog & direct releases: ${HUB_URL}. #MartinStrayd #DJAnna #IndieMusic`
+    ];
+    const igList = [
+      `Late night with DJ Anna: "${song}" carries decades of Martin Strayd songwriting in a raw, human cut.\n\nDirect hub: ${HUB_URL}\n#MartinStrayd #DJAnna #Songwriting #MusicDiscovery`,
+      `Real room, real craft: Martin Strayd brings "${song}" into the DJ Anna session with zero polish.\n\nListen & explore: ${HUB_URL}\n#MartinStrayd #DJAnna #Songwriting`
+    ];
+    const fbList = [
+      `DJ Anna here—what memory or mood does "${song}" bring up when it plays? ${news}\n\nExplore Martin Strayd's catalog: ${HUB_URL} #MartinStrayd #DJAnna`,
+      `Every song in the Martin Strayd catalog connects to a bigger story. "${song}" is today's stop—what do you hear first? ${news}\n\n${HUB_URL} #MartinStrayd #DJAnna`
+    ];
+
+    return {
+      pressOut: pressVal,
+      xOut: limitHashtags(xList[doy % xList.length], 2).slice(0, 280),
+      ttOut: limitHashtags(ttList[doy % ttList.length], 4),
+      igOut: limitHashtags(igList[doy % igList.length], 4),
+      fbOut: limitHashtags(fbList[doy % fbList.length], 3),
+      ytTitleOut: limitHashtags(`"${song}" — Martin Strayd | DJ Anna Session #MartinStrayd`, 2).slice(0, 100),
+      ytDescOut: limitHashtags(
+        `"${song}" by Martin Strayd—featured with DJ Anna across a continuous daily single release run.\n\n• Release & radio note: ${news}\n• Catalog & direct releases: ${HUB_URL}\n• Spotify: ${SPOTIFY_URL}\n\n#MartinStrayd #DJAnna #DailySingle`,
+        3
+      ).slice(0, 5000)
+    };
+  }
+
+  function populateOutputs(force) {
+    const generated = buildAllOutputs();
+    for (const id of OUTPUT_IDS) {
+      const el = document.getElementById(id);
+      if (!el || typeof el.value !== "string") continue;
+      const needsFill = !el.value.trim() || /\{\{TITLE\}\}|FirstIteminCatalogJSONon|Curiosity\s*&\s*Hook\s*Angle:/i.test(el.value);
+      if (!force && !needsFill && el.dataset.userEdited === "1") continue;
+      const nextVal = generated[id];
+      if (nextVal && el.value !== nextVal) {
+        el.value = nextVal;
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
+  }
+
+  function speakClean(text) {
+    if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") return;
+    let spoken = String(text || "")
+      .replace(/https?:\/\/\S+/gi, " the artist hub ")
+      .replace(/\bwww\.\S+/gi, " the artist hub ")
+      .replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "")
+      .replace(/#/g, "")
+      .replace(/[|•★☆►▪▸:=]+/g, ", ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!spoken) return;
+    try { window.speechSynthesis.cancel(); } catch (_) {}
+    const u = new SpeechSynthesisUtterance(spoken);
+    try {
+      const voices = window.speechSynthesis.getVoices() || [];
+      const female = voices.find((v) => /anna|samantha|victoria|aria|jenny|zira|female/i.test(v.name || ""));
+      if (female) u.voice = female;
+    } catch (_) {}
+    window.speechSynthesis.speak(u);
+  }
+
+  function ensureCardActions() {
+    OUTPUT_IDS.forEach((id) => {
+      const ta = document.getElementById(id);
+      if (!ta) return;
+      const barId = `anna-bar-${id}`;
+      if (document.getElementById(barId)) return;
+
+      const bar = document.createElement("div");
+      bar.id = barId;
+      bar.className = "anna-action-bar";
+
+      const speakBtn = document.createElement("button");
+      speakBtn.type = "button";
+      speakBtn.className = "anna-act-btn";
+      speakBtn.textContent = "Speak";
+      speakBtn.addEventListener("click", () => speakClean(ta.value));
+      bar.appendChild(speakBtn);
+
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "anna-act-btn";
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => {
+        ta.removeAttribute("readonly");
+        ta.dataset.userEdited = "1";
+        ta.focus();
+      });
+      bar.appendChild(editBtn);
+
+      const statusSpan = document.createElement("span");
+      statusSpan.className = "anna-save-flash";
+
+      const saveBtn = document.createElement("button");
+      saveBtn.type = "button";
+      saveBtn.className = "anna-act-btn";
+      saveBtn.textContent = "Save";
+      saveBtn.addEventListener("click", () => {
+        ta.dataset.userEdited = "1";
+        try { localStorage.setItem(`anna_draft_${id}`, ta.value); } catch (_) {}
+        statusSpan.textContent = "Saved";
+        setTimeout(() => { statusSpan.textContent = ""; }, 1800);
+      });
+      bar.appendChild(saveBtn);
+
+      const copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "anna-act-btn";
+      copyBtn.textContent = "Copy";
+      copyBtn.addEventListener("click", async () => {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(ta.value);
+          } else {
+            ta.select();
+            document.execCommand("copy");
+          }
+          statusSpan.textContent = "Copied";
+          setTimeout(() => { statusSpan.textContent = ""; }, 1800);
+        } catch (_) {}
+      });
+      bar.appendChild(copyBtn);
+
+      if (SOCIAL_IDS.includes(id)) {
+        const postBtn = document.createElement("button");
+        postBtn.type = "button";
+        postBtn.className = "anna-act-btn";
+        postBtn.textContent = "Post";
+        postBtn.addEventListener("click", () => {
+          const existingPost = ta.parentElement && ta.parentElement.querySelector("button.post-btn");
+          if (existingPost) {
+            existingPost.click();
+          } else {
+            try { localStorage.setItem(`anna_staged_${id}`, ta.value); } catch (_) {}
+            statusSpan.textContent = "Staged";
+            setTimeout(() => { statusSpan.textContent = ""; }, 2000);
+          }
+        });
+        bar.appendChild(postBtn);
+      }
+
+      bar.appendChild(statusSpan);
+      ta.insertAdjacentElement("afterend", bar);
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    const b = e.target && e.target.closest && e.target.closest("button");
+    if (!b) return;
+    if (b.id === "generateBtn" || b.id === "reloadBtn" || /generate|refresh|spin|next/i.test(b.textContent || "")) {
+      OUTPUT_IDS.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) delete el.dataset.userEdited;
+      });
+      setTimeout(() => { ensureCardActions(); populateOutputs(true); }, 120);
+      setTimeout(() => { ensureCardActions(); populateOutputs(true); }, 450);
+    }
+  }, true);
+
+  document.addEventListener("change", (e) => {
+    const t = e.target;
+    if (t && (t.id === "songPicker" || t.id === "customSong" || t.id === "liveNewsInput")) {
+      setTimeout(() => { ensureCardActions(); populateOutputs(t.id !== "liveNewsInput"); }, 120);
+    }
+  }, true);
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(() => { ensureCardActions(); populateOutputs(true); }, 250);
+      setTimeout(() => { ensureCardActions(); populateOutputs(false); }, 900);
+    });
+  } else {
+    setTimeout(() => { ensureCardActions(); populateOutputs(true); }, 250);
+    setTimeout(() => { ensureCardActions(); populateOutputs(false); }, 900);
+  }
+})();
+</script>
 </body>
 </html>
