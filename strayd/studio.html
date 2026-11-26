@@ -412,6 +412,17 @@
                 <button type="button" data-block="wild">Wild Sessions</button>
                 <button type="button" class="post-btn" id="playPreviewBtn">Play Preview + DJ Anna</button>
               </div>
+              <div class="btn-row" id="radioPlugControls" data-automate="radio-plug-bar" style="margin-top:8px;">
+                <select id="ttsPlugMode" data-automate="tts-plug-mode" aria-label="TTS Plug Placement" style="width:auto;padding:6px 10px;font-size:0.78rem;">
+                  <option value="pre-post" selected>TTS Plug: Pre + Post Song</option>
+                  <option value="pre">TTS Plug: Pre-Song Only</option>
+                  <option value="post">TTS Plug: Post-Song Only</option>
+                  <option value="off">TTS Plug: Off (Song Only)</option>
+                </select>
+                <button type="button" class="post-btn" id="runShowBtn" data-automate="run-show">Play Show (Audio + TTS)</button>
+                <button type="button" class="tts-btn" id="stopShowBtn" data-automate="stop-show">Stop</button>
+                <button type="button" id="autoAdvanceToggle" data-automate="auto-advance" data-state="off" aria-pressed="false" style="width:auto;padding:6px 12px;font-size:0.78rem;">Auto-Advance: OFF</button>
+              </div>
               <div class="channel-head" style="margin-top:12px;">
                 <span>YouTube Description • Search &amp; Listener Breakdown • 200–5,000c</span>
                 <span class="stats" id="ytDescStats">0 words • 0 / 5,000 chars</span>
@@ -2145,6 +2156,243 @@
     const btn = e.target && e.target.closest && e.target.closest("button");
     if (!btn) return;
     if (btn.id === "generateBtn" || btn.id === "reloadBtn") {
+      document.querySelectorAll("textarea, input[type='text']").forEach((el) => {
+        delete el.dataset.userEdited;
+      });
+      setTimeout(applyCleanPack, 80);
+      setTimeout(applyCleanPack, 320);
+    }
+  }, true);
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => setTimeout(applyCleanPack, 150));
+  } else {
+    setTimeout(applyCleanPack, 150);
+  }
+})();
+</script>
+<script>
+(() => {
+  const HUB_URL = "https://martinstrayd.github.io/artist/";
+  const SPOTIFY_URL = "https://open.spotify.com/artist/6aRM8IKV2HBUZRGnnDdrM0";
+  let audioPlayer = window.__annaAudioPlayer || null;
+  if (!audioPlayer) {
+    audioPlayer = new Audio();
+    audioPlayer.preload = "none";
+    window.__annaAudioPlayer = audioPlayer;
+  }
+
+  function sanitizeText(raw, fallbackTitle) {
+    let s = String(raw || "");
+    s = s.replace(/\{\{TITLE\}\}/gi, fallbackTitle || "this track");
+    s = s.replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "");
+    s = s.replace(/#FirstIteminCatalogJSONon\b/gi, "");
+    s = s.replace(/#[A-Za-z0-9_]{35,}/g, "");
+    s = s.replace(/\s*\(\s*\)\s*/g, " ");
+    s = s.replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+    return s;
+  }
+
+  function currentSongTitle() {
+    const hero = document.getElementById("heroTitle");
+    const sel = document.querySelector("select[id*='song' i], select[id*='track' i], input[id*='song' i], input[id*='title' i]");
+    let raw = (hero && hero.textContent) || (sel && sel.value) || "";
+    raw = raw.replace(/^Martin\s+Strayd\s*[-–—:]\s*/i, "").trim();
+    raw = sanitizeText(raw, "");
+    return raw || "Adhd I Can Do That (Travillen Disorder)";
+  }
+
+  function findTrackRecord(title) {
+    const pool = Array.isArray(window.catalogTracks) ? window.catalogTracks : [];
+    const norm = String(title || "").trim().toLowerCase();
+    return pool.find((t) => t && String(t.title || "").trim().toLowerCase() === norm)
+      || pool.find((t) => t && norm && String(t.title || "").toLowerCase().includes(norm))
+      || window.activeTrack
+      || null;
+  }
+
+  function buildCleanPack() {
+    const title = currentSongTitle();
+    const artist = "Martin Strayd";
+    const news = sanitizeText(document.getElementById("liveNewsInput")?.value, title)
+      || "Spinning across 10+ radio stations over the last 28 days as part of a 365-day daily release run.";
+
+    const pressRelease = [
+      "PRESS RELEASE",
+      "",
+      `FOR IMMEDIATE RELEASE — MARTIN STRAYD DROPS "${title.toUpperCase()}" AS DJ ANNA BROADCASTS DAILY SINGLE RUN`,
+      "",
+      `Independent songwriter and catalog builder ${artist}—drawing on decades of songwriting across rock, blues, reggae, soundtrack, and raw studio sessions—continues his daily single rollout alongside late-night host DJ Anna.`,
+      "",
+      `Unlike traditional release cycles that stretch a single track across months of silence, ${artist} pairs a steady stream of studio recordings with DJ Anna radio breaks, listener stories, and direct catalog access.`,
+      "",
+      `Latest Broadcast & Release Note: ${news}`,
+      "",
+      `Hear "${title}" and explore the full catalog directly at ${HUB_URL} or on Spotify at ${SPOTIFY_URL}.`
+    ].join("\n");
+
+    const xPost = sanitizeText(
+      `DJ Anna late night: why does "${title}" hit harder than half the over-polished playlists out right now? Four decades of ${artist} writing in one sharp cut. ${HUB_URL} #MartinStrayd #DJAnna`,
+      title
+    ).slice(0, 280);
+
+    const ttPost = sanitizeText(
+      `Wait till you hear what ${artist} just put into "${title}". DJ Anna spun it up and nobody in the room skipped past the first twenty seconds. Tell me what you hear first—and grab it straight from ${HUB_URL}. #MartinStrayd #DJAnna #DailySingle`,
+      title
+    );
+
+    const igPost = sanitizeText(
+      `Late night with DJ Anna: "${title}" carries the kind of weight you only get when a songwriter has lived inside the craft for decades. Real room, real tension, no fake polish.\n\nListen & get the release: ${HUB_URL}\n#MartinStrayd #DJAnna #Songwriting`,
+      title
+    );
+
+    const fbPost = sanitizeText(
+      `DJ Anna here—some songs sound like background noise, and some make you stop mid-sentence. "${title}" from ${artist} is one of those tracks people end up sending to a friend right away.\n\n${news}\n\nExplore the catalog & grab it here: ${HUB_URL}`,
+      title
+    );
+
+    const ytTitle = sanitizeText(
+      `"${title}" — ${artist} | DJ Anna Late-Night Session`,
+      title
+    ).slice(0, 100);
+
+    const ytDesc = sanitizeText(
+      `DJ Anna introduces "${title}" by ${artist}—part of a continuous daily single release run backed by decades of songwriting and multi-style studio sessions.\n\nIn this feature:\n• Why "${title}" stands out in today's rotation\n• ${news}\n• How each track connects to the wider ${artist} catalog\n\nCatalog & Direct Access: ${HUB_URL}\nSpotify: ${SPOTIFY_URL}`,
+      title
+    );
+
+    return { pressRelease, xPost, ttPost, igPost, fbPost, ytTitle, ytDesc };
+  }
+
+  function applyCleanPack() {
+    const pack = buildCleanPack();
+    const map = {
+      pressOut: pack.pressRelease,
+      xOut: pack.xPost,
+      ttOut: pack.ttPost,
+      igOut: pack.igPost,
+      fbOut: pack.fbPost,
+      ytTitleOut: pack.ytTitle,
+      ytDescOut: pack.ytDesc
+    };
+    for (const [id, val] of Object.entries(map)) {
+      const el = document.getElementById(id);
+      if (!el || typeof el.value !== "string") continue;
+      if (el.dataset.userEdited === "1") continue;
+      el.value = val;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+
+  function speakLine(text, onDone) {
+    const cleaned = sanitizeText(text, currentSongTitle()).replace(/#/g, "");
+    if (!cleaned || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") {
+      if (typeof onDone === "function") onDone();
+      return;
+    }
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(cleaned);
+      u.onend = () => { if (typeof onDone === "function") onDone(); };
+      u.onerror = () => { if (typeof onDone === "function") onDone(); };
+      window.speechSynthesis.speak(u);
+    } catch (_) {
+      if (typeof onDone === "function") onDone();
+    }
+  }
+
+  function stopShow() {
+    try { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); } catch (_) {}
+    try { audioPlayer.pause(); audioPlayer.currentTime = 0; } catch (_) {}
+  }
+
+  function getPlugTexts(title) {
+    const preRaw = (document.getElementById("ttOut")?.value || document.getElementById("xOut")?.value || "")
+      || `DJ Anna here—before "${title}" rolls, listen for how the song pulls you in from the first bar.`;
+    const postRaw = (document.getElementById("igOut")?.value || document.getElementById("fbOut")?.value || "")
+      || `That was "${title}" from Martin Strayd. Check the catalog and direct releases at ${HUB_URL}.`;
+    return {
+      pre: sanitizeText(preRaw, title).replace(/#/g, ""),
+      post: sanitizeText(postRaw, title).replace(/#/g, "")
+    };
+  }
+
+  function playTrackWithPlugs(trackObj) {
+    const title = (trackObj && trackObj.title) || currentSongTitle();
+    const tr = trackObj || findTrackRecord(title) || {};
+    const previewUrl = tr && tr.platforms && tr.platforms.appleMusic && tr.platforms.appleMusic.previewUrl;
+    const mode = document.getElementById("ttsPlugMode")?.value || "pre-post";
+    const autoAdv = document.getElementById("autoAdvanceToggle")?.dataset.state === "on";
+    const plugs = getPlugTexts(title);
+
+    stopShow();
+
+    const finishAfterSong = () => {
+      const nextStep = () => {
+        if (autoAdv && Array.isArray(window.catalogTracks) && window.catalogTracks.length && typeof window.selectCatalogTrackByIndex === "function") {
+          const idx = window.catalogTracks.indexOf(tr);
+          const nextIdx = idx >= 0 ? (idx + 1) % window.catalogTracks.length : 0;
+          window.selectCatalogTrackByIndex(nextIdx);
+          setTimeout(() => playTrackWithPlugs(window.catalogTracks[nextIdx]), 250);
+        }
+      };
+      if (mode === "post" || mode === "pre-post") {
+        speakLine(plugs.post, nextStep);
+      } else {
+        nextStep();
+      }
+    };
+
+    const startAudio = () => {
+      if (!previewUrl) {
+        finishAfterSong();
+        return;
+      }
+      audioPlayer.src = previewUrl;
+      audioPlayer.onended = finishAfterSong;
+      audioPlayer.onerror = finishAfterSong;
+      audioPlayer.play().catch(() => finishAfterSong());
+    };
+
+    if (mode === "pre" || mode === "pre-post") {
+      speakLine(plugs.pre, startAudio);
+    } else {
+      startAudio();
+    }
+  }
+
+  window.annaSpeakClean = function(text) {
+    speakLine(text);
+  };
+
+  window.annaAutomation = {
+    playCurrentShow: () => playTrackWithPlugs(findTrackRecord(currentSongTitle())),
+    stopShow: stopShow,
+    setPlugMode: (m) => {
+      const sel = document.getElementById("ttsPlugMode");
+      if (sel && m) { sel.value = m; sel.dispatchEvent(new Event("change", { bubbles: true })); }
+    },
+    setAutoAdvance: (on) => {
+      const btn = document.getElementById("autoAdvanceToggle");
+      if (!btn) return;
+      const isOn = Boolean(on);
+      btn.dataset.state = isOn ? "on" : "off";
+      btn.setAttribute("aria-pressed", isOn ? "true" : "false");
+      btn.textContent = `Auto-Advance: ${isOn ? "ON" : "OFF"}`;
+    }
+  };
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target && e.target.closest && e.target.closest("button");
+    if (!btn) return;
+    if (btn.id === "runShowBtn") {
+      playTrackWithPlugs(findTrackRecord(currentSongTitle()));
+    } else if (btn.id === "stopShowBtn") {
+      stopShow();
+    } else if (btn.id === "autoAdvanceToggle") {
+      const nextOn = btn.dataset.state !== "on";
+      window.annaAutomation.setAutoAdvance(nextOn);
+    } else if (btn.id === "generateBtn" || btn.id === "reloadBtn") {
       document.querySelectorAll("textarea, input[type='text']").forEach((el) => {
         delete el.dataset.userEdited;
       });
