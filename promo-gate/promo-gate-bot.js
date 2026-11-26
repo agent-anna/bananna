@@ -4,15 +4,15 @@
     repo: "anna-v2",
     branch: "main",
     workflowFile: "daily-song-promo.yml",
-    packagePath: "A1/promo-gate/latest-package.json",
-    reviewPath: "A1/promo-gate/latest-review.html",
-    queuePath: "A1/strayd/promo-queue.json",
+    packagePath: "promo-gate/latest-package.json",
+    reviewPath: "promo-gate/latest-review.html",
+    queuePath: "strayd/promo-queue.json",
     publishWebhookUrl: "",
     token: ""
   };
 
   const PROMO_BIBLE = [
-    "1. IDENTITY: Portal is VEG ANNA AA01. Never rebrand or drift into unrelated apps. Music is Martin Strayd played/promoted with Kunda Cafe.",
+    "1. IDENTITY: Portal is STRAYD. Never rebrand or drift into unrelated apps. Music is Martin Strayd played/promoted with Kunda Cafe.",
     "2. VISUAL LAW: Strictly realistic live-action cinematography only. ZERO cartoon, ZERO anime, ZERO illustration.",
     "3. TRUTH OVER GUESSWORK: Never claim a post went live on X, TikTok, or YouTube without a confirmed API/webhook response.",
     "4. GATE DISCIPLINE: Prepare -> Inspect latest-review.html / latest-package.json -> GO PUSH (dispatch workflow) -> Verify run & commit.",
@@ -89,7 +89,7 @@
         inputs: {
           mode: String(mode || "PREPARE_DAILY"),
           task_id: String(task_id || ""),
-          note: String(note || "VEG ANNA AA01 GO PUSH")
+          note: String(note || "STRAYDO PUSH")
         }
       })
     });
