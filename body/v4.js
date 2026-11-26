@@ -1965,6 +1965,41 @@ if (document.readyState === "loading") {
     mountLiveClockBadge();
 }
 
+async function getSelfIndexHtmlContext(userPrompt) {
+    const q = String(userPrompt || "").toLowerCase();
+    const wantsSelfUi = /\b(index\.html|your html|own html|page|ui|layout|button|buttons|clock|console|header|modal|screen|see yourself|blind)\b/i.test(q);
+    if (!wantsSelfUi) return "";
+
+    try {
+        let htmlText = "";
+        if (typeof repoVaultFiles === "object" && repoVaultFiles && typeof repoVaultFiles["index.html"] === "string") {
+            htmlText = repoVaultFiles["index.html"];
+        } else {
+            const owner = (typeof GITHUB_REPO_OWNER !== "undefined" && GITHUB_REPO_OWNER) ? GITHUB_REPO_OWNER : "agent-anna";
+            const repo = (typeof GITHUB_REPO_NAME !== "undefined" && GITHUB_REPO_NAME) ? GITHUB_REPO_NAME : "home";
+            const branch = (typeof activeBranch !== "undefined" && activeBranch) ? activeBranch : "main";
+            const ghHeaders = typeof getGitHubHeaders === "function" ? getGitHubHeaders() : null;
+            const res = await fetchWithTimeout(
+                `https://api.github.com/repos/${owner}/${repo}/contents/index.html?ref=${encodeURIComponent(branch)}`,
+                { headers: ghHeaders || {}, cache: "no-store" },
+                12000
+            );
+            if (res.ok) {
+                const json = await res.json();
+                const bin = atob(String(json.content || "").replace(/\s/g, ""));
+                htmlText = new TextDecoder().decode(Uint8Array.from(bin, (m) => m.codePointAt(0)));
+                if (typeof repoVaultFiles === "object" && repoVaultFiles) {
+                    repoVaultFiles["index.html"] = htmlText;
+                }
+            }
+        }
+        if (!htmlText) return "";
+        return `[SELF_INDEX_HTML_SNAPSHOT]\nBelow is Anna's own index.html source so she can inspect her page structure, IDs, scripts, and controls accurately:\n${htmlText.slice(0, 9000)}`;
+    } catch (_) {
+        return "";
+    }
+}
+
 async function sendMessage() {
         const input = document.getElementById("user-input");
         const prompt = input ? input.value.trim() : "";
@@ -2001,7 +2036,8 @@ async function sendMessage() {
             const pillarContext = bypassMode ? "" : getCorePillarsContext(prompt);
             const gitbookContext = bypassMode ? "" : getGitbookMirrorContext(prompt);
             const memoryFileContext = bypassMode ? "" : await getRequestedMemoryContext(prompt);
-            const systemPrompt = [voiceHeader, liveIntelBlock, vaultContext, pillarContext, offlineHits, gitbookContext, memoryFileContext].filter(Boolean).join("\n\n");
+            const selfIndexContext = await getSelfIndexHtmlContext(prompt);
+            const systemPrompt = [getLiveClockHeader(), selfIndexContext, voiceHeader, liveIntelBlock, vaultContext, pillarContext, offlineHits, gitbookContext, memoryFileContext].filter(Boolean).join("\n\n");
 
             const result = await callDahlDirect(
                 [
