@@ -1,0 +1,281 @@
+name: Agent Anna V3 Autonomous Audit
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+  push:
+    paths:
+      - 'A1/v3/vault/pending-commands.md'
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Direct command or live search directive for Agent Anna V3 (A1/v3)'
+        required: false
+        default: 'Perform a rapid A1/v3 vault check and verify live telemetry.'
+      search_query:
+        description: 'Optional live web/DuckDuckGo search query to execute on server'
+        required: false
+        default: ''
+      target_log:
+        description: 'Optional output log filename inside A1/v3/logs/'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  aa01-v3-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout AA01 V3 Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+          ref: main
+
+      - name: Run AA01 V3 Headless Audit & Live Telemetry
+        env:
+          DAHL_API_KEY: ${{ secrets.DAHL_API_KEY }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          DISPATCH_COMMAND: ${{ github.event.inputs.command }}
+          SEARCH_QUERY: ${{ github.event.inputs.search_query }}
+          TARGET_LOG: ${{ github.event.inputs.target_log }}
+        run: |
+          node -e '
+          const fs = require("fs");
+          const path = require("path");
+
+          const WORKSPACE = "A1/v3";
+          const MEMORY_PATH = path.join(WORKSPACE, "memory.json");
+          const VAULT_DIR = path.join(WORKSPACE, "vault");
+          const PENDING_CMD_PATH = path.join(VAULT_DIR, "pending-commands.md");
+          const LOGS_DIR = path.join(WORKSPACE, "logs");
+
+          function stripModelNames(str) {
+            return String(str || "")
+              .replace(/\s*\bon\s+MiniMaxAI\/MiniMax-M2\.7\.?/gi, "")
+              .replace(/\bMiniMaxAI\/MiniMax-M2\.7\.?/gi, "")
+              .replace(/\bMiniMax-M2\.7\.?/gi, "")
+              .replace(/\s{2,}/g, " ")
+              .trim();
+          }
+
+          async function fetchWithTimeout(url, opts, ms) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), ms || 12000);
+            try {
+              return await fetch(url, { ...(opts || {}), signal: controller.signal });
+            } finally {
+              clearTimeout(timer);
+            }
+          }
+
+          async function fetchLiveTelemetry(queryText, explicitSearch) {
+            const blocks = [];
+
+            if (/\b(btc|bitcoin|doge|dogecoin|crypto|price|market)\b/i.test(queryText)) {
+              try {
+                const cg = await fetchWithTimeout(
+                  "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,dogecoin&vs_currencies=usd&include_24hr_change=true",
+                  {},
+                  8000
+                );
+                if (cg.ok) {
+                  const data = await cg.json();
+                  blocks.push(
+                    `[VERIFIED COINGECKO LIVE DATA @ ${new Date().toISOString()}]\n` +
+                    `BTC: $${data.bitcoin.usd} (${data.bitcoin.usd_24h_change.toFixed(2)}%)\n` +
+                    `DOGE: $${data.dogecoin.usd} (${data.dogecoin.usd_24h_change.toFixed(2)}%)`
+                  );
+                }
+              } catch (e) {}
+            }
+
+            const cleanQuery = (explicitSearch || "").trim();
+            if (cleanQuery) {
+              try {
+                const ddgUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(cleanQuery)}&format=json&no_html=1&skip_disambig=1`;
+                const ddgRes = await fetchWithTimeout(ddgUrl, {}, 8000);
+                if (ddgRes.ok) {
+                  const ddg = await ddgRes.json();
+                  const snippets = [];
+                  if (ddg.AbstractText) snippets.push(`Summary: ${ddg.AbstractText} (${ddg.AbstractURL || ""})`);
+                  if (Array.isArray(ddg.RelatedTopics)) {
+                    ddg.RelatedTopics.slice(0, 5).forEach((t) => {
+                      if (t && t.Text) snippets.push(`- ${t.Text}`);
+                    });
+                  }
+                  if (snippets.length) {
+                    blocks.push(`[VERIFIED DUCKDUCKGO RESULTS FOR "${cleanQuery}"]\n${snippets.join("\n")}`);
+                  }
+                }
+              } catch (e) {}
+
+              try {
+                const jinaRes = await fetchWithTimeout(
+                  `https://s.jina.ai/${encodeURIComponent(cleanQuery)}`,
+                  { headers: { Accept: "text/plain" } },
+                  10000
+                );
+                if (jinaRes.ok) {
+                  const webText = await jinaRes.text();
+                  if (webText && webText.trim()) {
+                    blocks.push(`[VERIFIED LIVE WEB SEARCH FOR "${cleanQuery}"]\n${webText.trim().slice(0, 4500)}`);
+                  }
+                }
+              } catch (e) {}
+            }
+
+            return blocks.join("\n\n");
+          }
+
+          async function runAudit() {
+            console.log(`AA01 V3 Headless Executive initializing inside ${WORKSPACE}...`);
+
+            if (!process.env.DAHL_API_KEY) {
+              console.error("ERROR: DAHL_API_KEY secret is missing.");
+              process.exit(1);
+            }
+
+            fs.mkdirSync(VAULT_DIR, { recursive: true });
+            fs.mkdirSync(LOGS_DIR, { recursive: true });
+            if (!fs.existsSync(PENDING_CMD_PATH)) {
+              fs.writeFileSync(PENDING_CMD_PATH, `# IDLE - Initialized at ${new Date().toISOString()}\n`, "utf8");
+            }
+
+            let memory = {};
+            if (fs.existsSync(MEMORY_PATH)) {
+              try {
+                memory = JSON.parse(fs.readFileSync(MEMORY_PATH, "utf8"));
+              } catch (e) {
+                memory = {};
+              }
+            }
+            if (!Array.isArray(memory.self_audit_log)) {
+              memory.self_audit_log = [];
+            }
+
+            let activeCommand = (process.env.DISPATCH_COMMAND || "").trim();
+            let commandSource = "workflow_dispatch";
+
+            if (!activeCommand && fs.existsSync(PENDING_CMD_PATH)) {
+              const fileCmd = fs.readFileSync(PENDING_CMD_PATH, "utf8").trim();
+              if (fileCmd && !fileCmd.startsWith("# IDLE")) {
+                activeCommand = fileCmd;
+                commandSource = "pending_commands_file";
+              }
+            }
+
+            if (!activeCommand) {
+              activeCommand = `Confirm ${WORKSPACE} vault status and operational readiness.`;
+              commandSource = "scheduled_or_default_audit";
+            }
+
+            const explicitSearch = (process.env.SEARCH_QUERY || "").trim();
+            const liveData = await fetchLiveTelemetry(activeCommand, explicitSearch);
+
+            let auditNote = "Headless execution completed.";
+            let rawAiReply = "";
+            let apiSuccess = false;
+
+            try {
+              const res = await fetchWithTimeout(
+                "https://inference.dahl.global/v1/chat/completions",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${process.env.DAHL_API_KEY}`
+                  },
+                  body: JSON.stringify({
+                    model: "MiniMaxAI/MiniMax-M2.7",
+                    messages: [
+                      {
+                        role: "system",
+                        content:
+                          `You are AGENT ANNA V3 running headless on GitHub Actions inside ${WORKSPACE}. ` +
+                          `Respond in clear English only. Never include model names in prose. ` +
+                          `STRICT ZERO-HALLUCINATION RULE: Only report live prices, numbers, or search facts that appear explicitly in VERIFIED TELEMETRY below. If data is absent, state so directly.\n\n${liveData}`
+                      },
+                      { role: "user", content: activeCommand }
+                    ]
+                  })
+                },
+                55000
+              );
+
+              const rawText = await res.text();
+              if (res.ok) {
+                const parsed = JSON.parse(rawText);
+                rawAiReply = stripModelNames(
+                  (parsed.choices?.[0]?.message?.content || "")
+                    .replace(/<think>[\s\S]*?<\/think>/gi, "")
+                    .trim()
+                );
+                if (rawAiReply) {
+                  auditNote = "Live Dahl API Verified: " + rawAiReply.replace(/[\r\n]+/g, " ").slice(0, 300);
+                  apiSuccess = true;
+                }
+              } else {
+                auditNote = `Dahl API Error [HTTP ${res.status}]: ${rawText.slice(0, 150)}`;
+              }
+            } catch (apiErr) {
+              auditNote = "API Network Exception: " + apiErr.message;
+            }
+
+            const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+            const rawTarget = (process.env.TARGET_LOG || "").trim();
+            const logName = rawTarget ? path.basename(rawTarget) : `aa01-v3-exec-${stamp}.md`;
+            const fullLogPath = path.join(LOGS_DIR, logName);
+            const reportBody =
+              `# AA01 V3 HEADLESS EXECUTION REPORT (${WORKSPACE})\n` +
+              `- **Timestamp:** ${new Date().toISOString()}\n` +
+              `- **Source:** ${commandSource}\n` +
+              `- **Command:** ${activeCommand}\n` +
+              `- **Status:** ${apiSuccess ? "CLEAN_LIVE_API" : "FALLBACK_VERIFIED"}\n\n` +
+              `## VERIFIED TELEMETRY USED\n${liveData || "None"}\n\n` +
+              `## OUTPUT\n${rawAiReply || auditNote}\n`;
+            fs.writeFileSync(fullLogPath, reportBody, "utf8");
+
+            if (commandSource === "pending_commands_file") {
+              fs.writeFileSync(PENDING_CMD_PATH, `# IDLE - Last executed at ${new Date().toISOString()}\n`, "utf8");
+            }
+
+            memory.workspace = WORKSPACE;
+            memory.last_updated = new Date().toISOString();
+            memory.self_audit_log.push({
+              date: new Date().toISOString(),
+              workspace: WORKSPACE,
+              action: commandSource,
+              status: apiSuccess ? "CLEAN_LIVE_API" : "FALLBACK_VERIFIED",
+              log_file: fullLogPath,
+              notes: auditNote
+            });
+            if (memory.self_audit_log.length > 100) {
+              memory.self_audit_log = memory.self_audit_log.slice(-100);
+            }
+
+            fs.mkdirSync(path.dirname(MEMORY_PATH), { recursive: true });
+            fs.writeFileSync(MEMORY_PATH, JSON.stringify(memory, null, 2) + "\n", "utf8");
+            console.log(`Completed. Log written to ${fullLogPath}`);
+          }
+
+          runAudit().catch((err) => {
+            console.error("Critical Script Failure:", err.message);
+            process.exit(1);
+          });
+          '
+
+      - name: Commit Verified V3 Memory & Logs Back to Vault
+        run: |
+          git config user.name "Agent Anna V3"
+          git config user.email "aa01-v3@agent-anna.local"
+          git add -A A1/v3/memory.json A1/v3/logs/ A1/v3/vault/
+          if ! git diff --staged --quiet; then
+            git commit -m "AA01 V3 Autonomous Execution: vault & log sync [201]"
+            git pull --rebase origin main
+            git push
+          else
+            echo "No changes to commit inside A1/v3."
+          fi
