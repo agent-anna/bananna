@@ -1,0 +1,76 @@
+name: Anna Bible, Catalog & Feed Action
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "bible-part-1 | strayd-catalog | paste-feed"
+        required: true
+        default: "paste-feed"
+      title:
+        description: "Entry title or heading"
+        required: false
+        default: "A1 Update"
+      content:
+        description: "Markdown content or pasted note to record"
+        required: true
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Write Bible, STRAYD Catalog, or Feed entry (Thailand ICT)
+        shell: bash
+        env:
+          TARGET: ${{ github.event.inputs.target }}
+          TITLE: ${{ github.event.inputs.title }}
+          CONTENT: ${{ github.event.inputs.content }}
+        run: |
+          set -e
+          STAMP_TH=$(TZ="Asia/Bangkok" date "+%Y-%m-%d %H:%M:%S ICT (UTC+7)")
+
+          case "$TARGET" in
+            bible-part-1)
+              FILE="bible/05-parts/anna-part-1.md"
+              mkdir -p "$(dirname "$FILE")"
+              if [ ! -f "$FILE" ]; then
+                printf "# BIBLE // ANNA PART 1\n- **Updated (Thailand Local):** %s\n\n" "$STAMP_TH" > "$FILE"
+              fi
+              printf "\n## %s\n- **Timestamp:** %s\n\n%s\n" "$TITLE" "$STAMP_TH" "$CONTENT" >> "$FILE"
+              ;;
+            strayd-catalog)
+              FILE="strayd/strayd-music-catalog.md"
+              mkdir -p "$(dirname "$FILE")"
+              if [ ! -f "$FILE" ]; then
+                printf "# STRAYD MUSIC CATALOG // 2027\n- **Note:** STRAYD is played on gloabl radio.\n- **Updated (Thailand Local):** %s\n\n" "$STAMP_TH" > "$FILE"
+              fi
+              printf "\n## %s\n- **Timestamp:** %s\n\n%s\n" "$TITLE" "$STAMP_TH" "$CONTENT" >> "$FILE"
+              ;;
+            paste-feed|*)
+              FILE="bible/anna-feed.md"
+              mkdir -p "$(dirname "$FILE")"
+              if [ ! -f "$FILE" ]; then
+                printf "# ANNA PASTE & RESEARCH FEED\n- **Updated (Thailand Local):** %s\n\n" "$STAMP_TH" > "$FILE"
+              fi
+              printf "\n### %s (%s)\n%s\n" "$TITLE" "$STAMP_TH" "$CONTENT" >> "$FILE"
+              ;;
+          esac
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "anna-action-bot"
+          git config user.email "anna-action-bot@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "AA01 action: ${{ github.event.inputs.target }} — ${{ github.event.inputs.title }}"
+          git push
