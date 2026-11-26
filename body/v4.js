@@ -1862,6 +1862,62 @@ async function dispatchLiveIntelScrape(intelReq, assistantMsgId) {
     if (typeof setActionsStatus === "function") setActionsStatus("IDLE", "");
     return { path: targetPath, content: liveMd };
 }
+function formatLiveClockState() {
+    const now = new Date();
+    const localDate = now.toLocaleDateString(undefined, { weekday: "short", year: "numeric", month: "short", day: "2-digit" });
+    const localTime = now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local";
+    const utcTime = now.toISOString().slice(11, 19) + " UTC";
+    return {
+        now,
+        localDate,
+        localTime,
+        tz,
+        utcTime,
+        badgeText: `${localDate} ${localTime} (${tz}) | ${utcTime}`
+    };
+}
+
+function mountLiveClockBadge() {
+    let badge = document.getElementById("v4-live-clock");
+    if (!badge) {
+        badge = document.createElement("span");
+        badge.id = "v4-live-clock";
+        badge.setAttribute("role", "status");
+        badge.setAttribute("aria-live", "off");
+        badge.title = "Live Local & UTC System Clock (used automatically by Anna)";
+        badge.style.cssText = "display:inline-flex;align-items:center;padding:4px 10px;margin-left:8px;border-radius:6px;border:1px solid rgba(110,231,183,0.35);background:rgba(10,25,22,0.85);color:#a7f3d0;font-family:monospace;font-size:12px;letter-spacing:0.03em;white-space:nowrap;";
+
+        const actionsEl = document.getElementById("actions-status")
+            || Array.from(document.querySelectorAll("span, div, button")).find((el) => /ACTIONS:\s*(IDLE|DISPATCHING|SCRAPING|LIVE WEB|DONE|ERROR)/i.test(el.textContent || ""));
+        if (actionsEl && actionsEl.parentElement) {
+            actionsEl.parentElement.insertBefore(badge, actionsEl.nextSibling);
+        } else {
+            const headerBar = document.querySelector("header, nav, .top-bar, .status-bar") || document.body;
+            headerBar.appendChild(badge);
+        }
+    }
+    const tick = () => {
+        const state = formatLiveClockState();
+        badge.textContent = state.badgeText;
+    };
+    tick();
+    if (!window.__annaLiveClockTimer) {
+        window.__annaLiveClockTimer = setInterval(tick, 1000);
+    }
+}
+
+function getLiveClockHeader() {
+    const s = formatLiveClockState();
+    return `[LIVE_SYSTEM_CLOCK]\nCurrent Local Date & Time: ${s.localDate} ${s.localTime} (${s.tz})\nCurrent UTC ISO: ${s.now.toISOString()}\nRule: Use this exact LIVE_SYSTEM_CLOCK whenever the user asks for the date, day, or time. Never guess or check bible files for the current time.`;
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mountLiveClockBadge);
+} else {
+    mountLiveClockBadge();
+}
+
 async function sendMessage() {
         const input = document.getElementById("user-input");
         const prompt = input ? input.value.trim() : "";
