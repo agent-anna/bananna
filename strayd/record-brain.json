@@ -18,7 +18,6 @@
   "visualLaw": "Strictly realistic live-action cinematography only (zero cartoon, zero anime, zero illustration)",
   "titleLockLaw": "Preserve exact song titles verbatim without altering intentional word repetition",
   "bibleTargets": [
-    "A1/docs/v4BIBLE",
-    "docs/1 v4BIBLE"
+    "bible/04-song-catalog.md/"
   ]
 }
