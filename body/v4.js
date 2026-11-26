@@ -7,7 +7,7 @@ function buildIntelSlug(mode, target) {
     return `${clean}-${stamp}`;
 }
 
-﻿(function () {
+(function () {
     "use strict";
 
     const GITHUB_REPO_OWNER = "agent-anna";
