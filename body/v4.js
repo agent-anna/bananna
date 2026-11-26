@@ -284,7 +284,7 @@ function isV4CoreFile(path) {
         document.body.classList.remove("is-standby", "is-thinking", "is-responding", "is-saving", "is-error", "is-speaking", "is-listening");
         document.body.classList.add(`is-${target}`);
         const stEl = document.getElementById("state-text");
-        if (stEl) stEl.innerText = `${target.toUpperCase()} // AGENT ANNA`;
+        if (stEl) stEl.innerText = target === "standby" ? "STANDBY // AGENT ANNA OG" : `${target.toUpperCase()} // AGENT ANNA OG`;
     }
 
     function updateKeyBadge() {
@@ -759,7 +759,7 @@ function isV4CoreFile(path) {
         }
         const root = {};
         treeItems.forEach((item) => {
-            const relPath = item.path.replace(/^A1\/v4\/?/i, "") || item.path;
+            const relPath = item.path || item.path;
             const parts = relPath.split("/");
             let current = root;
             parts.forEach((part, idx) => {
@@ -788,7 +788,7 @@ function isV4CoreFile(path) {
             });
             return html;
         }
-        treeEl.innerHTML = `<div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">${WORKSPACE_ROOT} TREE (${treeItems.length} files on ${activeBranch})</div>` + buildHtml(root);
+        treeEl.innerHTML = `<div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">${GITHUB_REPO_NAME} TREE (${treeItems.length} files on ${activeBranch})</div>` + buildHtml(root);
     }
 
     function renderGridView() {
