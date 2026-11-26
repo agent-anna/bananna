@@ -1867,36 +1867,79 @@ function formatLiveClockState() {
     const localDate = now.toLocaleDateString(undefined, { weekday: "short", year: "numeric", month: "short", day: "2-digit" });
     const localTime = now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local";
-    const utcTime = now.toISOString().slice(11, 19) + " UTC";
     return {
         now,
         localDate,
         localTime,
         tz,
-        utcTime,
-        badgeText: `${localDate} ${localTime} (${tz}) | ${utcTime}`
+        badgeText: `${localDate} ${localTime} (${tz})`
     };
 }
 
+function scrubStaticClockText() {
+    try {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        const toClean = [];
+        let node;
+        while ((node = walker.nextNode())) {
+            const parent = node.parentElement;
+            if (!parent) continue;
+            if (parent.id === "v4-live-clock" || parent.closest("#v4-live-clock")) continue;
+            if (parent.closest("textarea, input, pre, code, .chat-msg, [class*='message'], [class*='msg']")) continue;
+            const val = node.nodeValue || "";
+            if (/(\bUTC\b|\bGMT\b|\b\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}|\b\d{1,2}:\d{2}:\d{2}\s*(AM|PM)?\s*(UTC|GMT)?\b)/i.test(val) && /time|clock|utc|gmt|asia\/bangkok|\d{2}:\d{2}/i.test(val)) {
+                toClean.push(node);
+            }
+        }
+        for (const n of toClean) {
+            n.nodeValue = (n.nodeValue || "")
+                .replace(/\|?\s*\d{2}:\d{2}(:\d{2})?\s*(UTC|GMT)\b/gi, "")
+                .replace(/\b\d{4}-\d{2}-\d{2}[\sT]\d{2}:\d{2}(:\d{2})?\s*(UTC|GMT)?\b/gi, "")
+                .replace(/\s{2,}/g, " ")
+                .trim();
+        }
+    } catch (_) {}
+}
+
+function findConsoleHeaderTarget() {
+    const candidates = Array.from(document.querySelectorAll("h1, h2, h3, h4, div, span, header"));
+    for (const el of candidates) {
+        const txt = (el.textContent || "").trim();
+        if (/CONSOLE\s*\[AGENT ANNA\s*\/\/\s*STUDIO WORKBENCH\]/i.test(txt) && txt.length < 140) {
+            const bar = el.closest("div, header, section") || el.parentElement;
+            if (bar) return { bar, labelEl: el };
+        }
+    }
+    return null;
+}
+
 function mountLiveClockBadge() {
+    scrubStaticClockText();
+
     let badge = document.getElementById("v4-live-clock");
     if (!badge) {
         badge = document.createElement("span");
         badge.id = "v4-live-clock";
         badge.setAttribute("role", "status");
         badge.setAttribute("aria-live", "off");
-        badge.title = "Live Local & UTC System Clock (used automatically by Anna)";
-        badge.style.cssText = "display:inline-flex;align-items:center;padding:4px 10px;margin-left:8px;border-radius:6px;border:1px solid rgba(110,231,183,0.35);background:rgba(10,25,22,0.85);color:#a7f3d0;font-family:monospace;font-size:12px;letter-spacing:0.03em;white-space:nowrap;";
-
-        const actionsEl = document.getElementById("actions-status")
-            || Array.from(document.querySelectorAll("span, div, button")).find((el) => /ACTIONS:\s*(IDLE|DISPATCHING|SCRAPING|LIVE WEB|DONE|ERROR)/i.test(el.textContent || ""));
-        if (actionsEl && actionsEl.parentElement) {
-            actionsEl.parentElement.insertBefore(badge, actionsEl.nextSibling);
-        } else {
-            const headerBar = document.querySelector("header, nav, .top-bar, .status-bar") || document.body;
-            headerBar.appendChild(badge);
-        }
+        badge.title = "Live Local Time (used automatically by Anna)";
+        badge.style.cssText = "display:inline-flex;align-items:center;padding:3px 9px;margin-left:10px;border-radius:6px;border:1px solid rgba(110,231,183,0.35);background:rgba(10,25,22,0.85);color:#a7f3d0;font-family:monospace;font-size:12px;letter-spacing:0.03em;white-space:nowrap;";
     }
+
+    const target = findConsoleHeaderTarget();
+    if (target) {
+        if (badge.parentElement !== target.bar) {
+            if (target.labelEl && target.labelEl.parentElement === target.bar) {
+                target.labelEl.insertAdjacentElement("afterend", badge);
+            } else {
+                target.bar.appendChild(badge);
+            }
+        }
+    } else if (!badge.parentElement) {
+        const headerBar = document.querySelector("header, nav, .top-bar, .status-bar") || document.body;
+        headerBar.appendChild(badge);
+    }
+
     const tick = () => {
         const state = formatLiveClockState();
         badge.textContent = state.badgeText;
@@ -1909,7 +1952,7 @@ function mountLiveClockBadge() {
 
 function getLiveClockHeader() {
     const s = formatLiveClockState();
-    return `[LIVE_SYSTEM_CLOCK]\nCurrent Local Date & Time: ${s.localDate} ${s.localTime} (${s.tz})\nCurrent UTC ISO: ${s.now.toISOString()}\nRule: Use this exact LIVE_SYSTEM_CLOCK whenever the user asks for the date, day, or time. Never guess or check bible files for the current time.`;
+    return `[LIVE_SYSTEM_CLOCK]\nCurrent Local Date & Time: ${s.localDate} ${s.localTime} (${s.tz})\nRule: Use this exact local time whenever asked for the date, day, or time. Do not report UTC unless explicitly asked, and do not guess or read bible files for the current time.`;
 }
 
 if (document.readyState === "loading") {
