@@ -1,0 +1,32 @@
+{
+  "updatedAt": "2026-11-26",
+  "owner": "Martin Strayd",
+  "agent": "Agent Anna (AA01)",
+  "visualPolicy": "realistic-cinematic-only-no-cartoon",
+  "groups": [
+    {
+      "id": "anna-socials",
+      "title": "Anna Social & Broadcast Fingers",
+      "links": [
+        { "label": "Anna YouTube", "url": "https://youtube.com", "accountStatus": "placeholder-update-ready" },
+        { "label": "Anna Facebook", "url": "https://facebook.com", "accountStatus": "placeholder-update-ready" },
+        { "label": "Anna TikTok", "url": "https://tiktok.com", "accountStatus": "placeholder-update-ready" },
+        { "label": "Anna X.com", "url": "https://x.com", "accountStatus": "placeholder-update-ready" },
+        { "label": "Anna Instagram", "url": "https://instagram.com", "accountStatus": "placeholder-update-ready" }
+      ]
+    },
+    {
+      "id": "martin-and-ops",
+      "title": "Martin & Command Branches",
+      "links": [
+        { "label": "GitHub Repo (anna-v2)", "url": "https://github.com/agent-anna/home", "accountStatus": "active" },
+        { "label": "Martin Artist Hub", "url": "https://martinstrayd.github.io/artist/", "accountStatus": "active" }
+      ]
+    }
+  ],
+  "biblePages": [
+    { "title": "Complete Handbook", "path": "../bible/ANNA_HANDBOOK.md" },
+    { "title": "Manifesto Notes", "path": "../bible/ANNA_manifesto/pages/page-***.md" },
+    { "title": "OPORD-DEPLOYMENT", "path": "./bible/01-operational-instructions.md" }
+  ]
+}
