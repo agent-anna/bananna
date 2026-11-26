@@ -170,7 +170,7 @@
       </div>
       <div>
         <h1 id="songHeading" class="song-title">Loading track...</h1>
-        <div id="dateMeta" class="meta-line"></div>
+        <div id="djMeta" class="meta-line">DJ Veg Anna • Martin Strayd Daily Singles</div>
         <div class="controls-grid">
           <div>
             <label for="songSelect">1. Pick Track from Catalog</label>
@@ -185,8 +185,8 @@
             <input id="hubUrl" type="text" value="https://martinstrayd.github.io/artist/" />
           </div>
           <div>
-            <label for="noteInput">Release / Radio Note (Optional)</label>
-            <input id="noteInput" type="text" placeholder="Add a fresh note or radio update..." />
+            <label for="noteInput">Hook / Vibe / Radio Note (Optional)</label>
+            <input id="noteInput" type="text" placeholder="Add a hook, vibe, or DJ note..." />
           </div>
         </div>
         <div class="hero-actions">
@@ -232,7 +232,7 @@
         .trim();
     }
 
-    function fullDateString() {
+    function pressDateString() {
       return new Date().toLocaleDateString("en-US", {
         weekday: "long",
         month: "long",
@@ -377,26 +377,26 @@
       const chosenOptionTitle = sel.options[sel.selectedIndex]?.dataset?.cleanTitle || "";
       const title = cleanTitle($("customTitle").value) || chosenOptionTitle || "Featured Single";
       const artist = "Martin Strayd";
-      const dateStr = fullDateString();
       const hub = $("hubUrl").value.trim() || BIBLE_STATE.hubUrl;
       const note = cleanTitle($("noteInput").value);
+      const dateStr = pressDateString();
 
       $("songHeading").textContent = title;
-      $("dateMeta").textContent = `DJ Veg Anna • ${dateStr}`;
+      $("djMeta").textContent = `DJ Veg Anna • ${artist} Spotlight`;
       const chosenArt = sel.options[sel.selectedIndex]?.dataset?.art || "";
       $("coverImg").src = chosenArt || makeFallbackArt(title);
       $("coverImg").onerror = () => { $("coverImg").src = makeFallbackArt(title); };
 
-      const notePart = note ? `${note} ` : "";
+      const hookLine = note || `Can't stop spinning "${title}" — ${artist} brings a track you need on repeat.`;
 
       const values = {
-        x: `"${title}" by ${artist} — ${notePart}${hub} #MartinStrayd #IndieMusic`.trim().slice(0, 280),
-        tiktok: `DJ Anna's pick today (${dateStr}): "${title}" by ${artist}. ${notePart}Own the MP3 + cover art bundle at ${hub} #MartinStrayd #DJAnna #Songwriting #IndieMusic`.trim().slice(0, 2200),
-        instagram: `"${title}" — ${artist} (${dateStr}) • ${hub}\n\n${notePart}MP3 + cover art bundle available at ${hub}\n\n#MartinStrayd #DJAnna #Songwriting #IndieMusic`.trim().slice(0, 2200),
-        facebook: `DJ Veg Anna on air (${dateStr}) with "${title}" by ${artist}.\n\n${notePart}Listen and get the MP3 + cover art bundle: ${hub}\n\n#MartinStrayd #DJAnna #IndieMusic`.trim().slice(0, 63206),
+        x: `"${title}" by ${artist} — ${hookLine} ${hub} #MartinStrayd #IndieMusic`.trim().slice(0, 280),
+        tiktok: `Wait till you hear "${title}" from ${artist}. ${hookLine} Grab the MP3 + cover art bundle at ${hub} #MartinStrayd #DJAnna #Songwriting #IndieMusic`.trim().slice(0, 2200),
+        instagram: `"${title}" — ${artist}\n\n${hookLine}\n\nOwn the MP3 + cover art bundle: ${hub}\n\n#MartinStrayd #DJAnna #Songwriting #IndieMusic`.trim().slice(0, 2200),
+        facebook: `DJ Veg Anna spinning "${title}" by ${artist} right now.\n\n${hookLine}\n\nCheck out the track and bundle here: ${hub}\n\n#MartinStrayd #DJAnna #IndieMusic`.trim().slice(0, 63206),
         ytTitle: `"${title}" — ${artist} | DJ Veg Anna Spotlight #MartinStrayd`.slice(0, 100),
-        ytDesc: `"${title}" by ${artist} — ${dateStr}\n\n${notePart}Artist Store & Hub: ${hub}\nPayPal: ${BIBLE_STATE.paypalUrl}\nWise (200 THB): ${BIBLE_STATE.wiseUrl}\nBuy Me a Coffee: ${BIBLE_STATE.coffeeUrl}\n\n#MartinStrayd #DJAnna #Songwriting #IndieMusic #DailySingle`.trim().slice(0, 5000),
-        press: `OFFICIAL MARTIN STRAYD SINGLES PARTY BY DJ VEG ANNA\n${dateStr}\n\n"${title}" — ${artist}\n\n${notePart}Artist Store & Hub: ${hub}`
+        ytDesc: `"${title}" by ${artist}\n\n${hookLine}\n\nArtist Store & Hub: ${hub}\nPayPal: ${BIBLE_STATE.paypalUrl}\nWise (200 THB): ${BIBLE_STATE.wiseUrl}\nBuy Me a Coffee: ${BIBLE_STATE.coffeeUrl}\n\n#MartinStrayd #DJAnna #Songwriting #IndieMusic`.trim().slice(0, 5000),
+        press: `OFFICIAL MARTIN STRAYD SINGLES PARTY BY DJ VEG ANNA\n${dateStr}\n\n"${title}" — ${artist}\n\n${hookLine}\n\nArtist Store & Hub: ${hub}`
       };
 
       CHANNELS.forEach((ch) => {
