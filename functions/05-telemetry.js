@@ -1,7 +1,7 @@
 /**
- * ANNA V3 // TELEMETRY MODULE
+ * ANNA ONLINE // TELEMETRY MODULE
  * Live web fetch, search, and crypto price telemetry
- * Version: AA01-V2-CLEAN
+ * Version: AA01-V2-CLEAN UP check its ok or update
  * Date: 2026-11-18
  */
 
