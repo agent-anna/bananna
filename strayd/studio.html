@@ -1080,143 +1080,136 @@
     }
 
     function composeDynamicChannelSet(track, shiftVal, rawKw, portalLink, paypalUrl, bmacLink, wiseStr, cadence, songRef) {
-      const title = preserveTitle(track.title) || "Single Release";
-      const artist = preserveTitle(track.artist);
-      const artistTag = artist ? `#${artist.replace(/[^a-zA-Z0-9]+/g, "")}` : "";
-      const artistInline = artist ? ` by ${artist}` : "";
-      const v = (runCounter + shiftVal) % 7;
+      const stripMeta = (val) => String(val || "")
+        .replace(/\{\{TITLE\}\}/gi, "")
+        .replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "")
+        .replace(/^Martin\s+Strayd\s*[-–—:|]+\s*/i, "")
+        .replace(/#FirstIteminCatalogJSONon\b/gi, "")
+        .replace(/#[A-Za-z0-9_]{26,}/g, "")
+        .replace(/\s*\(\s*\)\s*/g, " ")
+        .replace(/\s{2,}/g, " ")
+        .trim();
 
-      const kwList = cleanEditorialText(nonEmpty(rawKw, "independent music, live performance, listener hook, direct release"), title);
-      const kwParts = kwList.split(/[,\n]+/).map((k) => k.trim()).filter(Boolean);
-      const k1 = kwParts[0] || "independent music";
-      const k2 = kwParts[1] || "live performance";
+      const title = stripMeta(preserveTitle(track.title)) || "Featured Single";
+      const artist = stripMeta(preserveTitle(track.artist)) || "Martin Strayd";
+      const hub = portalLink || "https://martinstrayd.github.io/artist/";
+      const spotify = nonEmpty($("spotifyUrl")?.value) || "https://open.spotify.com/artist/6aRM8IKV2HBUZRGnnDdrM0";
+      const liveNews = stripMeta(nonEmpty($("liveNewsInput")?.value))
+        || "Featured across 10+ radio stations over the past 28 days in an ongoing daily release run.";
+      const todayLabel = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
-      const cleanTags = kwParts.map((k) => `#${k.replace(/[^a-zA-Z0-9]+/g, "")}`).filter((t) => t.length > 1);
-      const tags = Array.from(new Set(["#AgentAnna", artistTag, ...cleanTags].filter(Boolean)));
-      const ttTags = tags.slice(0, 4).join(" ");
-      const igTags = tags.slice(0, 5).join(" ");
-      const fbTags = tags.slice(0, 3).join(" ");
-      const xTags = tags.slice(0, 2).join(" ");
+      runCounter = (Number(runCounter) || 0) + 1;
+      const v = (runCounter + (Number(shiftVal) || 0) + title.length) % 6;
 
-      const cadenceLine = cadence === "multi_burst"
-        ? "High-impact burst cadence: TT 2–3/d, FB 1–3/d, IG 1–2/d + Stories, X 5–10/d, YT Shorts 1/d, YT Videos 3/wk."
-        : "Standard rollout cadence: TT 2–3/d, FB 1/d, IG 1 feed/d + Stories, X 5–10/d, YT Shorts 1/d, YT Videos 3/wk.";
+      const safeKw = stripMeta(rawKw)
+        .split(/[,\n]+/)
+        .map((k) => k.trim())
+        .filter((k) => k && k.length <= 28 && !/countdown|\{\{|spotify\.com|github\.io/i.test(k));
+      const extraTags = safeKw.map((k) => `#${k.replace(/[^a-zA-Z0-9]+/g, "")}`).filter((t) => t.length > 2);
+      const allTags = Array.from(new Set(["#MartinStrayd", "#DJAnna", "#Songwriting", "#IndieMusic", "#DailySingle", ...extraTags]));
 
-      const sceneBrief = `Realistic live-action camera work in a real space with natural or practical lighting and real human presence for "${title}" — strictly live-action only.`;
-      const payLinks = [
-        portalLink ? `Direct release: ${portalLink}` : "",
-        paypalUrl ? `PayPal: ${paypalUrl}` : "",
-        bmacLink ? `Support: ${bmacLink}` : "",
-        wiseStr || ""
-      ].filter(Boolean).join(" • ");
-      const streamLinks = [
-        nonEmpty($("spotifyUrl")?.value) ? `Spotify: ${$("spotifyUrl").value.trim()}` : "",
-        nonEmpty($("ytMusicUrl")?.value) ? `YT Music: ${$("ytMusicUrl").value.trim()}` : "",
-        nonEmpty($("appleMusicUrl")?.value) ? `Apple Music: ${$("appleMusicUrl").value.trim()}` : ""
-      ].filter(Boolean).join(" • ");
+      const xTags = allTags.slice(0, 2).join(" ");
+      const fbTags = allTags.slice(0, 3).join(" ");
+      const ttTags = allTags.slice(0, 4).join(" ");
+      const igTags = allTags.slice(0, 4).join(" ");
+      const ytTags = allTags.slice(0, 5).join(" ");
 
-      const hostRoleLine = bibleVoiceProfile ? ensureSentenceEnd(bibleVoiceProfile) : "";
-      const noteLine = songRef ? ensureSentenceEnd(songRef) : "";
-      const directiveLine = customDirective ? ensureSentenceEnd(`Room direction: ${customDirective}`) : "";
+      const noteClean = stripMeta(songRef);
 
-      const fbOpeners = [
-        `Wait—why did "${title}"${artistInline} stop everyone dead in the room on the first pass?`,
-        `Podcaster & DJ confession: I queued "${title}"${artistInline} to test a ${k1} set and couldn't cut away—what hits you first?`,
-        `Most tracks fade into noise before verse two. Does "${title}"${artistInline} actually earn a spot in your rotation?`,
-        `Late-night radio check: if you had one ${k2} cut to prove the room is awake, are you dropping "${title}"${artistInline}?`,
-        `Listen closely to "${title}"${artistInline}—is that hook built for headphones, a live room, or both?`,
-        `One line in "${title}"${artistInline} changes the whole temperature of the track. Catch which one yet?`,
-        `DJ booth check: "${title}"${artistInline} just cut through ${k1} chatter—who are you sending this to first?`
+      const pressLeads = [
+        `On ${todayLabel}, DJ Veg Anna spotlights "${title}" as today's featured single from songwriter, lyricist, and composer ${artist}—drawn from an independent catalog of more than 100 original songs built over decades of craft.`,
+        `Cueing up "${title}" for ${todayLabel} on the DJ Veg Anna Singles Party, ${artist} delivers an unvarnished, human cut that puts lyricism and lived perspective ahead of industry formula.`,
+        `Released into today's live rotation (${todayLabel}) with DJ Veg Anna, "${title}" highlights ${artist}'s signature blend of direct storytelling, acoustic-rock grit, and independent ownership.`,
+        `Today's broadcast feature (${todayLabel}) brings "${title}" to radio programmers and listeners worldwide—an original release from ${artist}'s 100+ song catalog hosted with DJ Veg Anna.`,
+        `On air ${todayLabel}, DJ Veg Anna presents "${title}" by ${artist}, continuing a continuous daily single rollout grounded in decades of original songwriting.`,
+        `For ${todayLabel}, the DJ Veg Anna Singles Party turns the spotlight onto "${title}"—a sharp, character-rich track from ${artist}'s deep independent catalog.`
       ];
-      const fbLead = fbOpeners[v].slice(0, 150);
 
-      const fbBody = [
-        `Agent Anna breaks down "${title}"${artistInline} through ${k1} and ${k2}.`,
-        hostRoleLine,
-        noteLine,
-        directiveLine
-      ].filter(Boolean).join(" ");
-
-      const facebook = [fbLead, `${fbBody} ${sceneBrief}`, payLinks, streamLinks, fbTags].filter(Boolean).join("\n\n").slice(0, 63206);
-
-      const igFirst125 = [
-        `Why "${title}"${artistInline} hijacked my DJ & podcast set (${k1})${portalLink ? ` • ${portalLink}` : ""}`,
-        `Radio host alert: "${title}"${artistInline} hits different live${paypalUrl ? ` • ${paypalUrl}` : ""}`,
-        `Stop scrolling—"${title}"${artistInline} brings raw ${k2} heat${portalLink ? ` • ${portalLink}` : ""}`,
-        `On air with Agent Anna: "${title}"${artistInline} (${k1})${portalLink ? ` • ${portalLink}` : ""}`
-      ][v % 4].slice(0, 125);
-      const instagram = [igFirst125, `${fbBody} ${sceneBrief}`, payLinks, streamLinks, igTags].filter(Boolean).join("\n\n").slice(0, 2200);
-
-      let tiktok = [
-        `DJ & podcast drop: why "${title}"${artistInline} flips a ${k1} room in seconds. ${[portalLink, ttTags].filter(Boolean).join(" ")}`,
-        `Heard "${title}"${artistInline} once on air and couldn't leave it alone—${k2} energy. ${[paypalUrl, ttTags].filter(Boolean).join(" ")}`,
-        `Live-action ${k1} check: "${title}"${artistInline} on the deck right now. ${[portalLink, ttTags].filter(Boolean).join(" ")}`,
-        `Radio host pick: "${title}"${artistInline}—${k1} meets ${k2} with zero polish fake-out. ${[bmacLink, ttTags].filter(Boolean).join(" ")}`,
-        `This is what happens when "${title}"${artistInline} hits a real speaker. ${[portalLink, ttTags].filter(Boolean).join(" ")}`,
-        `Podcaster & DJ alert: "${title}"${artistInline} (${k2}) is the one people ask about. ${[portalLink, ttTags].filter(Boolean).join(" ")}`,
-        `One spin of "${title}"${artistInline} and the room shifts. ${[portalLink, ttTags].filter(Boolean).join(" ")}`
-      ][v].trim();
-      if (tiktok.length > 300) {
-        tiktok = `DJ & podcast drop: "${title}"${artistInline} (${k1}). ${[portalLink, ttTags].filter(Boolean).join(" ")}`.trim().slice(0, 300);
-      }
-
-      let ytTitle = [
-        `Why "${title}"${artistInline} Hooks Every Listener (${k1} & ${k2}) — Agent Anna`,
-        `The Real Story Behind "${title}"${artistInline} | Podcast & DJ Breakdown`,
-        `"${title}"${artistInline} — Live-Action ${k1} Heat That Won't Let Go`
-      ][v % 3];
-      ytTitle = (ytTitle.length < 60 ? `${ytTitle} • Agent Anna` : ytTitle).slice(0, 100);
-
-      const ytDesc = [
-        `"${title}"${artistInline}${track.id ? ` (${track.id})` : ""} — ${k1}, ${k2}, and listener hooks around ${kwList}.`,
-        [hostRoleLine, noteLine].filter(Boolean).join(" "),
-        `${sceneBrief} ${cadenceLine}`,
-        payLinks,
-        streamLinks,
-        igTags
-      ].filter(Boolean).join("\n\n").slice(0, 5000);
-
-      const x = cleanEditorialText([
-        `DJ & podcast host check: "${title}"${artistInline} (${k1}) hits harder than expected. ${[portalLink, xTags].filter(Boolean).join(" ")}`,
-        `Why does "${title}"${artistInline} stay stuck after one pass? ${k2} heat on deck. ${[paypalUrl, xTags].filter(Boolean).join(" ")}`,
-        `Radio & club room note: "${title}"${artistInline} cuts straight through ${k1}. ${[portalLink, xTags].filter(Boolean).join(" ")}`,
-        `One track, real room, zero filler—"${title}"${artistInline} (${k1}). ${[bmacLink, xTags].filter(Boolean).join(" ")}`
-      ][v % 4], title).trim().slice(0, 280);
-
-      const pitchDeck = [
-        `Pitch Deck — "${title}"${artistInline}${track.id ? ` (${track.id})` : ""}`,
-        `Curiosity & Hook Angle: Lead with what makes "${title}" stand out in a crowded feed around ${k1} and ${k2}.`,
-        `Host & Artist Context: ${[hostRoleLine, noteLine, directiveLine].filter(Boolean).join(" ") || "Driven by Agent Anna across podcast, radio, and DJ angles."}`,
-        `Live-Action Visual Treatment: ${sceneBrief}`,
-        `Search & Discovery Angle: Focus keywords and listener prompts around ${kwList}.`,
-        `Direct Release & Support Rails: ${payLinks || streamLinks || "Add direct release, PayPal, Buy Me a Coffee, or Wise links in Section 1."}`
-      ].join("\n\n");
-
-      const slots = [
-        `Rollout Schedule — "${title}"${artistInline} (${cadenceLine})`,
-        `• Morning Slot (~08:30): Drop X punchline and TikTok hook introducing "${title}" around ${k1}; post Instagram hook/Story or Facebook listener question.`,
-        `• Midday Slot (~13:00): Publish YouTube Short/Video or follow-up TikTok & X clip unpacking ${k2} and live-action camera framing.`,
-        `• Evening Slot (~19:30–22:00): Share direct release link${portalLink ? ` (${portalLink})` : ""}, reply to comments with Agent Anna's reply pack, and line up the next drop.`
-      ].join("\n\n");
-
-      const replies = [
-        `Fan Reply Pack — "${title}"${artistInline}`,
-        `1) Hook / Curiosity: "Right?! '${title}'${artistInline} has that ${k1} pull where you hear something new on the second pass.${portalLink ? ` Grab it here: ${portalLink}` : ""}"`,
-        `2) Direct Access & Support: "${payLinks || streamLinks || "Check the direct release link on the page for listening and support."}"`,
-        `3) Live-Action & Production: "All live-action camera and real room energy—which moment or lyric grabbed you first?"`,
-        `4) Share / Playlist Push: "Send '${title}' to someone into ${k2} and tell me what they say—I'll queue their pick next."`
-      ].join("\n\n");
+      const pressMiddles = [
+        `Built without label gloss or disposable filler, "${title}" gives listeners and station hosts a track with real staying power—paired with open personal ownership so fans can collect and share the music freely.`,
+        `Every release in ${artist}'s catalog carries its own point of view, and "${title}" stands out immediately for its honest phrasing, groove, and direct connection with everyday listeners.`
+      ];
 
       const press = [
-        `Why Listeners Are Stopping Cold on "${title}"${artistInline} — Agent Anna's Single Spotlight`,
-        `With "${title}"${artistInline}${track.id ? ` (${track.id})` : ""}, Agent Anna brings a sharp ${k1} and ${k2} spotlight built for listeners who want substance over background noise. ${[hostRoleLine, noteLine, directiveLine].filter(Boolean).join(" ")}`.trim(),
-        `${sceneBrief} Pairing live-action framing with podcaster, radio host, and DJ storytelling gives "${title}" a clear point of view across short video, social feeds, and search.`,
-        `${cadenceLine} Keywords and topic threads around ${kwList} connect curious listeners with direct release access and open dialogue in the comments.`,
-        `Direct links and listener access: ${[payLinks, streamLinks].filter(Boolean).join(" • ") || "Direct release and payment links are managed in A1 Record Command."}`,
-        `A1 Record Command • Agent Anna`
+        `::::::::::::::::::::::::::::::PRESS RELEASE::::::::::::::::::::::::::::::::::::::\nOFFICIAL MARTIN STRAYD SINGLES PARTY BY DJ VEG ANNA`,
+        `FOR IMMEDIATE RELEASE — ${todayLabel.toUpperCase()}\n${artist.toUpperCase()} RELEASES "${title.toUpperCase()}" ON THE DJ VEG ANNA SINGLES PARTY`,
+        pressLeads[v],
+        pressMiddles[v % pressMiddles.length],
+        noteClean ? `Track Note: ${ensureSentenceEnd(noteClean)}` : "",
+        `Radio & Release Update: ${liveNews}`,
+        `Direct Artist Hub & Full Catalog: ${hub}\nSpotify Artist Page: ${spotify}`
       ].filter(Boolean).join("\n\n");
 
-      return { sceneBrief, pitchDeck, slots, replies, press, tiktok, instagram, ytTitle, ytDesc, facebook, x };
+      const x = [
+        `On deck with DJ Anna today: "${title}" by ${artist}—real songwriting, zero filler. Listen at ${hub} ${xTags}`,
+        `"${title}" from ${artist}'s 100+ song catalog holds attention from the first bar. Hear it with DJ Anna: ${hub} ${xTags}`,
+        `Today's single spin: "${title}" (${artist}). Unvarnished lyrics and real room energy on the DJ Anna rotation: ${hub} ${xTags}`,
+        `If you miss songs written by a real human with a story to tell, queue "${title}" by ${artist}: ${hub} ${xTags}`,
+        `DJ Anna radio check: "${title}" by ${artist} cuts straight through the feed noise. Full catalog: ${hub} ${xTags}`,
+        `One song, real craft, zero label polish—"${title}" by ${artist} on today's DJ Anna spotlight: ${hub} ${xTags}`
+      ][v].trim().slice(0, 280);
+
+      const tiktok = [
+        `Listen to how "${title}" opens—no overproduced gloss, just ${artist} putting decades of songwriting straight into the mic. DJ Anna's daily spin is live at ${hub}. ${ttTags}`,
+        `Somebody is hearing "${title}" by ${artist} for the first time tonight and hitting replay. Explore the full catalog & direct releases at ${hub}. ${ttTags}`,
+        `Tonight's DJ Anna feature: "${title}" by ${artist}. Let the lyric land and check out the rest of the catalog at ${hub}. ${ttTags}`,
+        `Real songwriting still cuts through the scroll. DJ Anna cues "${title}" by ${artist} on today's session—listen at ${hub}. ${ttTags}`,
+        `If you want honest words over algorithm noise, put "${title}" by ${artist} on right now. Full hub: ${hub}. ${ttTags}`,
+        `From a 100+ song independent catalog straight to your speakers: "${title}" by ${artist} with DJ Anna at ${hub}. ${ttTags}`
+      ][v].trim().slice(0, 2200);
+
+      const igLead = [
+        `On air with DJ Anna today: "${title}" by ${artist} • ${hub}`,
+        `Today's single spotlight: "${title}" — ${artist} • ${hub}`,
+        `Late-night spin with DJ Anna: "${title}" by ${artist} • ${hub}`,
+        `Real songwriting in the room: "${title}" — ${artist} • ${hub}`,
+        `DJ Veg Anna Singles Party: "${title}" by ${artist} • ${hub}`,
+        `From the 100+ song catalog: "${title}" — ${artist} • ${hub}`
+      ][v].slice(0, 125);
+
+      const instagram = [
+        igLead,
+        `Decades of original songwriting distilled into a direct, human cut—no label formula, just honest words and real presence.`,
+        `Radio & Release Update: ${liveNews}`,
+        `Direct Hub & Full Catalog: ${hub}\nSpotify: ${spotify}`,
+        igTags
+      ].join("\n\n").slice(0, 2200);
+
+      const facebook = [
+        [
+          `DJ Anna on the mic—today's featured single is "${title}" by ${artist}.`,
+          `Every day we pull another track from ${artist}'s 100+ song catalog, and today "${title}" takes center stage.`,
+          `What hits you first when you play this one—the lyric, the groove, or the vocal delivery?`,
+          `When a song is written from real life, you can feel it in the first twenty seconds—"${title}" by ${artist} is today's proof.`,
+          `Radio hosts and listeners keep coming back to ${artist}'s catalog because every track stands on its own. Today's spin: "${title}".`,
+          `From independent songwriting to live radio rotation—DJ Anna is featuring "${title}" by ${artist} today.`
+        ][v],
+        liveNews,
+        `Listen, explore the full catalog, and share freely: ${hub}\nSpotify: ${spotify}`,
+        fbTags
+      ].join("\n\n").slice(0, 63206);
+
+      const ytTitle = [
+        `"${title}" — ${artist} | DJ Anna Daily Single Spotlight #MartinStrayd`,
+        `${artist} - "${title}" (Official Audio & DJ Anna Radio Feature) #MartinStrayd`,
+        `Inside "${title}" — ${artist} | Hosted by DJ Veg Anna #MartinStrayd`,
+        `"${title}" by ${artist} | Independent Songwriting & Radio Spotlight #MartinStrayd`,
+        `DJ Anna Radio Session: "${title}" — ${artist} #MartinStrayd`,
+        `"${title}" — ${artist} (Full Track & Catalog Feature) #MartinStrayd`
+      ][v].slice(0, 100);
+
+      const ytDesc = [
+        `"${title}" by ${artist} — featured on the DJ Veg Anna Singles Party (${todayLabel}).`,
+        `Written and composed by ${artist}, "${title}" brings decades of independent songwriting craft, direct storytelling, and authentic human performance straight to listeners without label filler.`,
+        noteClean ? `Song & Session Context: ${ensureSentenceEnd(noteClean)}` : "",
+        `• Broadcast & Release Update: ${liveNews}`,
+        `• Direct Artist Hub, MP3s & Full Catalog: ${hub}`,
+        `• Stream ${artist} on Spotify: ${spotify}`,
+        `Explore more original songs from ${artist}'s 100+ track catalog and daily radio spotlights with DJ Anna.`,
+        ytTags
+      ].filter(Boolean).join("\n\n").slice(0, 5000);
+
+      return { sceneBrief: "", pitchDeck: "", slots: "", replies: "", press, tiktok, instagram, ytTitle, ytDesc, facebook, x };
     }
 
     function updateArtworkDisplay(track) {
