@@ -1,4 +1,4 @@
-# Build world cleanest fastest safest AI-powered music management system for MARTIN STRAYD
+# Build world cleanest fastest safest AI-powered music management system for MARTIN STRAYD AI OFFICE
 
 Building a digital manager for an artist and their entire music catalogue - something that remembers every song, knows the history, plans each release, creates promotional campaigns, organizes assets, tracks opportunities, and helps turn attention into income.
 
