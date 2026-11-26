@@ -1,5 +1,5 @@
 # ANNA Living Tree of Life System Map
-_Auto-generated on push to `bible/` at `2026-11-26T04:42:36.349265+00:00`_
+_Auto-generated on push to `bible/` at `2026-11-26T05:01:23.741250+00:00`_
 
 ## The Roots (Core Config & Memory)
 - `memory/brain.json`
@@ -9,6 +9,7 @@ _Auto-generated on push to `bible/` at `2026-11-26T04:42:36.349265+00:00`_
 - `strayd/record-brain.json`
 
 ## The Trunk (Cockpit & UI Engine)
+- `body/anna-sound-system.html`
 - `body/index.html`
 - `body/style.css`
 - `functions/00-utils.js`
