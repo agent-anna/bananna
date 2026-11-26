@@ -719,16 +719,26 @@
 
     function buildDirectArtUrls(track) {
       const urls = [];
+      const basePortal = nonEmpty(track && (track.portalUrl || track.portal || track.sourceUrl)) || "https://martinstrayd.github.io/artist/";
       const add = (u) => {
         const s = nonEmpty(u);
-        if (s && !urls.includes(s)) urls.push(s);
+        if (!s) return;
+        const resolved = /^https?:\/\//i.test(s) ? s : resolveAssetUrl(s, basePortal);
+        if (resolved && !urls.includes(resolved)) urls.push(resolved);
       };
-      add(track.url);
-      add(track.artworkUrl);
-      add(track.image);
-      const fname = nonEmpty(track.filename);
-      if (fname && (/^(https?:|\/|\.\.?\/)/i.test(fname) || /\.(png|jpe?g|webp)$/i.test(fname))) {
-        add(resolveAssetUrl(fname, track.sourceUrl));
+      if (track) {
+        add(track.artUrl);
+        add(track.art);
+        add(track.artworkUrlHighRes);
+        add(track.artworkUrl);
+        add(track.image);
+        add(track.url);
+        add(track.platforms && track.platforms.appleMusic && track.platforms.appleMusic.artworkUrlHighRes);
+        add(track.platforms && track.platforms.appleMusic && track.platforms.appleMusic.artworkUrl);
+        const fname = nonEmpty(track.filename);
+        if (fname && (/^(https?:|\/|\.\.?\/)/i.test(fname) || /\.(png|jpe?g|webp)$/i.test(fname))) {
+          add(fname);
+        }
       }
       return urls;
     }
