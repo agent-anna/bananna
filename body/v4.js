@@ -2209,6 +2209,46 @@ async function recordSessionLogAndMilestone(noteText, milestoneTitle) {
     return { logRes, msRes, logPath, milestonePath };
 }
 
+async function handleExplicitLogCommandIfAny(rawText, assistantMsgId) {
+    const trimmed = String(rawText || "").trim();
+    const slashMatch = trimmed.match(/^\/log(?:\s+(milestone)\s*:\s*|\s+(milestone)\s+|\s+)?([\s\S]*)$/i);
+    const naturalLogMatch = !slashMatch && /\b(log (this|our progress|today|session)|record (a )?milestone|save (this )?milestone)\b/i.test(trimmed);
+
+    if (!slashMatch && !naturalLogMatch) return false;
+
+    const isMilestone = Boolean((slashMatch && (slashMatch[1] || slashMatch[2])) || /\bmilestone\b/i.test(trimmed));
+    const detailText = slashMatch
+        ? (slashMatch[3] || "").trim()
+        : trimmed.replace(/^(please\s+)?(log|record|save)\s+(this|our progress|today|session|a\s+milestone|this\s+milestone)[:\s-]*/i, "").trim();
+
+    const note = detailText || "Checkpoint recorded during active studio session.";
+    const milestoneTitle = isMilestone ? note.split(/[.!?\n]/)[0].slice(0, 80) : "";
+
+    if (typeof updateMessage === "function" && assistantMsgId) {
+        updateMessage(assistantMsgId, isMilestone ? "Recording session log & milestone to repo..." : "Recording session log to repo...");
+    }
+
+    const res = await recordSessionLogAndMilestone(note, milestoneTitle);
+    const lines = [];
+    if (res.logRes && res.logRes.ok) {
+        lines.push(`Logged to \`${res.logPath}\`: ${note}`);
+    } else {
+        lines.push(`Could not write \`${res.logPath}\` (${(res.logRes && res.logRes.reason) || "check GitHub token in KEYS"}).`);
+    }
+    if (isMilestone) {
+        if (res.msRes && res.msRes.ok) {
+            lines.push(`Milestone added to \`${res.milestonePath}\`: **${milestoneTitle}**`);
+        } else {
+            lines.push(`Could not write \`${res.milestonePath}\` (${(res.msRes && res.msRes.reason) || "check GitHub token in KEYS"}).`);
+        }
+    }
+
+    if (typeof updateMessage === "function" && assistantMsgId) {
+        updateMessage(assistantMsgId, lines.join("\n"));
+    }
+    return true;
+}
+
 async function sendMessage() {
         const input = document.getElementById("user-input");
         const prompt = input ? input.value.trim() : "";
