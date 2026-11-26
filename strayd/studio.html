@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DJ Veg Anna • Social Post Maker & Radio Filler</title>
+  <title>DJ ANNA • Daily Single Press & Social Studio</title>
   <style>
     :root {
       --bg: #0b0f17;
@@ -91,7 +91,7 @@
       font-family: inherit;
     }
     textarea {
-      min-height: 145px;
+      min-height: 155px;
       resize: vertical;
     }
     .link-toggles {
@@ -150,7 +150,8 @@
       margin-bottom: 16px;
     }
     .press-top textarea {
-      min-height: 210px;
+      min-height: 360px;
+      line-height: 1.58;
     }
     .posts-grid {
       display: grid;
@@ -214,23 +215,31 @@
       </div>
       <div>
         <h1 id="songHeading" class="song-title">Loading song database...</h1>
-        <div id="djMeta" class="meta-line">DJ Veg Anna • 24/7 / 365 Daily Single Radio & Social Launch</div>
+        <div id="djMeta" class="meta-line">DJ ANNA • Martin Strayd Daily Single Radio Launch</div>
         <div class="controls-grid">
           <div>
             <label for="songSelect">1. Pick Song from Catalog</label>
             <select id="songSelect"></select>
           </div>
           <div>
+            <label for="voiceSelect">DJ ANNA / Veg Anna Female Voice</label>
+            <select id="voiceSelect"></select>
+          </div>
+          <div>
             <label for="customTitle">Custom Song Title (Optional)</label>
             <input id="customTitle" type="text" placeholder="Type a song title..." />
           </div>
           <div>
-            <label for="hubUrl">Artist Hub / Sales Portal</label>
+            <label for="hubUrl">Sales Portal / Artist Hub</label>
             <input id="hubUrl" type="text" value="https://martinstrayd.github.io/artist/" />
           </div>
           <div>
             <label for="noteInput">Story / Mood / Hook Note (Optional)</label>
-            <input id="noteInput" type="text" placeholder="Add a mood, story, or hook..." />
+            <input id="noteInput" type="text" placeholder="Add a song angle, hook, or story..." />
+          </div>
+          <div>
+            <label for="countriesInput">Radio Airplay Countries (Press Release)</label>
+            <input id="countriesInput" type="text" value="Australia, the Philippines, Ecuador, the United States, Chile, Canada, Indonesia, France, and Thailand" />
           </div>
         </div>
 
@@ -243,6 +252,7 @@
 
         <div class="hero-actions">
           <button id="makePostsBtn" class="primary" type="button">Make / Refresh Posts</button>
+          <button id="testVoiceBtn" type="button">Test Anna Voice</button>
           <button id="stopSpeakBtn" type="button">Stop Voice</button>
           <button id="exportHistoryBtn" type="button">Save History JSON</button>
           <span id="statusText" class="status-pill">Loading bible & song database...</span>
@@ -255,7 +265,7 @@
   </div>
 
   <script>
-    const PRESS_CHANNEL = { id: "press", label: "Press Release (Dated)", max: 12000 };
+    const PRESS_CHANNEL = { id: "press", label: "Official Press Release (Dated • Full Bio)", max: 12000 };
 
     const SOCIAL_CHANNELS = [
       { id: "x", label: "X", max: 280 },
@@ -276,41 +286,102 @@
       wiseUrl: "https://wise.com/pay/r/xGmJi9kSdap4lKo"
     };
 
-    const HOOK_ANGLES = [
+    const RADIO_ANGLES = [
       {
-        tag: "Late-Night Radio",
-        xLead: (t, a) => `Why is "${t}" by ${a} hitting so hard right now? DJ Veg Anna put it on heavy rotation—`,
-        ttLead: (t, a) => `If you haven't heard "${t}" by ${a} yet, stop scrolling. DJ Veg Anna just dropped it on the 365 daily single run—`,
-        igLead: (t, a) => `Some songs pull you in on the first bar. "${t}" by ${a} is locked into DJ Veg Anna's daily single radio rotation—`,
-        fbLead: (t, a) => `DJ Veg Anna spinning "${t}" by ${a} on the daily single launch. What's the first line or hook that grabs you?`,
-        ytTag: "Daily Single Drop",
-        pressLead: (t, a) => `Martin Strayd releases "${t}" as part of the ongoing daily single launch hosted by DJ Veg Anna, pairing raw songwriting with direct listener ownership.`
+        tag: "Prime-Time Broadcast",
+        host: "DJ ANNA",
+        callSign: "Live on the daily frequency, this is DJ ANNA",
+        xHook: (t, a) => `Why can't anyone stop replaying "${t}" by ${a}? DJ ANNA just put today's single on heavy rotation—`,
+        ttHook: (t, a) => `Stop scrolling—"${t}" by ${a} just hit the airwaves and it's pure replay fuel.\n\nDJ ANNA here on the daily single launch: 10 albums' worth of raw songwriting, one new single every single day. Hear why "${t}" hits different from the first bar, then grab the MP3 + cover art bundle to own and share freely with friends.`,
+        igHook: (t, a) => `Some songs don't ask for permission—they take over the room on the first chord.\n\nDJ ANNA spinning "${t}" by ${a} on today's daily single launch. Four decades of songwriting craft distilled into a track built for midnight drives and repeat plays.\n\nOwn the MP3 + cover art bundle outright and pass it along freely to friends for non-commercial enjoyment.`,
+        fbHook: (t, a) => `DJ ANNA on air with today's daily single drop: "${t}" by ${a}.\n\nWhen a songwriter brings 40+ years of real-world stories and zero industry filter, you hear it in every line. Crank "${t}" up, tell us the lyric or hook that hits you hardest, and grab the MP3 + cover art bundle to own and share freely with friends.`,
+        ytTag: "Daily Single Radio Premiere"
       },
       {
-        tag: "Songwriter Confession",
-        xLead: (t, a) => `The hook in "${t}" (${a}) won't leave my head. Hear why DJ Veg Anna called it essential—`,
-        ttLead: (t, a) => `Plot twist: "${t}" by ${a} is the kind of track you play once and immediately replay. DJ Veg Anna's daily radio pick—`,
-        igLead: (t, a) => `Honest songwriting cuts straight through the noise. "${t}" by ${a} is live on DJ Veg Anna's daily single broadcast—`,
-        fbLead: (t, a) => `Ever hear a song and feel like it was written for the exact room you're sitting in? "${t}" by ${a} on DJ Veg Anna's daily single feed—`,
-        ytTag: "DJ Veg Anna Pick",
-        pressLead: (t, a) => `Featured on DJ Veg Anna's daily single broadcast, "${t}" showcases Martin Strayd's direct songwriting voice and 365-day release cadence.`
+        tag: "Late-Night Confessional",
+        host: "Veg Anna",
+        callSign: "Veg Anna in the booth on the 365 daily single run",
+        xHook: (t, a) => `The hook in "${t}" (${a}) is dangerously addictive. Veg Anna has it spinning now—`,
+        ttHook: (t, a) => `Nobody warns you how fast "${t}" by ${a} gets stuck in your head.\n\nVeg Anna here on the 365-day single rollout. While everybody else drops one track a year, Martin Strayd is unleashing an entire vault—one daily single at a time. Grab the MP3 + cover art bundle and send it to a friend who gets real music.`,
+        igHook: (t, a) => `Late-night radio confession: "${t}" by ${a} is the track you play once and immediately hit repeat.\n\nVeg Anna here with today's daily single drop. No label gatekeepers, no waiting—just direct music you can own as an MP3 + cover art bundle and share freely with friends.`,
+        fbHook: (t, a) => `Veg Anna checking in from the studio booth with "${t}" by ${a}.\n\nDry wit, razor-sharp hooks, and zero filler—this is why our daily single party never slows down. Listen to "${t}", drop your take in the comments, and pick up the MP3 + cover art bundle to own and share with friends.`,
+        ytTag: "Veg Anna Radio Spotlight"
       },
       {
-        tag: "24/7 Crate Dig",
-        xLead: (t, a) => `24/7 radio crate dig: "${t}" by ${a} is built for replay. Grab the MP3 + cover art bundle—`,
-        ttLead: (t, a) => `365 days, one fresh single at a time. DJ Veg Anna just queued up "${t}" by ${a}—own the MP3 + art and pass it to friends—`,
-        igLead: (t, a) => `From crate dig to daily broadcast: "${t}" by ${a} is live with DJ Veg Anna. Own the MP3 + cover art bundle to keep and share freely with friends—`,
-        fbLead: (t, a) => `Running 24/7 across 365 daily drops: "${t}" by ${a} with DJ Veg Anna. Own the MP3 + cover art bundle and share freely with friends for non-commercial enjoyment—`,
-        ytTag: "365 Daily Singles",
-        pressLead: (t, a) => `As part of a 365-day single-a-day rollout, "${t}" by Martin Strayd arrives with DJ Veg Anna radio framing and direct MP3 + cover art bundles listeners can own and share with friends for non-commercial enjoyment.`
+        tag: "Global Crate Dig",
+        host: "DJ ANNA",
+        callSign: "Across the global airwaves, you're locked in with DJ ANNA",
+        xHook: (t, a) => `365 days. One new single every day. "${t}" by ${a} is live with DJ ANNA—`,
+        ttHook: (t, a) => `Imagine having 10 albums of unreleased firepower and dropping a fresh single every single day.\n\nDJ ANNA on the mic with "${t}" by ${a}. Turn this up, share it with your crew, and own the MP3 + cover art bundle with full non-commercial friend-sharing rights.`,
+        igHook: (t, a) => `From international radio rotation straight to your headphones: "${t}" by ${a}.\n\nDJ ANNA presenting today's daily single release. Own the MP3 + cover art bundle outright and share it freely with friends for non-commercial enjoyment.`,
+        fbHook: (t, a) => `DJ ANNA spinning "${t}" by ${a} across our 24/7 daily single launch!\n\nEvery day brings a new chapter from Martin Strayd's 10-album vault. Stream "${t}", share the link with music lovers who crave authenticity, and grab your MP3 + cover art bundle today.`,
+        ytTag: "365 Daily Singles"
       }
+    ];
+
+    const FEMALE_VOICE_HINTS = [
+      "aria", "jenny", "sonia", "libby", "maisie", "natasha", "clara", "ava",
+      "samantha", "victoria", "allison", "zoe", "karen", "moira", "tessa",
+      "zira", "hazel", "susan", "fiona", "veena", "female", "woman", "girl"
+    ];
+
+    const MALE_VOICE_HINTS = [
+      "guy", "ryan", "christopher", "eric", "davis", "andrew", "brian",
+      "steffan", "david", "mark", "george", "daniel", "arthur", "oliver",
+      "male", "man", "boy"
     ];
 
     let CATALOG_SONGS = [];
     let CURRENT_ART = "";
     let ANGLE_CURSOR = 0;
+    let AVAILABLE_VOICES = [];
 
     const $ = (id) => document.getElementById(id);
+
+    function scoreFemaleVoice(voice) {
+      const hay = `${voice.name || ""} ${voice.voiceURI || ""} ${voice.lang || ""}`.toLowerCase();
+      let score = 0;
+      if (/^en[-_]/i.test(voice.lang || "")) score += 20;
+      if (/natural|neural|online|premium|enhanced/i.test(hay)) score += 35;
+      for (const h of FEMALE_VOICE_HINTS) {
+        if (hay.includes(h)) score += 45;
+      }
+      for (const m of MALE_VOICE_HINTS) {
+        if (new RegExp(`\\b${m}\\b`, "i").test(hay)) score -= 120;
+      }
+      return score;
+    }
+
+    function populateVoices() {
+      if (!("speechSynthesis" in window)) return;
+      const raw = window.speechSynthesis.getVoices() || [];
+      if (!raw.length) return;
+
+      const sorted = [...raw].sort((a, b) => scoreFemaleVoice(b) - scoreFemaleVoice(a));
+      const nonMale = sorted.filter((v) => scoreFemaleVoice(v) > -50);
+      AVAILABLE_VOICES = nonMale.length ? nonMale : sorted;
+
+      const sel = $("voiceSelect");
+      const savedName = localStorage.getItem("anna_female_voice_name") || "";
+      sel.innerHTML = "";
+
+      AVAILABLE_VOICES.forEach((v, i) => {
+        const opt = document.createElement("option");
+        opt.value = String(i);
+        const tag = scoreFemaleVoice(v) >= 45 ? "★ Female" : "Voice";
+        opt.textContent = `${tag} • ${v.name} (${v.lang})`;
+        sel.appendChild(opt);
+      });
+
+      const savedIdx = AVAILABLE_VOICES.findIndex((v) => v.name === savedName);
+      sel.value = String(savedIdx >= 0 ? savedIdx : 0);
+    }
+
+    function getSelectedVoice() {
+      if (!AVAILABLE_VOICES.length) populateVoices();
+      const idx = Number($("voiceSelect")?.value || 0);
+      return AVAILABLE_VOICES[idx] || AVAILABLE_VOICES[0] || null;
+    }
 
     function cleanTitle(raw) {
       return String(raw || "")
@@ -344,7 +415,7 @@
         <rect width="600" height="600" fill="url(#g)"/>
         <circle cx="300" cy="235" r="105" fill="#38bdf8" fill-opacity="0.18"/>
         <text x="300" y="255" text-anchor="middle" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="30" font-weight="700">${safe.slice(0, 26)}</text>
-        <text x="300" y="305" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="18" font-weight="600">DJ VEG ANNA • DAILY SINGLE</text>
+        <text x="300" y="305" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="18" font-weight="600">DJ ANNA • DAILY SINGLE</text>
         <text x="300" y="340" text-anchor="middle" fill="#9fb0c8" font-family="system-ui,sans-serif" font-size="16">Martin Strayd</text>
       </svg>`;
       return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
@@ -373,7 +444,9 @@
         "../bible/00-bible-index.md",
         "../bible/02-links.md",
         "../bible/03-master-pages.md",
-        "../bible/AnnaManual.md"
+        "../bible/04-voice-and-broadcast-law.md",
+        "../bible/05-mission-manifesto.md",
+        "../bible/06-dj-anna-persona.md"
       ];
       for (const path of files) {
         try {
@@ -399,7 +472,7 @@
     function getSelectedLinks() {
       const hub = $("hubUrl").value.trim() || BIBLE_STATE.hubUrl;
       const chosen = [];
-      if ($("chkHub")?.checked && hub) chosen.push(`Artist Hub: ${hub}`);
+      if ($("chkHub")?.checked && hub) chosen.push(`Official Store & Artist Hub: ${hub}`);
       if ($("chkCoffee")?.checked) chosen.push(`Buy Me a Coffee: ${BIBLE_STATE.coffeeUrl}`);
       if ($("chkPaypal")?.checked) chosen.push(`PayPal: ${BIBLE_STATE.paypalUrl}`);
       if ($("chkWise")?.checked) chosen.push(`Wise (200 THB): ${BIBLE_STATE.wiseUrl}`);
@@ -530,6 +603,7 @@
 
     function speakForRadio(text) {
       if (!("speechSynthesis" in window)) return;
+      populateVoices();
       window.speechSynthesis.cancel();
       const spoken = String(text || "")
         .replace(/https?:\/\/\S+/gi, " ")
@@ -538,14 +612,15 @@
         .replace(/\s{2,}/g, " ")
         .trim();
       if (!spoken) return;
+
       const utter = new SpeechSynthesisUtterance(spoken);
-      const voices = window.speechSynthesis.getVoices();
-      const pref = voices.find((v) => /female|zira|aria|samantha|victoria|google uk english female/i.test(v.name))
-        || voices.find((v) => /^en/i.test(v.lang));
-      if (pref) utter.voice = pref;
+      const chosenVoice = getSelectedVoice();
+      if (chosenVoice) utter.voice = chosenVoice;
       utter.rate = 0.98;
+      utter.pitch = 1.04;
       window.speechSynthesis.speak(utter);
-      $("statusText").textContent = "DJ Veg Anna speaking radio filler...";
+      const label = chosenVoice ? chosenVoice.name : "Female Radio Voice";
+      $("statusText").textContent = `On Air (${label})...`;
     }
 
     function openShareTarget(chId, text) {
@@ -561,9 +636,9 @@
 
     function buildPostsFromInput(advanceAngle = false) {
       if (advanceAngle) {
-        ANGLE_CURSOR = (ANGLE_CURSOR + 1) % HOOK_ANGLES.length;
+        ANGLE_CURSOR = (ANGLE_CURSOR + 1) % RADIO_ANGLES.length;
       }
-      const angleObj = HOOK_ANGLES[ANGLE_CURSOR];
+      const angleObj = RADIO_ANGLES[ANGLE_CURSOR];
 
       const idx = Number($("songSelect").value || 0);
       const songObj = CATALOG_SONGS[idx] || {};
@@ -571,26 +646,44 @@
       const title = cleanTitle($("customTitle").value) || chosenOptionTitle || "Featured Single";
       const artist = cleanTitle(songObj.artist) || "Martin Strayd";
       const note = cleanTitle($("noteInput").value);
+      const countries = $("countriesInput").value.trim() || "Australia, the Philippines, Ecuador, the United States, Chile, Canada, Indonesia, France, and Thailand";
       const dateStr = pressDateString();
-      const { hub, chosen } = getSelectedLinks();
+      const { chosen } = getSelectedLinks();
 
       CURRENT_ART = resolveArtUrl(songObj, title);
       $("songHeading").textContent = title;
-      $("djMeta").textContent = `DJ Veg Anna • ${artist} (${angleObj.tag} • ${CATALOG_SONGS.length || 1} songs in DB)`;
+      $("djMeta").textContent = `${angleObj.host} • ${artist} (${angleObj.tag} • ${CATALOG_SONGS.length || 1} songs in DB)`;
       syncArtwork(title);
 
-      const extraNote = note ? ` ${note}` : "";
+      const extraNote = note ? `\n\n${note}` : "";
+      const inlineNote = note ? ` ${note}` : "";
       const linkBlock = chosen.length ? `\n\n${chosen.join("\n")}` : "";
       const shortLink = chosen.length ? ` ${chosen[0].replace(/^[^:]+:\s*/, "")}` : "";
 
+      const pressRelease = [
+        `FOR IMMEDIATE RELEASE — ${dateStr}`,
+        `GLOBAL RADIO & STREAMING LAUNCH: "${title}" BY MARTIN STRAYD`,
+        `Presented on Air by ${angleObj.host}`,
+        ``,
+        `INTERNATIONAL BROADCAST DESK — ${angleObj.callSign}, introducing "${title}," the newest daily single release from Australian lyricist, songwriter, and recording artist Martin Strayd.${extraNote}`,
+        ``,
+        `Drawing from a deep vault spanning more than 10 albums' worth of licensed material (over 100 original tracks), "${title}" continues Martin Strayd's 365-day single-a-day launch across global streaming services—including Spotify, Apple Music, iTunes, YouTube Music, and Shazam—alongside international radio rotation across ${countries}.`,
+        ``,
+        `ABOUT MARTIN STRAYD`,
+        `With 55 years of life experience and four decades of songwriting behind him, Australian artist Martin Strayd brings lived-in rock authenticity and cinematic storytelling to every release. Prior to launching his independent solo catalog, Strayd worked extensively behind the scenes in Hollywood as a 1990s celebrity guitar technician for rock icons including Steve Jones of the Sex Pistols and Doug Fieger of The Knack, and is a featured artist on ABC Triple J Unearthed. Channeling decades of studio craft, live grit, and unvarnished wit, Strayd delivers a new licensed single every single day of the year.`,
+        ``,
+        `LISTENER OWNERSHIP & SHARING RIGHTS`,
+        `In addition to global streaming and radio play, listeners can acquire the official "${title}" MP3 + cover art bundle directly—giving fans permanent personal ownership and the freedom to share copies with friends for non-commercial enjoyment.${linkBlock}`
+      ].join("\n");
+
       const values = {
-        press: `FOR IMMEDIATE RELEASE — ${dateStr}\nOFFICIAL MARTIN STRAYD SINGLES PARTY BY DJ VEG ANNA\n\n"${title}" — ${artist}\n\n${angleObj.pressLead(title, artist)}${extraNote}\n\nListeners can grab the MP3 + cover art bundle to own and share freely with friends for non-commercial enjoyment.${linkBlock}`,
-        x: `${angleObj.xLead(title, artist)}${extraNote}${shortLink} #MartinStrayd #DJAnna`.trim().slice(0, 280),
-        tiktok: `${angleObj.ttLead(title, artist)}${extraNote}${linkBlock}\n\n#MartinStrayd #DJAnna #DailySingle #IndieMusic`.trim().slice(0, 2200),
-        instagram: `${angleObj.igLead(title, artist)}${extraNote}${linkBlock}\n\n#MartinStrayd #DJAnna #DailySingle #Songwriting #IndieMusic`.trim().slice(0, 2200),
-        facebook: `${angleObj.fbLead(title, artist)}${extraNote}${linkBlock}\n\n#MartinStrayd #DJAnna #DailySingle #IndieMusic`.trim().slice(0, 63206),
-        ytTitle: `"${title}" — ${artist} | ${angleObj.ytTag} w/ DJ Veg Anna #MartinStrayd`.slice(0, 100),
-        ytDesc: `${angleObj.igLead(title, artist)}${extraNote}\n\nHosted by DJ Veg Anna for Martin Strayd's daily single launch. Own the MP3 + cover art bundle and share freely with friends for non-commercial enjoyment.${linkBlock}\n\n#MartinStrayd #DJAnna #DailySingle #Songwriting #IndieMusic`.trim().slice(0, 5000)
+        press: pressRelease,
+        x: `${angleObj.xHook(title, artist)}${inlineNote}${shortLink} #MartinStrayd #DJAnna`.trim().slice(0, 280),
+        tiktok: `${angleObj.ttHook(title, artist)}${extraNote}${linkBlock}\n\n#MartinStrayd #DJAnna #VegAnna #DailySingle #IndieMusic #NewMusic`.trim().slice(0, 2200),
+        instagram: `${angleObj.igHook(title, artist)}${extraNote}${linkBlock}\n\n#MartinStrayd #DJAnna #VegAnna #DailySingle #Songwriting #IndieMusic #NewRelease`.trim().slice(0, 2200),
+        facebook: `${angleObj.fbHook(title, artist)}${extraNote}${linkBlock}\n\n#MartinStrayd #DJAnna #VegAnna #DailySingle #IndieMusic`.trim().slice(0, 63206),
+        ytTitle: `"${title}" — ${artist} | ${angleObj.ytTag} w/ ${angleObj.host} #MartinStrayd`.slice(0, 100),
+        ytDesc: `${angleObj.igHook(title, artist)}${extraNote}\n\nPresented by ${angleObj.host} for Martin Strayd's 365-day single-a-day launch across Spotify, Apple Music / iTunes, YouTube Music, and international radio. Own the MP3 + cover art bundle outright and share freely with friends for non-commercial enjoyment.${linkBlock}\n\n#MartinStrayd #DJAnna #VegAnna #DailySingle #Songwriting #IndieMusic`.trim().slice(0, 5000)
       };
 
       ALL_CHANNELS.forEach((ch) => {
@@ -601,7 +694,7 @@
         }
       });
 
-      $("statusText").textContent = `Built (${angleObj.tag}) for "${title}"`;
+      $("statusText").textContent = `Built (${angleObj.host} • ${angleObj.tag}) for "${title}"`;
     }
 
     async function loadCatalog() {
@@ -654,9 +747,24 @@
       buildPostsFromInput(false);
     }
 
+    if ("speechSynthesis" in window) {
+      populateVoices();
+      window.speechSynthesis.onvoiceschanged = populateVoices;
+    }
+
     renderCards();
+    $("voiceSelect").addEventListener("change", () => {
+      const v = getSelectedVoice();
+      if (v) localStorage.setItem("anna_female_voice_name", v.name);
+      $("statusText").textContent = `Selected voice: ${v ? v.name : "Default"}`;
+    });
+    $("testVoiceBtn").addEventListener("click", () => {
+      const t = $("songHeading").textContent || "today's single";
+      speakForRadio(`Live on the daily frequency, this is DJ ANNA with Martin Strayd's daily single, ${t}.`);
+    });
     $("makePostsBtn").addEventListener("click", () => buildPostsFromInput(true));
     $("songSelect").addEventListener("change", () => buildPostsFromInput(false));
+    $("countriesInput").addEventListener("input", () => buildPostsFromInput(false));
     ["chkHub", "chkCoffee", "chkPaypal", "chkWise"].forEach((id) => {
       $(id)?.addEventListener("change", () => buildPostsFromInput(false));
     });
