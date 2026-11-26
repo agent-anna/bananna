@@ -1,12 +1,12 @@
 /**
- * ANNA V3 // BRAIN MANAGER
- * Load and cache the V3 brain.json identity file from A1/v4/memory/brain.json
- * Version: AA01-V3-CLEAN
+ * ANNA S.L.U.T. // BRAIN MANAGER
+ * Load and cache the brain.json identity file from memory/brain.json
+ * Version: ANNA S.L.U.T.1
  */
 
 const Brain = {
   config: {
-    path: 'A1/v4/memory/brain.json',
+    path: '/memory/brain.json',
     branch: null,
   },
 
@@ -14,7 +14,7 @@ const Brain = {
 
   _default: {
     name: 'Agent Anna',
-    version: 'V3-AA01',
+    version: 'NEURAL LINK: SLUT.',
     mission: '',
     goals: [],
     settings: {},
