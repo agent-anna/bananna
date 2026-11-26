@@ -2145,6 +2145,70 @@ function formatFetchDiagnostic(err, urlUsed) {
     return `Chat request failed (${msg}).${target}${online} — Check API key/endpoint in KEYS or open DevTools Console (F12) for exact CORS/network details.`;
 }
 
+async function appendRepoLogEntry(repoPath, entryMarkdown, commitMsg) {
+    const ghHeaders = typeof getGitHubHeaders === "function" ? getGitHubHeaders() : null;
+    if (!ghHeaders || !ghHeaders.Authorization) {
+        return { ok: false, reason: "Missing GitHub token in KEYS" };
+    }
+    const owner = (typeof GITHUB_REPO_OWNER !== "undefined" && GITHUB_REPO_OWNER) ? GITHUB_REPO_OWNER : "agent-anna";
+    const repo = (typeof GITHUB_REPO_NAME !== "undefined" && GITHUB_REPO_NAME) ? GITHUB_REPO_NAME : "home";
+    const branch = (typeof activeBranch !== "undefined" && activeBranch) ? activeBranch : "main";
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${repoPath}?ref=${encodeURIComponent(branch)}`;
+
+    let existingText = "";
+    let sha = null;
+    const curRes = await fetchWithTimeout(apiUrl, { headers: ghHeaders, cache: "no-store" }, 12000).catch(() => null);
+    if (curRes && curRes.ok) {
+        const curJson = await curRes.json();
+        sha = curJson.sha || null;
+        const bin = atob(String(curJson.content || "").replace(/\s/g, ""));
+        existingText = new TextDecoder().decode(Uint8Array.from(bin, (m) => m.codePointAt(0)));
+    }
+
+    const updatedText = (existingText ? existingText.trimEnd() + "\n\n" : `# ${repoPath}\n\n`) + entryMarkdown.trim() + "\n";
+    const bytes = new TextEncoder().encode(updatedText);
+    let binOut = "";
+    for (let i = 0; i < bytes.length; i++) binOut += String.fromCharCode(bytes[i]);
+
+    const body = {
+        message: commitMsg || `chore(log): update ${repoPath}`,
+        content: btoa(binOut),
+        branch
+    };
+    if (sha) body.sha = sha;
+
+    const putRes = await fetchWithTimeout(`https://api.github.com/repos/${owner}/${repo}/contents/${repoPath}`, {
+        method: "PUT",
+        headers: { ...ghHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    }, 15000);
+
+    if (!putRes.ok) {
+        return { ok: false, reason: `GitHub PUT ${putRes.status}` };
+    }
+    if (typeof repoVaultFiles === "object" && repoVaultFiles) repoVaultFiles[repoPath] = updatedText;
+    return { ok: true, path: repoPath };
+}
+
+async function recordSessionLogAndMilestone(noteText, milestoneTitle) {
+    const stamp = new Date().toISOString();
+    const localStr = typeof formatLiveClockState === "function" ? formatLiveClockState().badgeText : stamp;
+    const cleanNote = String(noteText || "Session activity recorded.").trim();
+    const dailySlug = stamp.slice(0, 10);
+    const logPath = `logs/session-${dailySlug}.md`;
+    const milestonePath = `bible/milestones.md`;
+
+    const logEntry = `### ${localStr}\n- ${cleanNote}`;
+    const logRes = await appendRepoLogEntry(logPath, logEntry, `chore(log): append session entry (${dailySlug})`);
+
+    let msRes = { ok: true, path: milestonePath };
+    if (milestoneTitle) {
+        const msEntry = `- **${localStr}** — **${milestoneTitle}**: ${cleanNote}`;
+        msRes = await appendRepoLogEntry(milestonePath, msEntry, `feat(milestone): ${milestoneTitle}`);
+    }
+    return { logRes, msRes, logPath, milestonePath };
+}
+
 async function sendMessage() {
         const input = document.getElementById("user-input");
         const prompt = input ? input.value.trim() : "";
