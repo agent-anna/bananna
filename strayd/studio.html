@@ -3118,5 +3118,79 @@
     display: none !important;
   }
 </style>
+<style id="anna-kill-hero-collision-css">
+  /* Hide overlapping legacy hero elements sitting over #annaTopSongBox */
+  .hero > div:not(#annaTopDock):not(#annaTopArtBox):not(#annaTopSongBox),
+  #annaTopDock ~ div,
+  #annaTopDock ~ .eyebrow,
+  #annaTopDock ~ .hero-title,
+  #annaTopDock ~ .hero-meta,
+  #annaTopDock ~ .badges,
+  .eyebrow,
+  #artFileMeta,
+  #sceneBriefMeta,
+  #visualRuleMeta,
+  #statusBadges,
+  #engineModeMeta,
+  #gateStatus {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* Keep hero title inside #annaTopSongBox above CUSTOM TITLE with plenty of breathing room */
+  #annaTopSongBox #heroTitle {
+    display: block !important;
+    position: relative !important;
+    font-size: 1.35rem !important;
+    line-height: 1.25 !important;
+    margin: 2px 0 6px !important;
+    z-index: 2 !important;
+  }
+
+  #annaTopSongBox label,
+  #annaTopSongBox select,
+  #annaTopSongBox input {
+    position: relative !important;
+    z-index: 2 !important;
+  }
+</style>
+<script>
+(() => {
+  function purgeCollidingHeroNodes() {
+    document.querySelectorAll("section.hero > div").forEach((div) => {
+      if (div.id === "annaTopDock" || div.id === "annaTopArtBox" || div.id === "annaTopSongBox") return;
+      if (div.querySelector("#songPicker") || div.querySelector("#artPreview")) return;
+      div.style.display = "none";
+    });
+
+    document.querySelectorAll("div, p, span").forEach((el) => {
+      if (el.closest("#annaTopSongBox")) return;
+      const t = (el.textContent || "").trim();
+      if (
+        /365-DAY ONCE-A-DAY SINGLE RELEASE/i.test(t) ||
+        /^Single:\s*Martin Strayd/i.test(t) ||
+        /\bSINGLE-001\b/i.test(t)
+      ) {
+        if (el.children.length === 0) {
+          el.style.display = "none";
+        }
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      purgeCollidingHeroNodes();
+      setTimeout(purgeCollidingHeroNodes, 250);
+      setTimeout(purgeCollidingHeroNodes, 800);
+    });
+  } else {
+    purgeCollidingHeroNodes();
+    setTimeout(purgeCollidingHeroNodes, 250);
+    setTimeout(purgeCollidingHeroNodes, 800);
+  }
+})();
+</script>
 </body>
 </html>
