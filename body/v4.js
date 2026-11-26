@@ -1901,16 +1901,29 @@ function scrubStaticClockText() {
     } catch (_) {}
 }
 
-function findConsoleHeaderTarget() {
-    const candidates = Array.from(document.querySelectorAll("h1, h2, h3, h4, div, span, header"));
-    for (const el of candidates) {
-        const txt = (el.textContent || "").trim();
-        if (/CONSOLE\s*\[AGENT ANNA\s*\/\/\s*STUDIO WORKBENCH\]/i.test(txt) && txt.length < 140) {
-            const bar = el.closest("div, header, section") || el.parentElement;
-            if (bar) return { bar, labelEl: el };
+function replaceConsoleTitleWithClock(badge) {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
+    let el;
+    while ((el = walker.nextNode())) {
+        if (el.id === "v4-live-clock" || el.contains(badge)) continue;
+        const directText = Array.from(el.childNodes)
+            .filter((n) => n.nodeType === Node.TEXT_NODE)
+            .map((n) => n.nodeValue || "")
+            .join(" ")
+            .trim();
+        if (/CONSOLE\s*\[AGENT ANNA\s*\/\/\s*STUDIO WORKBENCH\]/i.test(directText)) {
+            for (const n of Array.from(el.childNodes)) {
+                if (n.nodeType === Node.TEXT_NODE && /CONSOLE|AGENT ANNA|STUDIO WORKBENCH/i.test(n.nodeValue || "")) {
+                    n.remove();
+                }
+            }
+            if (badge.parentElement !== el) {
+                el.insertBefore(badge, el.firstChild);
+            }
+            return true;
         }
     }
-    return null;
+    return false;
 }
 
 function mountLiveClockBadge() {
@@ -1922,20 +1935,11 @@ function mountLiveClockBadge() {
         badge.id = "v4-live-clock";
         badge.setAttribute("role", "status");
         badge.setAttribute("aria-live", "off");
-        badge.title = "Live Local Time (used automatically by Anna)";
-        badge.style.cssText = "display:inline-flex;align-items:center;padding:3px 9px;margin-left:10px;border-radius:6px;border:1px solid rgba(110,231,183,0.35);background:rgba(10,25,22,0.85);color:#a7f3d0;font-family:monospace;font-size:12px;letter-spacing:0.03em;white-space:nowrap;";
+        badge.title = "Live Local Date & Time";
+        badge.style.cssText = "display:inline-flex;align-items:center;padding:4px 10px;border-radius:6px;border:1px solid rgba(110,231,183,0.35);background:rgba(10,25,22,0.85);color:#a7f3d0;font-family:monospace;font-size:12px;letter-spacing:0.03em;white-space:nowrap;";
     }
 
-    const target = findConsoleHeaderTarget();
-    if (target) {
-        if (badge.parentElement !== target.bar) {
-            if (target.labelEl && target.labelEl.parentElement === target.bar) {
-                target.labelEl.insertAdjacentElement("afterend", badge);
-            } else {
-                target.bar.appendChild(badge);
-            }
-        }
-    } else if (!badge.parentElement) {
+    if (!replaceConsoleTitleWithClock(badge) && !badge.parentElement) {
         const headerBar = document.querySelector("header, nav, .top-bar, .status-bar") || document.body;
         headerBar.appendChild(badge);
     }
