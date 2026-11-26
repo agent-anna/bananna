@@ -2335,6 +2335,14 @@ async function sendMessage() {
             const gitbookContext = fastMode ? "" : getGitbookMirrorContext(prompt);
             const memoryFileContext = fastMode ? "" : await getRequestedMemoryContext(prompt);
             const systemPrompt = [getLiveClockHeader(), selfIndexContext, voiceHeader, liveIntelBlock, vaultContext, pillarContext, offlineHits, gitbookContext, memoryFileContext].filter(Boolean).join("\n\n");
+            const voiceHeader = getAgentAnnaVoiceHeader(fastMode);
+            const selfIndexContext = fastMode ? "" : getCachedIndexHtmlFast(prompt);
+            const offlineHits = fastMode ? "" : searchOfflineWorld(prompt);
+            const vaultContext = fastMode ? "" : getCompactVaultContext(prompt);
+            const pillarContext = fastMode ? "" : getCorePillarsContext(prompt);
+            const gitbookContext = fastMode ? "" : getGitbookMirrorContext(prompt);
+            const memoryFileContext = fastMode ? "" : await getRequestedMemoryContext(prompt);
+            const systemPrompt = [getLiveClockHeader(), selfIndexContext, voiceHeader, liveIntelBlock, vaultContext, pillarContext, offlineHits, gitbookContext, memoryFileContext].filter(Boolean).join("\n\n");
 
             const result = await callDahlDirect(
                 [
