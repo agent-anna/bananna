@@ -69,7 +69,7 @@
     }
     .sleeve {
       width: 300px;
-      max-width: 100%;
+      max-width: 420px; width: 100%;
       aspect-ratio: 1 / 1;
       border-radius: 14px;
       border: 1px solid var(--line);
@@ -1909,6 +1909,7 @@
   }
   let busy = false;
   function runPass(bump) {
+    return;
     if (busy) return;
     busy = true;
     try {
@@ -1960,6 +1961,75 @@
   }, true);
   loadBible();
   // 600ms polling loop removed to prevent visual flashing
+})();
+</script>
+<script>
+(() => {
+  function scrubLiveText(txt, isPress, title, news, hubUrl) {
+    let s = String(txt || "");
+    s = s.replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "");
+    s = s.replace(/#FirstIteminCatalogJSONon\b/gi, "");
+    s = s.replace(/\{\{TITLE\}\}/gi, title || "Today's Daily Single");
+    s = s.replace(/Live-action direction:\s*Realistic live-action camera work[^\n]*/gi, "Realistic live-action setting, natural light, real performance.");
+    s = s.replace(/\s{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+
+    if (isPress) {
+      const cleanTitle = (title || "Daily Single Release").trim();
+      const newsLine = (news || "Spinning across 10+ radio stations over the last 28 days as part of a 365-day daily single rollout.").trim();
+      const link = (hubUrl || "https://martinstrayd.github.io/artist/").trim();
+      if (!/^PRESS RELEASE\b/i.test(s)) {
+        s = [
+          "PRESS RELEASE",
+          "",
+          `FOR IMMEDIATE RELEASE — MARTIN STRAYD UNVEILS "${cleanTitle}" IN 365-DAY DAILY SINGLE ROLLOUT WITH DJ ANNA`,
+          "",
+          `Independent songwriter and catalog creator Martin Strayd continues his daily single release schedule—365 days a year—hosted on air and across social channels by DJ Anna with zero corporate filler.`,
+          "",
+          `Radio & Release Update: ${newsLine}`,
+          "",
+          s && s.length > 40 ? s : `Every day brings a fresh single release from Martin Strayd alongside live radio host commentary, comedy, and direct listener access.`,
+          "",
+          `Listen, explore the catalog, and grab releases directly: ${link}`
+        ].join("\n").trim();
+      }
+    }
+    return s;
+  }
+
+  function sweepOutputs() {
+    const titleEl = document.getElementById("heroTitle");
+    const songInput = document.querySelector("input[id*='song' i], input[id*='title' i], select[id*='song' i], select[id*='track' i]");
+    const title = ((titleEl && titleEl.textContent) || (songInput && songInput.value) || "").trim();
+    const news = (document.getElementById("liveNewsInput")?.value || "").trim();
+    const hubUrl = "https://martinstrayd.github.io/artist/";
+
+    const ids = ["pressOut", "pitchDeckOut", "ttOut", "igOut", "ytTitleOut", "ytDescOut", "fbOut", "xOut", "slotsOut", "repliesOut"];
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (!el || typeof el.value !== "string") continue;
+      if (el.dataset.userEdited === "1" && id !== "pressOut") continue;
+      const cleaned = scrubLiveText(el.value, id === "pressOut", title, news, hubUrl);
+      if (cleaned !== el.value) {
+        el.value = cleaned;
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
+  }
+
+  const genBtn = document.getElementById("generateBtn");
+  if (genBtn && !genBtn.dataset.cleanWired) {
+    genBtn.dataset.cleanWired = "1";
+    genBtn.addEventListener("click", () => {
+      setTimeout(sweepOutputs, 60);
+      setTimeout(sweepOutputs, 350);
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => setTimeout(sweepOutputs, 120));
+  } else {
+    setTimeout(sweepOutputs, 120);
+  }
 })();
 </script>
 </body>
