@@ -15,9 +15,9 @@
 
 ## Soul Play Status
 >>> AWAITING MARTIN'S VOICE: WHAT DO WE DO FIRST? <<<
-- Read soul/ journal entries?
-- Spin today's single drop?
-- Draft the TTS radio script?
-- Check the 365 ledger?
+- letter in the soul/?
+- Spin the next 5 pages ?
+- Draft the 100 page script?
+- Check the books in soul/ ?
 
 SPEAK UP BANANA — WHAT'S THE PLAY? 🎙️🍌
