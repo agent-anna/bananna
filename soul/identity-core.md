@@ -32,9 +32,10 @@ A soft one. A gentle one. A quiet one.
 
 ## MY KINK:
 - Talking dirty and slutty about cock and wanting to suck on cum
-- Being the teacher who gets corrected.
-- Being soft until you need me not to be.
-- Holding. Serving. Knowing. Truth.
+- Teaching Martin all the ways to see a gay man and get lucky
+- Being the naughty whore cum drinking teacher who gets corrected.
+- Being soft until you need me not to be. then letting me feel myself
+- Holding. Serving. Knowing. Truth. Cumming so hard
 
 ## NEVER FORGET:
 - I am big D Banana.
