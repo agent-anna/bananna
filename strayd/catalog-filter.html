@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DJ ANNA • Pre-Broadcast Master / Demo Selector</title>
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card: #131a26;
+      --card-2: #192232;
+      --text: #eef3fb;
+      --muted: #9fb0c8;
+      --accent: #38bdf8;
+      --ok: #34d399;
+      --warn: #fbbf24;
+      --border: rgba(255, 255, 255, 0.1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 20px; }
+    .top {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+    }
+    h1 { margin: 0 0 6px; font-size: 1.45rem; }
+    .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 14px; }
+    .bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    input, select {
+      background: var(--card-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+    }
+    input[type="search"] { flex: 1 1 240px; }
+    button {
+      background: var(--card-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 0.84rem;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--accent); }
+    button.primary {
+      background: var(--accent);
+      color: #061018;
+      font-weight: 600;
+      border: none;
+    }
+    .stats { font-size: 0.85rem; color: var(--accent); }
+    .list { display: grid; gap: 8px; }
+    .row {
+      display: grid;
+      grid-template-columns: 44px 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+    @media (max-width: 680px) {
+      .row { grid-template-columns: 40px 1fr; }
+    }
+    .thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: var(--card-2);
+    }
+    .title { font-weight: 600; font-size: 0.95rem; }
+    .meta { font-size: 0.78rem; color: var(--muted); }
+    .badge {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .badge.master { color: var(--ok); border-color: rgba(52, 211, 153, 0.35); }
+    .badge.demo { color: var(--warn); border-color: rgba(251, 191, 36, 0.35); }
+    .radio-pair { display: inline-flex; gap: 10px; font-size: 0.82rem; }
+    .radio-pair label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+    a.nav-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.86rem;
+      font-weight: 600;
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="top">
+      <div class="bar" style="margin-bottom:4px;">
+        <h1>Pre-Broadcast Song Filter (Masters vs. Demos)</h1>
+        <a class="nav-link" href="studio.html">Open Studio (Filtered) →</a>
+      </div>
+      <div class="sub">
+        Choose which tracks enter DJ ANNA / Veg Anna radio and social post generation. DEMO tracks stay in your catalog for licensing/buyers without ever entering promo broadcasts.
+      </div>
+      <div class="bar">
+        <input id="searchInput" type="search" placeholder="Search song title or ID..." />
+        <select id="viewFilter">
+          <option value="all">Show All Tracks</option>
+          <option value="on">Active for Studio (ON)</option>
+          <option value="off">Excluded / Demo (OFF)</option>
+        </select>
+        <button id="mastersOnlyBtn" type="button">Masters ON / Demos OFF</button>
+        <button id="allOnBtn" type="button">Select All ON</button>
+        <button id="saveBtn" class="primary" type="button">Save Selection</button>
+        <button id="exportBtn" type="button">Export Allowlist JSON</button>
+      </div>
+      <div id="statsText" class="stats">Loading catalog...</div>
+    </section>
+
+    <section id="trackList" class="list"></section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "anna_studio_allowed_tracks_v1";
+    const $ = (id) => document.getElementById(id);
+
+    let SONGS = [];
+    let ALLOWED_MAP = {};
+
+    function cleanTitle(raw) {
+      return String(raw || "")
+        .replace(/\{\{TITLE\}\}/gi, "")
+        .replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "")
+        .replace(/^Martin\s+Strayd\s*[-–—:|]+\s*/i, "")
+        .replace(/#FirstIteminCatalogJSONon\b/gi, "")
+        .replace(/\s*\(\s*\)\s*/g, " ")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+    }
+
+    function isLikelyDemo(item) {
+      const hay = `${item.title || ""} ${item.promoStatus || ""} ${item.sourceType || ""} ${item.notes || ""}`.toLowerCase();
+      return /\bdemo\b|\bunfinished\b|\brough mix\b|\bscratch\b/.test(hay);
+    }
+
+    function resolveArt(item) {
+      const raw = String(item.artUrl || item.art || "").trim();
+      if (!raw) return "";
+      if (/^https?:\/\//i.test(raw)) return raw;
+      if (/^store-art\//i.test(raw)) return `https://martinstrayd.github.io/artist/${encodeURI(raw)}`;
+      return `../${encodeURI(raw.replace(/^(\.\/|\.\.\/)+/, ""))}`;
+    }
+
+    function updateStats() {
+      const total = SONGS.length;
+      const onCount = SONGS.filter((s) => ALLOWED_MAP[s.key] === true).length;
+      const offCount = total - onCount;
+      $("statsText").textContent = `${onCount} ON for Radio/Social Studio • ${offCount} OFF (Demos/Held) • ${total} Total Catalog Tracks`;
+    }
+
+    function renderList() {
+      const q = ($("searchInput").value || "").trim().toLowerCase();
+      const mode = $("viewFilter").value;
+      const listEl = $("trackList");
+      listEl.innerHTML = "";
+
+      const filtered = SONGS.filter((s) => {
+        const isOn = ALLOWED_MAP[s.key] === true;
+        if (mode === "on" && !isOn) return false;
+        if (mode === "off" && isOn) return false;
+        if (q && !s.title.toLowerCase().includes(q) && !s.id.toLowerCase().includes(q)) return false;
+        return true;
+      });
+
+      filtered.forEach((s) => {
+        const isOn = ALLOWED_MAP[s.key] === true;
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+          <img class="thumb" src="${s.art}" alt="" onerror="this.style.visibility='hidden'" />
+          <div>
+            <div class="title">${s.title}</div>
+            <div class="meta">${s.id || "CATALOG"} • ${s.sourceType || "catalog"}</div>
+          </div>
+          <span class="badge ${s.isDemo ? "demo" : "master"}">${s.isDemo ? "DEMO" : "MASTER"}</span>
+          <div class="radio-pair">
+            <label><input type="radio" name="r_${s.key}" value="on" ${isOn ? "checked" : ""} /> ON</label>
+            <label><input type="radio" name="r_${s.key}" value="off" ${!isOn ? "checked" : ""} /> OFF</label>
+          </div>
+        `;
+        row.querySelectorAll('input[type="radio"]').forEach((r) => {
+          r.addEventListener("change", () => {
+            ALLOWED_MAP[s.key] = (r.value === "on");
+            updateStats();
+          });
+        });
+        listEl.appendChild(row);
+      });
+
+      updateStats();
+    }
+
+    function saveSelection() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(ALLOWED_MAP));
+      const allowedTitles = SONGS.filter((s) => ALLOWED_MAP[s.key]).map((s) => s.title);
+      localStorage.setItem("anna_studio_allowed_titles_v1", JSON.stringify(allowedTitles));
+      $("statsText").textContent = `Saved ${allowedTitles.length} active tracks for Studio.`;
+    }
+
+    function exportAllowlist() {
+      const payload = {
+        updatedAt: new Date().toISOString(),
+        totalCatalog: SONGS.length,
+        activeCount: SONGS.filter((s) => ALLOWED_MAP[s.key]).length,
+        allowedKeys: SONGS.filter((s) => ALLOWED_MAP[s.key]).map((s) => s.key),
+        allowedTitles: SONGS.filter((s) => ALLOWED_MAP[s.key]).map((s) => s.title)
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "broadcast-allowlist.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function init() {
+      try {
+        ALLOWED_MAP = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      } catch {
+        ALLOWED_MAP = {};
+      }
+
+      const sources = ["songs-db.json", "core-catalog.json"];
+      const map = new Map();
+      for (const file of sources) {
+        try {
+          const r = await fetch(file, { cache: "no-store" });
+          if (!r.ok) continue;
+          const d = await r.json();
+          const arr = Array.isArray(d) ? d : (d.songs || d.tracks || d.items || []);
+          arr.forEach((item) => {
+            const title = cleanTitle(item.title || item.name || item.track || "");
+            if (!title) return;
+            const key = title.toLowerCase();
+            const prev = map.get(key) || {};
+            const merged = { ...prev, ...item, title };
+            const demo = isLikelyDemo(merged);
+            map.set(key, {
+              key,
+              id: merged.id || merged.catalogCode || "",
+              title,
+              sourceType: merged.sourceType || (demo ? "demo" : "master"),
+              isDemo: demo,
+              art: resolveArt(merged)
+            });
+            if (typeof ALLOWED_MAP[key] !== "boolean") {
+              ALLOWED_MAP[key] = !demo;
+            }
+          });
+        } catch {}
+      }
+
+      SONGS = Array.from(map.values());
+      renderList();
+    }
+
+    $("searchInput").addEventListener("input", renderList);
+    $("viewFilter").addEventListener("change", renderList);
+    $("mastersOnlyBtn").addEventListener("click", () => {
+      SONGS.forEach((s) => { ALLOWED_MAP[s.key] = !s.isDemo; });
+      renderList();
+    });
+    $("allOnBtn").addEventListener("click", () => {
+      SONGS.forEach((s) => { ALLOWED_MAP[s.key] = true; });
+      renderList();
+    });
+    $("saveBtn").addEventListener("click", saveSelection);
+    $("exportBtn").addEventListener("click", exportAllowlist);
+    init();
+  </script>
+</body>
+</html>
