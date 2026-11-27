@@ -144,7 +144,7 @@
           </div>
           <div>
             <label for="hubUrl">Sales Portal / Artist Hub</label>
-            <input id="hubUrl" type="text" value="https://martinstrayd.github.io/artist/" />
+            <input id="hubUrl" type="text" value="https://tinyurl.com/martinstrayd" />
           </div>
           <div>
             <label for="noteInput">Story / Hook / Lyrics Angle (Optional)</label>
@@ -196,7 +196,7 @@
     const ALL_CHANNELS = [PRESS_CHANNEL, ...SOCIAL_CHANNELS];
 
     const BIBLE = {
-      hubUrl: "https://martinstrayd.github.io/artist/",
+      hubUrl: "https://tinyurl.com/martinstrayd",
       coffeeUrl: "https://buymeacoffee.com/martinstrayd",
       paypalUrl: "https://www.paypal.com/paypalme/martinstrayd",
       wiseUrl: "https://wise.com/pay/r/xGmJi9kSdap4lKo",
@@ -401,7 +401,7 @@
         const val = String(raw || "").trim();
         if (!val) continue;
         if (/^(https?:\/\/|data:image\/)/i.test(val)) return val;
-        if (/^store-art\//i.test(val)) return `https://martinstrayd.github.io/artist/${encodeURI(val)}`;
+        if (/^store-art\//i.test(val)) return `https://tinyurl.com/martinstrayd${encodeURI(val)}`;
         return `../${encodeURI(val.replace(/^(\.\/|\.\.\/)+/, ""))}`;
       }
       return makeFallbackArt(title);
