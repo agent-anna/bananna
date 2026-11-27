@@ -222,6 +222,16 @@
 
     const $ = (id) => document.getElementById(id);
 
+        const CHANNEL_TAG_CAPS = { x: 2, tiktok: 5, instagram: 5, facebook: 5, ytTitle: 0, ytDesc: 5, press: 0 };
+    function capHashtagsByChannel(chId, text) {
+      const cap = CHANNEL_TAG_CAPS[chId];
+      if (typeof cap !== "number") return text;
+      let count = 0;
+      return String(text || "").replace(/(^|\s)#[A-Za-z0-9_]+/g, (match, prefix) => {
+        count += 1;
+        return count <= cap ? `${prefix}${match.trim()}` : "";
+      }).replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+    }
     function sanitizeText(str) {
       return String(str || "")
         .replace(/\*\*.*?\*\*/g, "")
@@ -699,7 +709,7 @@
       ALL_CHANNELS.forEach((ch) => {
         const ta = $(`ta-${ch.id}`);
         if (ta) {
-          ta.value = generateUniquePost(ch.id, ctx);
+          ta.value = capHashtagsByChannel(ch.id, generateUniquePost(ch.id, ctx));
           updateCounter(ch.id, ch.max);
         }
       });
