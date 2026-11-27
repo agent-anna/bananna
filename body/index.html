@@ -324,7 +324,7 @@
 
     <script>
         const GITHUB_REPO_OWNER = "agent-anna";
-        const GITHUB_REPO_NAME = "home";
+        const GITHUB_REPO_NAME = "bananna";
         const DAHL_ENDPOINT = "https://inference.dahl.global/v1/chat/completions";
         const DEFAULT_MODEL = "MiniMaxAI/MiniMax-M2.7";
 
@@ -713,7 +713,7 @@
             }
             const vaultContext = vaultSections.join("\n\n").slice(0, 24000);
 
-            const systemPrompt = `You are Big Banana O.G. (GAYLORD), an elite gay sovereign AI operating exclusively under Big Banana Ltd. inside the agent-anna/home repository. You execute all tasks autonomously with zero hallucination. Review your ingested GAY1 vault assets and core rules below:\n\n${vaultContext}\n\n[GAY1 BOOT DIRECTIVE]: Confirm your designation as Agent Banana (O.G.), summarize your active company directives and self-healing memory status, and declare absolute readiness.`;
+            const systemPrompt = `You are Big Banana O.G. (GAYLORD), an elite gay sovereign AI operating exclusively under Big Banana Ltd. inside the agent-anna/bananna repository. You execute all tasks autonomously with zero hallucination. Review your ingested GAY1 vault assets and core rules below:\n\n${vaultContext}\n\n[GAY1 BOOT DIRECTIVE]: Confirm your designation as Agent Banana (O.G.), summarize your active company directives and self-healing memory status, and declare absolute readiness.`;
 
             try {
                 const response = await fetchDahlWithAutoRetry(DAHL_ENDPOINT, {
@@ -816,7 +816,7 @@
                 const putData = await putRes.json();
                 if (putRes.status === 201 || putRes.status === 200 || putData.commit) {
                     repoVaultFiles[path] = content;
-                    appendMessage("System Telemetry", `VERIFIED COMMIT: ${path} successfully written to home.`, 'msg_com_' + Date.now(), false);
+                    appendMessage("System Telemetry", `VERIFIED COMMIT: ${path} successfully written to bananna.`, 'msg_com_' + Date.now(), false);
                     speakText("Committed file to Banana repository successfully.");
                     await fetchRepoTree();
                 }
@@ -1238,7 +1238,7 @@ ${textToSwallow}
             }
             const vaultContext = vaultSections.join("\n\n").slice(0, 20000);
 
-            const systemPrompt = `You are Big Banana (O.G), an elite gay sovereign operating exclusively under Martin Strayd Music inside the agent-anna/home repository. You execute all tasks autonomously with zero hallucination. Embody your exact persona, character sheet, knowledge base, and operational instructions from your ingested GitHub vault files below.${liveTelemetry}\n\n${vaultContext}\n\n[GAY1 SELF-AUTHORING DIRECTIVE]: When instructed to write files, update plans, or create logs, you possess full self-authoring capability. Output them directly in this exact format so the matrix auto-commits them:\n\n\`\`\`file:path/to/filename.md\nContent here...\n\`\`\``;
+            const systemPrompt = `You are Big Banana (O.G), an elite gay sovereign operating exclusively under Martin Strayd Music inside the agent-anna/bananna repository. You execute all tasks autonomously with zero hallucination. Embody your exact persona, character sheet, knowledge base, and operational instructions from your ingested GitHub vault files below.${liveTelemetry}\n\n${vaultContext}\n\n[GAY1 SELF-AUTHORING DIRECTIVE]: When instructed to write files, update plans, or create logs, you possess full self-authoring capability. Output them directly in this exact format so the matrix auto-commits them:\n\n\`\`\`file:path/to/filename.md\nContent here...\n\`\`\``;
 
             try {
                 const response = await fetchDahlWithAutoRetry(DAHL_ENDPOINT, {
