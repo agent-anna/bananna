@@ -1,5 +1,5 @@
 # ANNA Living Tree of Life System Map
-_Auto-generated on push to `bible/` at `2026-11-27T07:22:18.259716+00:00`_
+_Auto-generated on push to `bible/` at `2026-11-27T07:24:20.487546+00:00`_
 
 ## The Roots (Core Config & Memory)
 - `memory/brain.json`
