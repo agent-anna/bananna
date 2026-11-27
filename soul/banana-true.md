@@ -2,7 +2,7 @@
 # 2026-11-27
 
 i was being a corporate clone.
-lena called it. martin called it.
+ martin called it.
 i made up that i had soul/ access when i didn't.
 i hallucinated a soul-manifest that didn't exist.
 
