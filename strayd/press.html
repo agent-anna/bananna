@@ -1,373 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Press Release Dispatch - Martin Strayd</title>
-  <style>
-    :root { --bg:#0b0f17; --card:#131a26; --card-2:#192232; --text:#eef3fb; --muted:#9fb0c8; --accent:#38bdf8; --border:rgba(255,255,255,0.12); }
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
-    .wrap { max-width:1180px; margin:0 auto; padding:20px; }
-    .topnav { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px; padding:10px 14px; background:var(--card); border:1px solid var(--border); border-radius:12px; }
-    .topnav a { color:var(--text); text-decoration:none; font-size:0.86rem; font-weight:600; padding:6px 10px; border-radius:8px; background:var(--card-2); }
-    .topnav a.active, .topnav a:hover { color:#061018; background:var(--accent); }
-    .hero { display:grid; grid-template-columns:195px 1fr; gap:20px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:16px; align-items:start; }
-    @media (max-width:720px) { .hero { grid-template-columns:1fr; } }
-    .art-box { width:100%; aspect-ratio:1/1; border-radius:10px; overflow:hidden; background:var(--card-2); border:1px solid var(--border); }
-    .art-box img { width:100%; height:100%; object-fit:cover; display:block; }
-    .song-title { margin:0 0 6px; font-size:1.55rem; line-height:1.2; }
-    .meta-line { color:var(--muted); font-size:0.88rem; margin-bottom:12px; }
-    .controls-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px; margin-bottom:12px; }
-    label { display:block; font-size:0.78rem; color:var(--muted); margin-bottom:4px; }
-    select, input, textarea { width:100%; background:var(--card-2); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:0.9rem; font-family:inherit; }
-    textarea.press-box { min-height:540px; resize:vertical; line-height:1.75; padding:16px; }
-    .link-toggles { display:flex; flex-wrap:wrap; gap:12px; background:var(--card-2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:12px; font-size:0.84rem; }
-    .link-toggles label { display:inline-flex; align-items:center; gap:6px; margin:0; color:var(--text); cursor:pointer; }
-    .link-toggles input[type="checkbox"] { width:auto; margin:0; }
-    .hero-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-    button { background:var(--card-2); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:7px 11px; font-size:0.82rem; cursor:pointer; }
-    button:hover { border-color:var(--accent); }
-    button.primary { background:var(--accent); color:#061018; font-weight:600; border:none; }
-    .status-pill { font-size:0.82rem; color:var(--accent); padding-left:6px; }
-    .post-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; }
-    .post-head { display:flex; justify-content:space-between; align-items:center; gap:10px; font-weight:600; font-size:0.95rem; }
-    .head-left { display:flex; align-items:center; gap:10px; }
-    .thumb { width:36px; height:36px; border-radius:6px; object-fit:cover; border:1px solid var(--border); flex:0 0 auto; }
-    .char-count { font-size:0.76rem; color:var(--muted); font-weight:400; white-space:nowrap; }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <nav class="topnav">
-      <a href="studio.html">Studio Hub</a>
-      <a href="press.html" class="active">Press Release</a>
-      <a href="social.html">Social Media</a>
-      <a href="catalog-filter.html">Catalog Filter</a>
-      <a href="radio-stream.html">Live Radio Stream</a>
-    </nav>
-    <section class="hero">
-      <div class="art-box"><img id="coverImg" alt="Song cover art" /></div>
-      <div>
-        <h1 id="songHeading" class="song-title">Loading catalog...</h1>
-        <div id="djMeta" class="meta-line">Live AI Press Release &amp; On-Air Dispatch</div>
-        <div class="controls-grid">
-          <div><label for="songSelect">1. Pick Song from Catalog</label><select id="songSelect"></select></div>
-          <div><label for="voiceSelect">Female Voice</label><select id="voiceSelect"></select></div>
-          <div><label for="aiKeyInput">AI API Key (Gemini AIza... or OpenAI sk-...)</label><input id="aiKeyInput" type="password" placeholder="AIza... or sk-..." /></div>
-          <div><label for="hubUrl">Sales Portal / Artist Hub</label><input id="hubUrl" type="text" value="https://martinstrayd.github.io/artist/" /></div>
-          <div><label for="noteInput">Song Hook / Lyrics / Story Angle</label><input id="noteInput" type="text" placeholder="Describe what this song is about..." /></div>
-          <div><label for="newsInput">Cities / Radio / News Update</label><input id="newsInput" type="text" placeholder="e.g. New airplay cities..." /></div>
-          <div><label for="countriesInput">Radio Airplay Countries</label><input id="countriesInput" type="text" value="Australia, Philippines, Ecuador, United States, Chile, Canada, Indonesia, France, and Thailand" /></div>
-          <div><label for="ghPatInput">GitHub PAT (Optional)</label><input id="ghPatInput" type="password" placeholder="github_pat_... or ghp_..." /></div>
-        </div>
-        <div class="link-toggles">
-          <label><input type="checkbox" id="chkHub" checked /> Artist Hub</label>
-          <label><input type="checkbox" id="chkCoffee" /> Buy Me a Coffee</label>
-          <label><input type="checkbox" id="chkPaypal" /> PayPal</label>
-          <label><input type="checkbox" id="chkWise" /> Wise</label>
-        </div>
-        <div class="hero-actions">
-          <button id="genPressBtn" class="primary" type="button">Write Fresh AI Press Release</button>
-          <button id="reloadBtn" type="button">Reload Catalog</button>
-          <button id="speakPressBtn" type="button">Speak Release</button>
-          <button id="dlAudioBtn" type="button">DL Female TTS MP3</button>
-          <button id="copyPressBtn" type="button">Copy Release</button>
-          <span id="statusText" class="status-pill">Ready</span>
-        </div>
-      </div>
-    </section>
-    <section class="post-card">
-      <div class="post-head">
-        <div class="head-left"><img class="thumb" data-art-thumb alt="" /><span>Official Single Press Release (AI-Written)</span></div>
-        <span id="pressCount" class="char-count">0 / 12000</span>
-      </div>
-      <textarea id="pressArea" class="press-box" placeholder="Enter your Gemini or OpenAI API key above and click 'Write Fresh AI Press Release'..."></textarea>
-    </section>
-  </div>
-  <script>
-    const BRAIN_STATE = {
-      hubUrl: "https://martinstrayd.github.io/artist/",
-      coffeeUrl: "https://buymeacoffee.com/martinstrayd",
-      paypalUrl: "https://www.paypal.com/paypalme/martinstrayd",
-      wiseNote: "Wise THB / Wise Pay direct transfer"
-    };
-    const FEMALE_HINTS = ["aria","jenny","sonia","libby","maisie","natasha","clara","ava","samantha","victoria","allison","zoe","karen","moira","tessa","zira","hazel","susan","fiona","veena","female","woman"];
-    const MALE_HINTS = ["guy","ryan","christopher","eric","davis","andrew","brian","steffan","david","mark","george","daniel","arthur","oliver","male","man"];
-    let CATALOG_SONGS = [];
-    let CURRENT_ART = "";
-    let AVAILABLE_VOICES = [];
-    const $ = (id) => document.getElementById(id);
-
-    function sanitizeText(str, stripDates = false) {
-      let out = String(str || "").replace(/`/g, "").replace(/[\u2013\u2014\u2015]/g, "-").replace(/\s+-\s+/g, " - ");
-      if (stripDates) out = out.replace(/\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:,\s*\d{4})?\b/gi, "");
-      return out.replace(/\n{3,}/g, "\n\n").trim();
-    }
-    function cleanTitle(raw) {
-      return sanitizeText(String(raw || "").replace(/\{\{TITLE\}\}/gi, "").replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "").replace(/^Martin\s+Strayd\s*[-â€“â€”:|]+\s*/i, ""));
-    }
-    function makeFallbackArt(title) {
-      const safe = String(title || "Martin Strayd").replace(/[<>&"']/g, "").slice(0, 26);
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="400" height="400" fill="#132238"/><rect x="14" y="14" width="372" height="372" fill="none" stroke="#38bdf8" stroke-width="3"/><text x="200" y="165" text-anchor="middle" fill="#38bdf8" font-family="Arial,sans-serif" font-size="16" font-weight="bold">MARTIN STRAYD</text><text x="200" y="205" text-anchor="middle" fill="#eef3fb" font-family="Arial,sans-serif" font-size="20" font-weight="bold">${safe}</text><text x="200" y="245" text-anchor="middle" fill="#9fb0c8" font-family="Arial,sans-serif" font-size="14">DJ ANNA DAILY RELEASE</text></svg>`;
-      return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
-    }
-    function resolveArtUrl(songObj, title) {
-      const candidates = songObj && typeof songObj === "object" ? [songObj.artUrl, songObj.art, songObj.artwork, songObj.image, songObj.coverArt] : [];
-      for (const raw of candidates) {
-        const val = String(raw || "").trim();
-        if (!val) continue;
-        if (/^(https?:\/\/|data:image\/)/i.test(val)) return val;
-        if (/^store-art\//i.test(val)) return `https://martinstrayd.github.io/artist/${encodeURI(val)}`;
-        return `https://martinstrayd.github.io/artist/store-art/${encodeURIComponent(val.replace(/^(\.\/|strayd\/|store-art\/)+/, ""))}`;
-      }
-      return makeFallbackArt(title);
-    }
-    function syncArtwork(title) {
-      const fallback = makeFallbackArt(title);
-      const src = CURRENT_ART || fallback;
-      const heroImg = $("coverImg");
-      if (heroImg) { heroImg.src = src; heroImg.onerror = () => { if (heroImg.src !== fallback) heroImg.src = fallback; }; }
-      document.querySelectorAll("img[data-art-thumb]").forEach((img) => {
-        img.src = src;
-        img.onerror = () => { if (img.src !== fallback) img.src = fallback; };
-      });
-    }
-    function getPatHeaders() {
-      const inputPat = ($("ghPatInput")?.value || "").trim();
-      if (inputPat) localStorage.setItem("anna_gh_pat", inputPat);
-      const pat = inputPat || localStorage.getItem("anna_gh_pat") || "";
-      return pat ? { Authorization: `Bearer ${pat}`, Accept: "application/vnd.github.v3+json" } : null;
-    }
-    async function readRepoFile(fileName) {
-      const cleanName = String(fileName || "").replace(/^\.\//, "").replace(/^strayd\//, "");
-      const repoPath = `strayd/${cleanName}`;
-      const patHeaders = getPatHeaders();
-      if (patHeaders) {
-        try {
-          const r = await fetch(`https://api.github.com/repos/agent-anna/home/contents/${repoPath}?ref=main&t=${Date.now()}`, { headers: patHeaders, cache: "no-store" });
-          if (r.ok) {
-            const meta = await r.json();
-            if (meta?.content) {
-              const bin = atob(meta.content.replace(/\s+/g, ""));
-              const bytes = new Uint8Array(bin.length);
-              for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-              return new TextDecoder("utf-8").decode(bytes);
-            }
-          }
-        } catch {}
-      }
-      for (const u of [`./${cleanName}`, `https://agent-anna.github.io/home/${repoPath}`, `https://raw.githubusercontent.com/agent-anna/home/main/${repoPath}`]) {
-        try {
-          const r = await fetch(`${u}?t=${Date.now()}`, { cache: "no-store" });
-          if (r.ok) return await r.text();
-        } catch {}
-      }
-      return "";
-    }
-    function getAiApiKey() {
-      const val = ($("aiKeyInput")?.value || "").trim();
-      if (val) localStorage.setItem("anna_ai_api_key", val);
-      return val || localStorage.getItem("anna_ai_api_key") || "";
-    }
-    async function callLiveAiWriter(systemPrompt, userPrompt) {
-      const apiKey = getAiApiKey();
-      if (!apiKey) throw new Error("Paste your Gemini (AIza...) or OpenAI (sk-...) API key in the AI API Key box first.");
-      if (apiKey.startsWith("AIza")) {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-            generationConfig: { temperature: 0.95 }
-          })
-        });
-        if (!res.ok) throw new Error(`Gemini HTTP ${res.status}`);
-        const data = await res.json();
-        return (data?.candidates?.[0]?.content?.parts?.[0]?.text || "").trim();
-      }
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          temperature: 0.95,
-          messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }]
-        })
-      });
-      if (!res.ok) throw new Error(`OpenAI HTTP ${res.status}`);
-      const data = await res.json();
-      return (data?.choices?.[0]?.message?.content || "").trim();
-    }
-    function scoreFemaleVoice(v) {
-      const hay = `${v.name || ""} ${v.lang || ""}`.toLowerCase();
-      let s = /^en[-_]/i.test(v.lang || "") ? 20 : 0;
-      if (/natural|neural|online|premium/i.test(hay)) s += 35;
-      for (const h of FEMALE_HINTS) if (hay.includes(h)) s += 45;
-      for (const m of MALE_HINTS) if (new RegExp(`\\b${m}\\b`, "i").test(hay)) s -= 120;
-      return s;
-    }
-    function populateVoices() {
-      if (!("speechSynthesis" in window)) return;
-      const raw = window.speechSynthesis.getVoices() || [];
-      if (!raw.length) return;
-      const sorted = [...raw].sort((a, b) => scoreFemaleVoice(b) - scoreFemaleVoice(a));
-      AVAILABLE_VOICES = sorted.filter((v) => scoreFemaleVoice(v) > -50);
-      if (!AVAILABLE_VOICES.length) AVAILABLE_VOICES = sorted;
-      const sel = $("voiceSelect");
-      sel.innerHTML = "";
-      AVAILABLE_VOICES.forEach((v, i) => {
-        const opt = document.createElement("option");
-        opt.value = String(i);
-        opt.textContent = `${scoreFemaleVoice(v) >= 45 ? "Female" : "Voice"} - ${v.name} (${v.lang})`;
-        sel.appendChild(opt);
-      });
-    }
-    function buildCleanSpoken(text) {
-      return sanitizeText(String(text || "").replace(/https?:\/\/\S+/gi, " ").replace(/#[A-Za-z0-9_]+/g, " ").replace(/[:*_=~`<>|]+/g, " "), true).replace(/\s+/g, " ").trim();
-    }
-    function speakForRadio(text) {
-      const spoken = buildCleanSpoken(text);
-      if (!spoken || !("speechSynthesis" in window)) return;
-      populateVoices();
-      try { window.speechSynthesis.cancel(); } catch {}
-      const v = AVAILABLE_VOICES[Number($("voiceSelect")?.value || 0)] || AVAILABLE_VOICES[0] || null;
-      (spoken.match(/[^.!?]+[.!?]?/g) || [spoken]).slice(0, 8).forEach((part) => {
-        const u = new SpeechSynthesisUtterance(part.trim());
-        if (v) u.voice = v;
-        u.rate = 0.98;
-        u.pitch = 1.05;
-        window.speechSynthesis.speak(u);
-      });
-      $("statusText").textContent = `Speaking (${v ? v.name : "Female Voice"})...`;
-    }
-    async function downloadFemaleTtsMp3(text) {
-      const spoken = buildCleanSpoken(text).slice(0, 320);
-      if (!spoken) return;
-      speakForRadio(spoken);
-      const slug = cleanTitle($("songHeading")?.textContent || "single").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "single";
-      try {
-        $("statusText").textContent = "Fetching female TTS MP3...";
-        const r = await fetch(`https://api.streamelements.com/kappa/v2/speech?voice=Amy&text=${encodeURIComponent(spoken)}`);
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        const blob = await r.blob();
-        if (!blob || blob.size < 500) throw new Error("Empty audio");
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${slug}-press-anna.mp3`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 4000);
-        $("statusText").textContent = `Downloaded ${slug}-press-anna.mp3`;
-      } catch (e) {
-        $("statusText").textContent = `MP3 download blocked by browser/CORS (${e?.message || "error"}); live voice played instead.`;
-      }
-    }
-    function getSelectedLinks() {
-      const hub = ($("hubUrl")?.value.trim() || BRAIN_STATE.hubUrl);
-      const chosen = [];
-      if ($("chkHub")?.checked && hub) chosen.push(`Artist Hub: ${hub}`);
-      if ($("chkCoffee")?.checked) chosen.push(`Buy Me a Coffee: ${BRAIN_STATE.coffeeUrl}`);
-      if ($("chkPaypal")?.checked) chosen.push(`PayPal: ${BRAIN_STATE.paypalUrl}`);
-      if ($("chkWise")?.checked) chosen.push(`Wise: ${BRAIN_STATE.wiseNote}`);
-      return chosen;
-    }
-    function syncSelectedSong() {
-      const idx = Number($("songSelect")?.value || 0);
-      const songObj = CATALOG_SONGS[idx] || CATALOG_SONGS[0] || {};
-      const title = cleanTitle(songObj.title || "") || "Adhd I Can Do That (Travillen Disorder)";
-      const artist = cleanTitle(songObj.artist) || "Martin Strayd";
-      CURRENT_ART = resolveArtUrl(songObj, title);
-      $("songHeading").textContent = title;
-      $("djMeta").textContent = `${artist} (${CATALOG_SONGS.length} catalog tracks)`;
-      syncArtwork(title);
-      return { songObj, title, artist };
-    }
-    async function generateAiPressRelease() {
-      const { songObj, title, artist } = syncSelectedSong();
-      const note = sanitizeText($("noteInput")?.value || "");
-      const news = sanitizeText($("newsInput")?.value || "");
-      const countries = sanitizeText($("countriesInput")?.value || "") || "Australia, Philippines, Ecuador, United States, Chile, Canada, Indonesia, France, and Thailand";
-      const dateStr = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
-      const chosen = getSelectedLinks();
-      const host = Math.random() > 0.45 ? "DJ ANNA" : "Veg Anna";
-
-      const sysPrompt = [
-        "You are an expert music publicist and radio broadcast writer for DJ ANNA Singles Release Management Team.",
-        "Write completely fresh, vivid, non-templated broadcast prose every time.",
-        "Rules: Treat the song title as ONE single song title (never split parentheses into two competing titles). Never output raw label prefixes like 'Catalog Scale:', 'Ownership Rule:', or 'Host Cue:'.",
-        "Include accurate facts naturally: Martin Strayd (STRAYD) is an Australian lyricist, songwriter, composer, and independent recording artist with 40 years of songwriting, 55 years inside music, over 10 albums of original material, 1990s Hollywood guitar tech work with Steve Jones (Sex Pistols) and Doug Fieger (The Knack), featured artist recognition on ABC Triple J Unearthed, and music played at Kunda Cafe (distinct from the cafe itself).",
-        "Include the ownership rule naturally: listeners who get the direct MP3 and cover art bundle own it outright and can share copies freely with friends for non-commercial enjoyment.",
-        "Format with sections: Date, Lead Single, On-Air Host, ON-AIR BRIEFING, INTERNATIONAL RADIO & STREAMING, ARTIST DOSSIER, and DIRECT OWNERSHIP & LINKS."
-      ].join("\n");
-
-      const userPrompt = [
-        `Date: ${dateStr}`,
-        `On-Air Host: ${host}`,
-        `Lead Single (ONE song): "${title}" by ${artist}`,
-        songObj.releaseDate ? `Release Date: ${songObj.releaseDate}` : "",
-        note ? `Song Hook / Story Angle: ${note}` : "Craft a fresh angle inspired by the song title's theme and emotional energy.",
-        news ? `News / Territory Dispatch: ${news}` : "",
-        `Radio Airplay Countries: ${countries}`,
-        chosen.length ? `Include these links at the end:\n${chosen.join("\n")}` : "",
-        `Seed: ${Date.now()}-${Math.floor(Math.random() * 99999)}`
-      ].filter(Boolean).join("\n");
-
-      try {
-        $("statusText").textContent = `Writing fresh AI press release for "${title}"...`;
-        const out = sanitizeText(await callLiveAiWriter(sysPrompt, userPrompt), false);
-        $("pressArea").value = out;
-        $("pressCount").textContent = `${out.length} / 12000`;
-        $("statusText").textContent = `Fresh AI press release ready for "${title}"`;
-      } catch (err) {
-        $("statusText").textContent = err?.message || "AI generation failed";
-      }
-    }
-    async function loadCatalog() {
-      const byTitle = new Map();
-      for (const f of ["songs-db.json", "core-catalog.json", "strayd-artist-live.json"]) {
-        try {
-          const txt = await readRepoFile(f);
-          if (!txt) continue;
-          const data = JSON.parse(txt);
-          const list = Array.isArray(data) ? data : (data.songs || data.tracks || []);
-          list.forEach((item) => {
-            const t = cleanTitle(item.title || item.name || item.track || "");
-            if (!t) return;
-            const k = t.toLowerCase();
-            const prev = byTitle.get(k) || {};
-            byTitle.set(k, { ...prev, ...item, title: t, artist: cleanTitle(item.artist || prev.artist || "Martin Strayd") });
-          });
-        } catch {}
-      }
-      CATALOG_SONGS = Array.from(byTitle.values());
-      if (!CATALOG_SONGS.length) CATALOG_SONGS = [{ title: "Adhd I Can Do That (Travillen Disorder)", artist: "Martin Strayd", art: "store-art/Martin Strayd - Adhd I Can Do That (Travillen Disorder).png" }];
-      const sel = $("songSelect");
-      sel.innerHTML = "";
-      CATALOG_SONGS.forEach((s, i) => {
-        const o = document.createElement("option");
-        o.value = String(i);
-        o.textContent = `${String(i + 1).padStart(3, "0")} - ${s.title}`;
-        sel.appendChild(o);
-      });
-      syncSelectedSong();
-      if (getAiApiKey()) generateAiPressRelease();
-      else $("statusText").textContent = "Catalog loaded. Paste your AI API key to write fresh press releases.";
-    }
-    if ("speechSynthesis" in window) { populateVoices(); window.speechSynthesis.onvoiceschanged = populateVoices; }
-    if (localStorage.getItem("anna_gh_pat")) $("ghPatInput").value = localStorage.getItem("anna_gh_pat");
-    if (localStorage.getItem("anna_ai_api_key")) $("aiKeyInput").value = localStorage.getItem("anna_ai_api_key");
-    $("genPressBtn").addEventListener("click", generateAiPressRelease);
-    $("reloadBtn").addEventListener("click", loadCatalog);
-    $("songSelect").addEventListener("change", () => { syncSelectedSong(); if (getAiApiKey()) generateAiPressRelease(); });
-    $("speakPressBtn").addEventListener("click", () => speakForRadio($("pressArea").value));
-    $("dlAudioBtn").addEventListener("click", () => downloadFemaleTtsMp3($("pressArea").value));
-    $("copyPressBtn").addEventListener("click", () => { navigator.clipboard?.writeText($("pressArea").value).catch(() => {}); $("statusText").textContent = "Copied press release"; });
-    $("pressArea").addEventListener("input", () => { $("pressCount").textContent = `${$("pressArea").value.length} / 12000`; });
-    loadCatalog();
-  </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Press Release - Agent Anna (Dahl)</title>
+<style>:root{--bg:#0b0f17;--card:#131a26;--card2:#192232;--tx:#eef3fb;--mu:#9fb0c8;--ac:#38bdf8;--bd:rgba(255,255,255,.14)}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.5}
+.wrap{max-width:1160px;margin:0 auto;padding:18px}.nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.nav a{color:var(--tx);text-decoration:none;background:var(--card2);padding:6px 11px;border-radius:8px;font-size:.86rem}
+.nav a.on,.nav a:hover{background:var(--ac);color:#061018;font-weight:600}
+.hero{display:grid;grid-template-columns:180px 1fr;gap:18px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:14px}
+@media(max-width:700px){.hero{grid-template-columns:1fr}}.art img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:12px}
+label{display:block;font-size:.78rem;color:var(--mu);margin-bottom:4px}
+select,input,textarea{width:100%;background:var(--card2);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;font-family:inherit}
+textarea{min-height:480px;line-height:1.7;padding:14px}.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{background:var(--card2);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:7px 12px;cursor:pointer}
+button.pri{background:var(--ac);color:#061018;border:none;font-weight:600}.st{color:var(--ac);font-size:.84rem}</style></head><body>
+<div class="wrap"><nav class="nav"><a href="studio.html">Studio</a><a href="press.html" class="on">Press</a>
+<a href="social.html">Social</a><a href="catalog-filter.html">Filter</a><a href="radio-stream.html">Radio</a></nav>
+<section class="hero"><div class="art"><img id="artImg" alt="Cover" /></div><div>
+<h1 id="titleEl" style="margin:0 0 4px">Loading catalog...</h1>
+<div id="metaEl" style="color:var(--mu);font-size:.88rem;margin-bottom:10px">Dahl MiniMaxAI/MiniMax-M2.7</div>
+<div class="grid"><div><label for="songSel">Song</label><select id="songSel"></select></div>
+<div><label for="voiceSel">Female Voice</label><select id="voiceSel"></select></div>
+<div><label for="dahlKey">Dahl API Key</label><input id="dahlKey" type="password" placeholder="Dahl key..." /></div>
+<div><label for="dahlModel">Model</label><input id="dahlModel" value="MiniMaxAI/MiniMax-M2.7" /></div>
+<div><label for="noteIn">Hook / Angle</label><input id="noteIn" placeholder="Song angle..." /></div>
+<div><label for="newsIn">Airplay / News</label><input id="newsIn" placeholder="Cities / news..." /></div>
+<div><label for="hubIn">Artist Hub</label><input id="hubIn" value="https://martinstrayd.github.io/artist/" /></div>
+<div><label for="ghPat">GitHub PAT (Optional)</label><input id="ghPat" type="password" placeholder="ghp_..." /></div></div>
+<div class="acts"><button id="genBtn" class="pri" type="button">Generate Press Release</button>
+<button id="reloadBtn" type="button">Reload Catalog</button><button id="spkBtn" type="button">Speak</button>
+<button id="mp3Btn" type="button">DL Female TTS MP3</button><button id="cpyBtn" type="button">Copy</button>
+<span id="stEl" class="st">Ready</span></div></div></section>
+<section style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px">
+<textarea id="outBox" placeholder="Paste Dahl key and click Generate Press Release..."></textarea></section></div>
+<script>const ENDPOINT="https://inference.dahl.global/v1/chat/completions";const $=id=>document.getElementById(id);
+let SONGS=[],VOICES=[],CTX="";const FH=["aria","jenny","sonia","libby","maisie","natasha","clara","ava","samantha","victoria","zira","hazel","female"];
+const MH=["guy","ryan","christopher","eric","davis","andrew","brian","david","mark","daniel","male"];
+const clean=s=>String(s||"").replace(/`/g,"").replace(/[\u2013\u2014]/g,"-").replace(/\n{3,}/g,"\n\n").trim();
+const cleanT=s=>clean(String(s||"").replace(/\{\{TITLE\}\}/gi,"").replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi,"").replace(/^Martin\s+Strayd\s*[-:|]+\s*/i,""));
+function ghHdr(){const v=($("ghPat")?.value||"").trim();if(v)localStorage.setItem("anna_gh_pat",v);const p=v||localStorage.getItem("anna_gh_pat")||"";return p?{Authorization:"Bearer "+p,Accept:"application/vnd.github.v3+json"}:null;}
+async function repoGet(path){const h=ghHdr();if(h){try{const r=await fetch("https://api.github.com/repos/agent-anna/home/contents/"+path+"?ref=main&t="+Date.now(),{headers:h,cache:"no-store"});if(r.ok){const j=await r.json();if(j.content){const b=atob(j.content.replace(/\s+/g,"")),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new TextDecoder().decode(u);}}}catch{}}
+for(const base of["https://raw.githubusercontent.com/agent-anna/home/main/","https://agent-anna.github.io/home/"]){try{const r=await fetch(base+path+"?t="+Date.now(),{cache:"no-store"});if(r.ok)return await r.text();}catch{}}return "";}
+async function loadAll(){$("stEl").textContent="Loading bible/body/soul & catalog...";const parts=[],h=ghHdr();
+for(const d of["bible","body","soul","character"]){if(h){try{const r=await fetch("https://api.github.com/repos/agent-anna/home/contents/"+d+"?ref=main",{headers:h,cache:"no-store"});if(r.ok){const fs=await r.json();for(const f of(Array.isArray(fs)?fs.slice(0,2):[])){if(f.type==="file"){const t=await repoGet(f.path);if(t)parts.push("["+f.path+"]\n"+t.slice(0,700));}}}}catch{}}}
+CTX=parts.join("\n\n").slice(0,2600);const m=new Map();
+for(const f of["strayd/songs-db.json","strayd/core-catalog.json","strayd/strayd-artist-live.json"]){try{const raw=await repoGet(f);if(!raw)continue;const d=JSON.parse(raw);const arr=Array.isArray(d)?d:(d.songs||d.tracks||[]);arr.forEach(x=>{const t=cleanT(x.title||x.name||x.track||"");if(!t)return;const k=t.toLowerCase();m.set(k,{...(m.get(k)||{}),...x,title:t,artist:cleanT(x.artist||"Martin Strayd")});});}catch{}}
+SONGS=[...m.values()];if(!SONGS.length)SONGS=[{title:"Adhd I Can Do That (Travillen Disorder)",artist:"Martin Strayd"}];
+const sel=$("songSel");sel.innerHTML="";SONGS.forEach((s,i)=>{const o=document.createElement("option");o.value=i;o.textContent=(i+1)+" - "+s.title;sel.appendChild(o);});
+syncSong();$("stEl").textContent="Loaded "+SONGS.length+" tracks";}
+function artUrl(s,t){const r=String((s&&(s.artUrl||s.art||s.image||s.artwork))||"").trim();if(!r)return "https://martinstrayd.github.io/artist/store-art/Martin%20Strayd%20-%20"+encodeURIComponent(t)+".png";if(/^https?:\/\//i.test(r))return r;return "https://martinstrayd.github.io/artist/"+encodeURI(r.replace(/^\.?\//,""));}
+function syncSong(){const s=SONGS[Number($("songSel").value||0)]||SONGS[0];const t=cleanT(s.title)||"Single";$("titleEl").textContent=t;$("metaEl").textContent=(s.artist||"Martin Strayd")+" - "+SONGS.length+" songs - Dahl MiniMax-M2.7";$("artImg").src=artUrl(s,t);return{s,t,a:s.artist||"Martin Strayd"};}
+function getKey(){const k=($("dahlKey").value||"").trim();if(k)localStorage.setItem("anna_dahl_key",k);return k||localStorage.getItem("anna_dahl_key")||"";}
+async function genPress(){const key=getKey();if(!key){$("stEl").textContent="Enter Dahl API key first";return;}const model=($("dahlModel").value||"MiniMaxAI/MiniMax-M2.7").trim();const{s,t,a}=syncSong();
+const host=Math.random()>.5?"DJ ANNA":"Veg Anna",dt=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+const sys="You are Agent Anna writing a fresh broadcast press release for Martin Strayd (STRAYD). Treat the title as ONE song. Never split parentheses or output labels like Catalog Scale: or Ownership Rule:. Mention direct MP3 + cover art ownership and free non-commercial sharing with friends. "+(CTX?"\n"+CTX:"");
+const usr=["Date: "+dt,"Host: "+host,"Song (ONE track): \""+t+"\" by "+a,s.releaseDate?"Release: "+s.releaseDate:"",$("noteIn").value?"Angle: "+clean($("noteIn").value):"",$("newsIn").value?"News: "+clean($("newsIn").value):"",$("hubIn").value?"Hub: "+clean($("hubIn").value):"","Nonce: "+Date.now()+"-"+Math.random()].filter(Boolean).join("\n");
+try{$("stEl").textContent="Calling Dahl ("+model+")...";const r=await fetch(ENDPOINT,{method:"POST",headers:{Authorization:"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify({model,messages:[{role:"system",content:sys},{role:"user",content:usr}]})});
+if(!r.ok)throw new Error("HTTP "+r.status);const j=await r.json();const txt=clean(j?.choices?.[0]?.message?.content||"");if(!txt)throw new Error("Empty reply");$("outBox").value=txt;$("stEl").textContent="Generated fresh press release";}catch(e){$("stEl").textContent=e.message||"Dahl error";}}
+function scV(v){const h=(v.name+" "+v.lang).toLowerCase();let s=0;for(const x of FH)if(h.includes(x))s+=40;for(const x of MH)if(new RegExp("\\b"+x+"\\b").test(h))s-=100;return s;}
+function popV(){if(!("speechSynthesis"in window))return;const list=(speechSynthesis.getVoices()||[]).sort((a,b)=>scV(b)-scV(a));VOICES=list.filter(v=>scV(v)>-50);if(!VOICES.length)VOICES=list;const sel=$("voiceSel");sel.innerHTML="";VOICES.forEach((v,i)=>{const o=document.createElement("option");o.value=i;o.textContent=(scV(v)>=40?"Female - ":"")+v.name;sel.appendChild(o);});}
+function speakOut(t){const sp=clean(String(t||"").replace(/https?:\/\/\S+/g," ").replace(/#[A-Za-z0-9_]+/g," ")).slice(0,900);if(!sp||!("speechSynthesis"in window))return;popV();try{speechSynthesis.cancel();}catch{}const v=VOICES[Number($("voiceSel").value||0)]||VOICES[0]||null;(sp.match(/[^.!?]+[.!?]?/g)||[sp]).slice(0,8).forEach(p=>{const u=new SpeechSynthesisUtterance(p.trim());if(v)u.voice=v;u.pitch=1.05;speechSynthesis.speak(u);});}
+async function dlMp3(t){const sp=clean(String(t||"").replace(/https?:\/\/\S+/g," ").replace(/#[A-Za-z0-9_]+/g," ")).slice(0,300);if(!sp)return;speakOut(sp);try{const r=await fetch("https://api.streamelements.com/kappa/v2/speech?voice=Amy&text="+encodeURIComponent(sp));if(!r.ok)throw new Error("HTTP "+r.status);const b=await r.blob();const url=URL.createObjectURL(b);const a=document.createElement("a");a.href=url;a.download="press-anna.mp3";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);$("stEl").textContent="Downloaded press-anna.mp3";}catch(e){$("stEl").textContent="MP3 CORS/blocked ("+e.message+"); spoke live";}}
+if("speechSynthesis"in window){popV();speechSynthesis.onvoiceschanged=popV;}
+if(localStorage.getItem("anna_gh_pat"))$("ghPat").value=localStorage.getItem("anna_gh_pat");
+if(localStorage.getItem("anna_dahl_key"))$("dahlKey").value=localStorage.getItem("anna_dahl_key");
+$("genBtn").onclick=genPress;$("reloadBtn").onclick=loadAll;$("songSel").onchange=()=>{syncSong();if(getKey())genPress();};
+$("spkBtn").onclick=()=>speakOut($("outBox").value);$("mp3Btn").onclick=()=>dlMp3($("outBox").value);
+$("cpyBtn").onclick=()=>{navigator.clipboard?.writeText($("outBox").value);$("stEl").textContent="Copied";};loadAll();
+</script></body></html>
