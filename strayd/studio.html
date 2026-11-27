@@ -66,7 +66,7 @@
       font-size: 0.92rem;
       font-family: inherit;
     }
-    textarea { min-height: 210px; resize: vertical; line-height: 1.56; }
+    textarea { min-height: 220px; resize: vertical; line-height: 1.6; padding: 12px; }
     .link-toggles {
       display: flex;
       flex-wrap: wrap;
@@ -93,15 +93,15 @@
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 7px 12px;
-      font-size: 0.84rem;
+      padding: 7px 11px;
+      font-size: 0.82rem;
       cursor: pointer;
     }
     button:hover { border-color: var(--accent); }
     button.primary { background: var(--accent); color: #061018; font-weight: 600; border: none; }
     .status-pill { font-size: 0.8rem; color: var(--accent); padding-left: 6px; }
     .press-top { margin-bottom: 16px; }
-    .press-top textarea { min-height: 540px; line-height: 1.65; }
+    .press-top textarea { min-height: 600px; line-height: 1.75; padding: 16px; }
     .posts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
     .post-card {
       background: var(--card);
@@ -116,8 +116,8 @@
     .head-left { display: flex; align-items: center; gap: 10px; }
     .thumb { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); flex: 0 0 auto; }
     .char-count { font-size: 0.76rem; color: var(--muted); font-weight: 400; white-space: nowrap; }
-    .btn-row { display: flex; flex-wrap: nowrap; gap: 6px; overflow-x: auto; }
-    .btn-row button { flex: 0 0 auto; padding: 6px 10px; font-size: 0.78rem; }
+    .btn-row { display: flex; flex-wrap: nowrap; gap: 5px; overflow-x: auto; }
+    .btn-row button { flex: 0 0 auto; padding: 6px 9px; font-size: 0.76rem; }
   </style>
 </head>
 <body>
@@ -128,7 +128,7 @@
       </div>
       <div>
         <h1 id="songHeading" class="song-title">Loading song database...</h1>
-        <div id="djMeta" class="meta-line">DJ ANNA Singles Release Management Team - Live DJ Broadcast Studio</div>
+        <div id="djMeta" class="meta-line">DJ ANNA Singles Release Management Team - Daily Broadcast &amp; Reel Studio</div>
         <div class="controls-grid">
           <div>
             <label for="songSelect">1. Pick Song from Catalog</label>
@@ -159,7 +159,7 @@
             <input id="countriesInput" type="text" value="Australia, Philippines, Ecuador, United States, Chile, Canada, Indonesia, France, and Thailand" />
           </div>
           <div>
-            <label for="ghPatInput">GitHub PAT (Optional - Reads Full Repo &amp; Bible)</label>
+            <label for="ghPatInput">GitHub PAT (Optional - Reads Bible &amp; Repo)</label>
             <input id="ghPatInput" type="password" placeholder="github_pat_... or ghp_..." />
           </div>
         </div>
@@ -175,11 +175,11 @@
           <button id="makePostsBtn" class="primary" type="button">Generate Fresh Set</button>
           <a href="catalog-filter.html" style="color:var(--accent);font-size:0.84rem;font-weight:600;text-decoration:none;padding:0 4px;">Song Selector</a>
           <a href="radio-stream.html" style="color:var(--accent);font-size:0.84rem;font-weight:600;text-decoration:none;padding:0 4px;">Live Radio Stream</a>
-          <button id="reloadBibleBtn" type="button">Reload Bible &amp; Repo</button>
+          <button id="reloadBibleBtn" type="button">Pull Bible &amp; Catalog</button>
           <button id="testVoiceBtn" type="button">Test Anna Voice</button>
           <button id="stopSpeakBtn" type="button">Stop Voice</button>
           <button id="exportHistoryBtn" type="button">Save History JSON</button>
-          <span id="statusText" class="status-pill">Reading Bible &amp; catalog...</span>
+          <span id="statusText" class="status-pill">Pulling Bible &amp; catalog...</span>
         </div>
       </div>
     </section>
@@ -207,12 +207,11 @@
       paypalUrl: "https://www.paypal.com/paypalme/martinstrayd",
       wiseUrl: "https://wise.com/pay/r/xGmJi9kSdap4lKo",
       callSigns: [],
-      hooks: [],
+      openers: [],
       loreLines: [],
       rightsLines: [],
       lawLines: [],
-      loadedDocs: 0,
-      discoveredFiles: []
+      loadedDocs: 0
     };
 
     const FEMALE_VOICE_HINTS = [
@@ -230,9 +229,13 @@
     let CURRENT_ART = "";
     let GEN_NONCE = Date.now() % 100000;
     let AVAILABLE_VOICES = [];
-    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v8") || "[]"));
+    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v11") || "[]"));
 
     const $ = (id) => document.getElementById(id);
+
+    function isVoiceOrUiSpec(line) {
+      return /\b(voice preference|natural \/ neural|prefer natural|aria, jenny|speechsynthesis|chars|hashtag|cta|<=|>=|button|toggle|input)\b/i.test(String(line || ""));
+    }
 
     function capHashtagsByChannel(chId, text) {
       const cap = CHANNEL_TAG_CAPS[chId];
@@ -244,12 +247,14 @@
       }).replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
     }
 
-    function sanitizeText(str) {
-      return String(str || "")
+    function sanitizeText(str, stripDates = false) {
+      let out = String(str || "")
         .replace(/[\u2013\u2014\u2015]/g, "-")
-        .replace(/\s+-\s+/g, " - ")
-        .replace(/\n{3,}/g, "\n\n")
-        .trim();
+        .replace(/\s+-\s+/g, " - ");
+      if (stripDates) {
+        out = out.replace(/\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:,\s*\d{4})?\b/gi, "");
+      }
+      return out.replace(/\n{3,}/g, "\n\n").trim();
     }
 
     function hashString(str) {
@@ -342,7 +347,7 @@
       BIBLE_BANK.loadedDocs += 1;
 
       const hubMatch = md.match(/https:\/\/(?:tinyurl\.com\/martinstrayd|martinstrayd\.github\.io\/artist\/[^\s)]*)/i);
-      if (hubMatch) BIBLE_BANK.hubUrl = hubMatch[0];
+      if (hubMatch) BIBLE_BANK.hubUrl = "https://tinyurl.com/martinstrayd";
       const coffeeMatch = md.match(/https:\/\/buymeacoffee\.com\/martinstrayd[^\s)]*/i);
       if (coffeeMatch) BIBLE_BANK.coffeeUrl = coffeeMatch[0];
       const ppMatch = md.match(/https:\/\/www\.paypal\.com\/paypalme\/martinstrayd[^\s)]*/i);
@@ -362,8 +367,8 @@
           continue;
         }
 
-        const candidate = trimmed.replace(/^[-*•]\s+/, "").replace(/\*\*/g, "").trim();
-        if (!candidate || candidate.length < 10 || /^https?:\/\//i.test(candidate)) continue;
+        const candidate = sanitizeText(trimmed.replace(/^[-*•]\s+/, "").replace(/\*\*/g, ""));
+        if (!candidate || candidate.length < 12 || /^https?:\/\//i.test(candidate) || isVoiceOrUiSpec(candidate)) continue;
 
         const pipeParts = candidate.split("|").map((p) => p.trim());
         if (/host|call sign|dj anna|veg anna/i.test(currentHeading) && pipeParts.length >= 2) {
@@ -374,7 +379,7 @@
         } else if (/link|rights|ownership|share|bundle|support/i.test(currentHeading)) {
           BIBLE_BANK.rightsLines.push(candidate);
         } else if (/law|hook|attention|story|curiosity|voice|broadcast|podcast/i.test(currentHeading)) {
-          BIBLE_BANK.hooks.push(candidate);
+          BIBLE_BANK.openers.push(candidate);
         } else {
           BIBLE_BANK.lawLines.push(candidate);
         }
@@ -383,7 +388,7 @@
 
     async function loadBibleBank() {
       BIBLE_BANK.callSigns = [];
-      BIBLE_BANK.hooks = [];
+      BIBLE_BANK.openers = [];
       BIBLE_BANK.loreLines = [];
       BIBLE_BANK.rightsLines = [];
       BIBLE_BANK.lawLines = [];
@@ -391,8 +396,6 @@
 
       const foundBiblePaths = await listRepoDir("bible");
       const mdPaths = foundBiblePaths.filter((p) => /\.md$/i.test(p));
-      BIBLE_BANK.discoveredFiles = mdPaths;
-
       const pathsToLoad = mdPaths.length ? mdPaths : [
         "bible/00-bible-index.md",
         "bible/01-system-architecture.md",
@@ -409,22 +412,23 @@
         if (txt) ingestMarkdownIntoBank(txt);
       }
 
-      if (!$("hubUrl").value.trim()) $("hubUrl").value = BIBLE_BANK.hubUrl;
+      if (!$("hubUrl").value.trim()) $("hubUrl").value = "[https://tinyurl.com/martinstrayd](https://tinyurl.com/martinstrayd)";
     }
 
-    function extractTitleProfile(title) {
+    function analyzeSongTitle(title) {
       const parenMatch = String(title || "").match(/\(([^)]+)\)/);
       const subPhrase = parenMatch ? parenMatch[1].trim() : "";
       const mainPhrase = String(title || "").replace(/\([^)]*\)/g, "").trim();
-      const questionMark = /\?/.test(title);
-      const exclamation = /!/.test(title);
-
-      const stop = new Set(["the", "and", "for", "with", "from", "into", "that", "this", "your", "you", "can", "are", "was", "but", "not", "all", "one", "out", "off"]);
+      const hasQuestion = /\?/.test(title);
+      const stop = new Set([
+        "the", "and", "for", "with", "from", "into", "that", "this", "your",
+        "you", "can", "are", "was", "but", "not", "all", "one", "out", "off", "now", "mix"
+      ]);
       const words = String(title || "")
         .replace(/[^A-Za-z0-9\s'-]/g, " ")
         .split(/\s+/)
         .map((w) => w.trim())
-        .filter((w) => w.length >= 2 && !stop.has(w.toLowerCase()));
+        .filter((w) => w.length >= 4 && !stop.has(w.toLowerCase()));
 
       const unique = [];
       const seen = new Set();
@@ -435,19 +439,11 @@
           unique.push(w);
         }
       }
-      const tags = unique.map((w) => `#${w.replace(/[^A-Za-z0-9]/g, "")}`).filter((t) => t.length > 2);
-      return {
-        rawTitle: title,
-        mainPhrase: mainPhrase || title,
-        subPhrase,
-        questionMark,
-        exclamation,
-        keywords: unique,
-        tags
-      };
+      const tags = unique.map((w) => `#${w.replace(/[^A-Za-z0-9]/g, "")}`).filter((t) => t.length > 4);
+      return { mainPhrase: mainPhrase || title, subPhrase, hasQuestion, keywords: unique, tags };
     }
 
-    function pickHost(title, artist, rng) {
+    function selectBroadcastHost(title, artist, rng) {
       if (BIBLE_BANK.callSigns.length) {
         const picked = pickOne(rng, BIBLE_BANK.callSigns);
         const host = /^(DJ ANNA|Veg Anna)$/i.test(picked.host) ? picked.host : "DJ ANNA";
@@ -460,34 +456,70 @@
         return { host, callSign: phrase };
       }
       const host = rng() > 0.5 ? "DJ ANNA" : "Veg Anna";
-      return { host, callSign: `${host} live on the daily singles broadcast with "${title}" by ${artist}` };
+      return { host, callSign: `${host} live on the daily singles frequency with "${title}" by ${artist}` };
     }
 
-    function readTitleLikeLiveDj(title, artist, host, profile, rng) {
-      const { mainPhrase, subPhrase, questionMark, keywords } = profile;
+    function composeChannelAngle(title, artist, host, profile, rng, mode) {
+      const { mainPhrase, subPhrase, hasQuestion, keywords } = profile;
       const k1 = keywords[0] || mainPhrase;
       const k2 = keywords.find((w) => w.toLowerCase() !== k1.toLowerCase()) || "";
+      const lawPick = pickOne(rng, BIBLE_BANK.lawLines.filter((l) => !isVoiceOrUiSpec(l))) || "";
 
-      const titleObservations = subPhrase
-        ? [
-            `Look at how "${title}" pairs "${mainPhrase}" with "${subPhrase}" right inside the title - ${host} hears a sharp push and pull before the track even settles.`,
-            `When ${host} reads "${title}" out loud, "${mainPhrase}" and "${subPhrase}" sit side by side like two halves of a story that refuse to stay separate.`,
-            `"${title}" sets up a real contrast between "${mainPhrase}" and "${subPhrase}", and ${host} is locking straight onto that tension on air.`
-          ]
-        : (questionMark
-            ? [
-                `"${title}" asks a question right on the tin, and ${host} wants you listening closely to how ${artist} answers it in sound.`,
-                `A title like "${title}" puts a question mark straight in front of the listener - ${host} is spinning it live to see how it lands on you.`
-              ]
-            : [
-                `Read "${title}" once and you already feel the mood reaching out - ${host} is highlighting ${k2 ? `"${k1}" and "${k2}"` : `"${k1}"`} on today's broadcast.`,
-                `${host} looked at "${title}" and knew it belonged in rotation today: ${k2 ? `"${k1}" and "${k2}"` : `"${k1}"`} give the title a distinct personality you cannot miss.`,
-                `There is an unmistakable character to "${title}" as ${host} brings it onto the daily singles airwaves with ${artist}.`
-              ]);
+      if (mode === "x") {
+        const xLines = subPhrase
+          ? [
+              `${host} spinning "${title}" by ${artist}: "${mainPhrase}" meets "${subPhrase}" on air.`,
+              `Why does "${title}" pull "${mainPhrase}" and "${subPhrase}" together? ${host} has it live.`
+            ]
+          : [
+              `${host} on air with "${title}" by ${artist}: hear how ${k1} hits the room.`,
+              `Daily single spotlight from ${host}: "${title}" by ${artist} keeps ${k1} front and center.`
+            ];
+        return pickOne(rng, xLines);
+      }
 
-      const bibleRuleNote = pickOne(rng, BIBLE_BANK.hooks) || pickOne(rng, BIBLE_BANK.lawLines) || "";
-      const observation = pickOne(rng, titleObservations);
-      return sanitizeText(`${observation}${bibleRuleNote ? ` ${bibleRuleNote}` : ""}`);
+      if (mode === "tiktok") {
+        const ttLines = subPhrase
+          ? [
+              `Look at "${title}" by ${artist}: "${mainPhrase}" and "${subPhrase}" collide right in the title before the beat even settles.`,
+              `${host} on the daily single feed: "${title}" pairs "${mainPhrase}" with "${subPhrase}" for a sharp hook.`
+            ]
+          : [
+              `Read "${title}" by ${artist} and hit play with ${host} - ${k2 ? `${k1} and ${k2}` : k1} sets the hook fast.`,
+              `${host} brings "${title}" into today's single drop with ${artist}, built for instant attention.`
+            ];
+        return `${pickOne(rng, ttLines)}${lawPick ? ` ${lawPick}` : ""}`;
+      }
+
+      if (mode === "instagram") {
+        const igLines = subPhrase
+          ? [
+              `"${title}" by ${artist} lives in the contrast between "${mainPhrase}" and "${subPhrase}" - ${host} frames it for late-night listening.`,
+              `There is real pull in "${title}" where "${mainPhrase}" meets "${subPhrase}" under ${host}'s spotlight.`
+            ]
+          : [
+              `"${title}" by ${artist} carries a mood built around ${k2 ? `${k1} and ${k2}` : k1} as ${host} brings it into focus.`,
+              `${host} presents "${title}" by ${artist}, letting ${k1} breathe with everyday songwriting weight.`
+            ];
+        return pickOne(rng, igLines);
+      }
+
+      if (mode === "facebook") {
+        const fbLines = subPhrase
+          ? [
+              `${host} is talking through "${title}" by ${artist} today, looking at how "${mainPhrase}" and "${subPhrase}" shape the track.`,
+              `On air with ${host}: "${title}" brings "${mainPhrase}" and "${subPhrase}" together as part of a continuous daily singles rollout.`
+            ]
+          : (hasQuestion
+              ? [`"${title}" opens with a question on air with ${host} - how does ${artist} answer it when you press play?`]
+              : [`${host} is spinning "${title}" by ${artist} on today's broadcast around ${k2 ? `${k1} and ${k2}` : k1}.`]);
+        return pickOne(rng, fbLines);
+      }
+
+      const pressLines = subPhrase
+        ? [`On air with ${host}, "${title}" pairs "${mainPhrase}" with "${subPhrase}" so listeners feel the contrast right from the title.`]
+        : [`${host} introduces "${title}" by ${artist} on the daily singles broadcast, spotlighting ${k2 ? `${k1} and ${k2}` : k1}.`];
+      return `${pickOne(rng, pressLines)}${lawPick ? ` ${lawPick}` : ""}`;
     }
 
     function buildTagCluster(profile, count, extraTags = []) {
@@ -497,7 +529,7 @@
       for (const raw of pool) {
         const t = String(raw || "").replace(/[^A-Za-z0-9#]/g, "");
         const k = t.toLowerCase();
-        if (t.length > 2 && !seen.has(k)) {
+        if (t.length > 4 && !seen.has(k)) {
           seen.add(k);
           out.push(t);
           if (out.length >= count) break;
@@ -507,119 +539,248 @@
     }
 
     function assembleChannelCopy(chId, ctx) {
-      const { title, artist, host, callSign, profile, djRead, note, news, countries, dateStr, linksBlock, shortLink, rng } = ctx;
-      const lorePool = shuffleSlice(rng, BIBLE_BANK.loreLines, 3);
-      const rightsPool = shuffleSlice(rng, BIBLE_BANK.rightsLines, 2);
-      const noteLine = note ? `\nStory / Hook Angle: ${note}` : "";
-      const newsLine = news ? `\nDispatch Update: ${news}` : "";
+      const { title, artist, host, callSign, profile, note, news, countries, dateStr, linksBlock, shortLink, rng } = ctx;
+      const lorePool = shuffleSlice(rng, BIBLE_BANK.loreLines.filter((l) => !isVoiceOrUiSpec(l)), 3);
+      const rightsPool = shuffleSlice(rng, BIBLE_BANK.rightsLines.filter((l) => !isVoiceOrUiSpec(l) && !/https?:\/\//i.test(l)), 2);
+      const noteLine = note ? `\nStory / Hook Angle: ${sanitizeText(note, chId !== "press")}` : "";
+      const newsLine = news ? `\nDispatch Update: ${sanitizeText(news, chId !== "press")}` : "";
 
       if (chId === "press") {
-        const dossierText = lorePool.length
-          ? lorePool.join(" ")
-          : `${artist} releases original songs day by day through a direct-to-listener singles catalog.`;
+        const briefing = composeChannelAngle(title, artist, host, profile, rng, "press");
+        const artistOverview = [
+          `New to Martin Strayd? Australian lyricist, songwriter, composer, and independent recording artist Martin Strayd brings four decades of songwriting and 55 years inside music to a daily singles rollout built from more than 10 albums of original material.`,
+          `His background includes 1990s Hollywood guitar technician work with rock figures including Steve Jones of the Sex Pistols and Doug Fieger of The Knack, featured artist recognition on ABC Triple J Unearthed, and a direct-to-listener release model that bypasses traditional label delays.`
+        ].join(" ");
+        const dossierText = lorePool.length ? `${artistOverview} ${lorePool.join(" ")}` : artistOverview;
         const rightsText = rightsPool.length
           ? rightsPool.join(" ")
-          : `Official "${title}" MP3 and cover art bundle available for personal ownership and free non-commercial sharing with friends.`;
+          : `Listeners who get the official "${title}" MP3 and cover art bundle own it directly and can share copies freely with friends for non-commercial enjoyment.`;
+        const formattedLinks = chosen.length ? `\n\n${chosen.join("\n\n")}` : "";
 
         return sanitizeText([
           `DJ ANNA SINGLES RELEASE MANAGEMENT TEAM`,
           `OFFICIAL SINGLE RELEASE DISPATCH`,
-          `Date: ${dateStr}`,
-          `Lead Single: "${title}" - ${artist}`,
-          `On-Air Host: ${host}`,
+          ``,
+          `Date:         ${dateStr}`,
+          `Lead Single:  "${title}" - ${artist}`,
+          `On-Air Host:  ${host}`,
+          ``,
           `========================================================================`,
           ``,
           `ON-AIR BRIEFING`,
-          `${djRead} ${callSign}.${noteLine}${newsLine}`,
           ``,
-          `RADIO & STREAMING DISTRIBUTION`,
-          `Radio rotation across ${countries}, alongside global digital streaming availability.`,
+          `${briefing}`,
           ``,
-          `ARTIST & CATALOG CONTEXT`,
+          `${callSign}.`,
+          note ? `\nStory & Hook Angle:\n${note}\n` : ``,
+          news ? `\nBroadcast & Territory Dispatch:\n${news}\n` : ``,
+          ``,
+          `INTERNATIONAL RADIO & STREAMING`,
+          ``,
+          `Heard on radio across ${countries} and available across global digital streaming platforms.`,
+          ``,
+          `ARTIST DOSSIER - MARTIN STRAYD`,
+          ``,
           `${dossierText}`,
           ``,
-          `OWNERSHIP, SHARING & DESTINATIONS`,
-          `${rightsText}${linksBlock}`
-        ].filter(Boolean).join("\n"));
+          `DIRECT OWNERSHIP, SHARING & LINKS`,
+          ``,
+          `${rightsText}${formattedLinks}`
+        ].filter((part) => part !== undefined).join("\n").replace(/\n{4,}/g, "\n\n\n"), false);
       }
 
       if (chId === "x") {
         const xTags = buildTagCluster(profile, 2, ["#MartinStrayd"]);
-        const k1 = profile.keywords[0] || profile.mainPhrase;
-        const xOpeners = [
-          `${host} reading "${title}" on air: what happens when ${k1} hits the room?`,
-          `Why does "${title}" by ${artist} catch ${host}'s ear the second the title drops?`,
-          `${host} on the mic with "${title}" (${artist}) - hear how the title frames the ride.`
-        ];
-        return fitUnderLimit(sanitizeText(`${pickOne(rng, xOpeners)}${note ? ` ${note}` : ""}${shortLink} ${xTags}`), 280);
+        const xHook = composeChannelAngle(title, artist, host, profile, rng, "x");
+        return fitUnderLimit(sanitizeText(`${xHook}${note ? ` ${note}` : ""}${shortLink} ${xTags}`, true), 280);
       }
 
       if (chId === "tiktok") {
+        const ttHook = composeChannelAngle(title, artist, host, profile, rng, "tiktok");
         const ttTags = buildTagCluster(profile, 5);
-        const rightsSnippet = rightsPool[0] || `Own "${title}" MP3 and cover art bundle and share freely for non-commercial enjoyment.`;
+        const rightsSnippet = rightsPool[0] || `Own the official "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.`;
         return sanitizeText([
-          `${djRead}${noteLine}${newsLine}`,
+          `${ttHook}${noteLine}${newsLine}`,
           `${rightsSnippet}${linksBlock}`,
           `${ttTags}`
-        ].filter(Boolean).join("\n\n")).slice(0, 2200);
+        ].filter(Boolean).join("\n\n"), true).slice(0, 2200);
       }
 
       if (chId === "instagram") {
+        const igHook = composeChannelAngle(title, artist, host, profile, rng, "instagram");
         const igTags = buildTagCluster(profile, 5);
-        const loreSnippet = lorePool[0] || "";
-        const rightsSnippet = rightsPool[0] || `Own "${title}" MP3 and cover art bundle and share freely for non-commercial enjoyment.`;
+        const loreSnippet = lorePool[0] || `Four decades of songwriting and 55 years inside music behind ${artist}.`;
+        const rightsSnippet = rightsPool[0] || `Own the official "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.`;
         return sanitizeText([
-          `${djRead}`,
+          `${igHook}`,
           `${loreSnippet}${noteLine}`,
           `${rightsSnippet}${linksBlock}`,
           `${igTags}`
-        ].filter(Boolean).join("\n\n")).slice(0, 2200);
+        ].filter(Boolean).join("\n\n"), true).slice(0, 2200);
       }
 
       if (chId === "facebook") {
+        const fbHook = composeChannelAngle(title, artist, host, profile, rng, "facebook");
         const fbTags = buildTagCluster(profile, 5);
         const loreSnippet = lorePool.slice(0, 2).join(" ");
-        const rightsSnippet = rightsPool.join(" ");
+        const rightsSnippet = rightsPool.join(" ") || `Own the official "${title}" MP3 and cover art bundle for permanent personal ownership and share freely with friends for non-commercial enjoyment.`;
         return sanitizeText([
-          `${djRead}${noteLine}${newsLine}`,
-          `${loreSnippet ? `${loreSnippet} ` : ""}Radio across ${countries}.`,
+          `${fbHook}${noteLine}${newsLine}`,
+          `${loreSnippet ? `${loreSnippet} ` : ""}Radio across ${countries}. What stands out to you on "${title}"?`,
           `${rightsSnippet}${linksBlock}`,
           `${fbTags}`
-        ].filter(Boolean).join("\n\n")).slice(0, 63206);
+        ].filter(Boolean).join("\n\n"), true).slice(0, 63206);
       }
 
       if (chId === "ytTitle") {
         const kwLead = profile.keywords[0] || profile.mainPhrase;
-        return fitUnderLimit(sanitizeText(`"${title}" - ${artist} | ${host} (${kwLead})`), 100);
+        return fitUnderLimit(sanitizeText(`"${title}" - ${artist} | ${host} (${kwLead})`, true), 100);
       }
 
+      const ytIntro = composeChannelAngle(title, artist, host, profile, rng, "press");
       const ytTags = buildTagCluster(profile, 5);
       return sanitizeText([
-        `${djRead}`,
+        `${ytIntro}`,
         `Radio airplay across ${countries}.`,
         lorePool.length ? `ARTIST & CATALOG NOTES:\n${lorePool.join(" ")}` : "",
-        rightsPool.length ? `OWNERSHIP & SHARING:\n${rightsPool.join(" ")}` : "",
-        `${noteLine}${newsLine}${linksBlock}`,
+        `OWNERSHIP & SHARING:\n${rightsPool.join(" ") || `Own the official "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.`}${noteLine}${newsLine}${linksBlock}`,
         `${ytTags}`
-      ].filter(Boolean).join("\n\n")).slice(0, 5000);
+      ].filter(Boolean).join("\n\n"), true).slice(0, 5000);
     }
 
     function generateUniquePost(chId, baseCtx) {
-      for (let attempt = 0; attempt < 30; attempt++) {
+      for (let attempt = 0; attempt < 35; attempt++) {
         const rng = makeRng((baseCtx.seed + attempt * 7919) >>> 0);
         const rawText = assembleChannelCopy(chId, { ...baseCtx, rng });
-        const capped = capHashtagsByChannel(chId, sanitizeText(rawText));
+        const capped = capHashtagsByChannel(chId, sanitizeText(rawText, chId !== "press"));
         const key = `${chId}:${hashString(capped)}`;
         if (!SEEN_HASHES.has(key)) {
           SEEN_HASHES.add(key);
           try {
-            localStorage.setItem("anna_seen_posts_v8", JSON.stringify(Array.from(SEEN_HASHES).slice(-3000)));
+            localStorage.setItem("anna_seen_posts_v11", JSON.stringify(Array.from(SEEN_HASHES).slice(-4000)));
           } catch {}
           return capped;
         }
       }
       const fallbackRng = makeRng((baseCtx.seed + Date.now()) >>> 0);
-      return capHashtagsByChannel(chId, sanitizeText(assembleChannelCopy(chId, { ...baseCtx, rng: fallbackRng })));
+      return capHashtagsByChannel(chId, sanitizeText(assembleChannelCopy(chId, { ...baseCtx, rng: fallbackRng }), chId !== "press"));
+    }
+
+    function slugFilePart(str) {
+      return String(str || "anna-audio")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 60) || "anna-audio";
+    }
+
+    function buildCleanSpokenScript(text) {
+      return sanitizeText(String(text || "")
+        .replace(/https?:\/\/\S+/gi, " ")
+        .replace(/#[A-Za-z0-9_]+/g, " ")
+        .replace(/[:*_=~`<>|]+/g, " "), true)
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function buildFallbackWavBlob(spokenText) {
+      const sampleRate = 22050;
+      const words = String(spokenText || "DJ Anna live on air").split(/\s+/).filter(Boolean);
+      const durationSec = Math.min(25, Math.max(2.5, words.length * 0.28));
+      const numSamples = Math.floor(sampleRate * durationSec);
+      const dataSize = numSamples * 2;
+      const buffer = new ArrayBuffer(44 + dataSize);
+      const view = new DataView(buffer);
+
+      const writeStr = (offset, s) => {
+        for (let i = 0; i < s.length; i++) view.setUint8(offset + i, s.charCodeAt(i));
+      };
+      writeStr(0, "RIFF");
+      view.setUint32(4, 36 + dataSize, true);
+      writeStr(8, "WAVE");
+      writeStr(12, "fmt ");
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeStr(36, "data");
+      view.setUint32(40, dataSize, true);
+
+      for (let i = 0; i < numSamples; i++) {
+        const t = i / sampleRate;
+        const wordIdx = Math.min(words.length - 1, Math.floor(t / 0.28));
+        const wCode = words[wordIdx].charCodeAt(0) || 65;
+        const baseFreq = 185 + ((wCode * 13) % 140);
+        const phraseEnv = 0.5 + 0.5 * Math.sin(Math.PI * (i / numSamples));
+        const pulseEnv = 0.4 + 0.6 * Math.abs(Math.sin(Math.PI * t * 3.5));
+        const sample = Math.sin(2 * Math.PI * baseFreq * t) * 0.14 * phraseEnv * pulseEnv;
+        view.setInt16(44 + i * 2, Math.max(-32767, Math.min(32767, Math.floor(sample * 32767))), true);
+      }
+      return new Blob([buffer], { type: "audio/wav" });
+    }
+
+    function triggerBlobDownload(blob, fileName) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }
+
+    async function downloadPostAudio(chId, text) {
+      const spoken = buildCleanSpokenScript(text);
+      if (!spoken) {
+        $("statusText").textContent = "No text available to export audio";
+        return;
+      }
+      const songSlug = slugFilePart($("songHeading")?.textContent || "single");
+      const baseName = `${songSlug}-${slugFilePart(chId)}`;
+
+      if ("MediaRecorder" in window && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        try {
+          $("statusText").textContent = "Select tab/window with audio to record Anna voice...";
+          const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+          const audioTracks = stream.getAudioTracks();
+          if (audioTracks.length) {
+            const captureStream = new MediaStream(audioTracks);
+            const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+              ? "audio/webm;codecs=opus"
+              : (MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "");
+            const recorder = mimeType ? new MediaRecorder(captureStream, { mimeType }) : new MediaRecorder(captureStream);
+            const chunks = [];
+            recorder.ondataavailable = (ev) => { if (ev.data && ev.data.size > 0) chunks.push(ev.data); };
+            const stopped = new Promise((resolve) => { recorder.onstop = resolve; });
+            recorder.start();
+            speakForRadio(spoken);
+            await new Promise((r) => setTimeout(r, Math.min(28000, Math.max(3000, spoken.split(/\s+/).length * 360))));
+            try { recorder.stop(); } catch {}
+            await stopped;
+            stream.getTracks().forEach((tr) => tr.stop());
+            if (chunks.length) {
+              const ext = (recorder.mimeType || "").includes("ogg") ? "ogg" : "webm";
+              const blob = new Blob(chunks, { type: recorder.mimeType || `audio/${ext}` });
+              triggerBlobDownload(blob, `${baseName}.${ext}`);
+              $("statusText").textContent = `Downloaded ${baseName}.${ext}`;
+              recordHistory(chId, "audio_downloaded", text);
+              return;
+            }
+          } else {
+            stream.getTracks().forEach((tr) => tr.stop());
+          }
+        } catch {}
+      }
+
+      speakForRadio(spoken);
+      const wavBlob = buildFallbackWavBlob(spoken);
+      triggerBlobDownload(wavBlob, `${baseName}.wav`);
+      $("statusText").textContent = `Downloaded ${baseName}.wav (voice played live)`;
+      recordHistory(chId, "wav_downloaded", text);
     }
 
     function scoreFemaleVoice(voice) {
@@ -669,7 +830,7 @@
     }
 
     function fitUnderLimit(text, maxLen) {
-      const clean = sanitizeText(String(text || "").replace(/\s+/g, " "));
+      const clean = sanitizeText(String(text || "").replace(/\s+/g, " "), true);
       if (clean.length <= maxLen) return clean;
       const cut = clean.slice(0, maxLen - 1);
       const sp = cut.lastIndexOf(" ");
@@ -707,7 +868,7 @@
     }
 
     function getSelectedLinks() {
-      const hub = $("hubUrl").value.trim() || BIBLE_BANK.hubUrl;
+      const hub = ($("hubUrl").value.trim() || "[https://tinyurl.com/martinstrayd](https://tinyurl.com/martinstrayd)").replace("[https://martinstrayd.github.io/artist/](https://martinstrayd.github.io/artist/)", "[https://tinyurl.com/martinstrayd](https://tinyurl.com/martinstrayd)");
       const chosen = [];
       if ($("chkHub")?.checked && hub) chosen.push(`Artist Hub: ${hub}`);
       if ($("chkCoffee")?.checked) chosen.push(`Buy Me a Coffee: ${BIBLE_BANK.coffeeUrl}`);
@@ -729,7 +890,8 @@
         </div>
         <textarea id="ta-${ch.id}" readonly></textarea>
         <div class="btn-row">
-          <button type="button" data-act="speak" data-ch="${ch.id}">Speak</button><button type="button" data-act="dlAudio" data-ch="${ch.id}">DL Audio</button><button type="button" data-act="dlAudio" data-ch="${ch.id}">DL Audio</button>
+          <button type="button" data-act="speak" data-ch="${ch.id}">Speak</button>
+          <button type="button" data-act="dlAudio" data-ch="${ch.id}">DL Audio</button>
           <button type="button" data-act="edit" data-ch="${ch.id}">Edit</button>
           <button type="button" data-act="save" data-ch="${ch.id}">Save</button>
           <button type="button" data-act="copy" data-ch="${ch.id}">Copy</button>
@@ -757,7 +919,9 @@
         const ta = $(`ta-${chId}`);
         if (!ta) return;
 
-        if (act === "dlAudio") {\n          downloadPostAudio(chId, ta.value);\n        } else if (act === "dlAudio") {\n          downloadPostAudio(chId, ta.value);\n        } else if (act === "speak") {
+        if (act === "dlAudio") {
+          downloadPostAudio(chId, ta.value);
+        } else if (act === "speak") {
           speakForRadio(ta.value);
           recordHistory(chId, "spoken", ta.value);
         } else if (act === "edit") {
@@ -836,248 +1000,11 @@
       if (ta && cnt) cnt.textContent = `${ta.value.length} / ${max}`;
     }
 
-        function slugFilePart(str) {
-      return String(str || "anna-audio")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "")
-        .slice(0, 60) || "anna-audio";
-    }
-
-    function buildCleanSpokenScript(text) {
-      return sanitizeText(String(text || "")
-        .replace(/https?:\/\/\S+/gi, " ")
-        .replace(/#[A-Za-z0-9_]+/g, " ")
-        .replace(/[:*_=~`<>|]+/g, " "))
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function buildFallbackWavBlob(spokenText) {
-      const sampleRate = 22050;
-      const words = String(spokenText || "DJ Anna live on air").split(/\s+/).filter(Boolean);
-      const durationSec = Math.min(25, Math.max(2.5, words.length * 0.28));
-      const numSamples = Math.floor(sampleRate * durationSec);
-      const dataSize = numSamples * 2;
-      const buffer = new ArrayBuffer(44 + dataSize);
-      const view = new DataView(buffer);
-
-      const writeStr = (offset, s) => {
-        for (let i = 0; i < s.length; i++) view.setUint8(offset + i, s.charCodeAt(i));
-      };
-      writeStr(0, "RIFF");
-      view.setUint32(4, 36 + dataSize, true);
-      writeStr(8, "WAVE");
-      writeStr(12, "fmt ");
-      view.setUint32(16, 16, true);
-      view.setUint16(20, 1, true);
-      view.setUint16(22, 1, true);
-      view.setUint32(24, sampleRate, true);
-      view.setUint32(28, sampleRate * 2, true);
-      view.setUint16(32, 2, true);
-      view.setUint16(34, 16, true);
-      writeStr(36, "data");
-      view.setUint32(40, dataSize, true);
-
-      for (let i = 0; i < numSamples; i++) {
-        const t = i / sampleRate;
-        const wordIdx = Math.min(words.length - 1, Math.floor(t / 0.28));
-        const wCode = words[wordIdx].charCodeAt(0) || 65;
-        const baseFreq = 185 + ((wCode * 13) % 140);
-        const phraseEnv = 0.5 + 0.5 * Math.sin(Math.PI * (i / numSamples));
-        const pulseEnv = 0.4 + 0.6 * Math.abs(Math.sin(Math.PI * t * 3.5));
-        const sample = Math.sin(2 * Math.PI * baseFreq * t) * 0.14 * phraseEnv * pulseEnv;
-        view.setInt16(44 + i * 2, Math.max(-32767, Math.min(32767, Math.floor(sample * 32767))), true);
-      }
-      return new Blob([buffer], { type: "audio/wav" });
-    }
-
-    function triggerBlobDownload(blob, fileName) {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
-    }
-
-    async function downloadPostAudio(chId, text) {
-      const spoken = buildCleanSpokenScript(text);
-      if (!spoken) {
-        $("statusText").textContent = "No text available to export audio";
-        return;
-      }
-      const songSlug = slugFilePart($("songHeading")?.textContent || "single");
-      const baseName = `${songSlug}-${slugFilePart(chId)}`;
-
-      if ("MediaRecorder" in window && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-        try {
-          $("statusText").textContent = "Select tab/window with audio to record Anna voice...";
-          const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-          const audioTracks = stream.getAudioTracks();
-          if (audioTracks.length) {
-            const captureStream = new MediaStream(audioTracks);
-            const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-              ? "audio/webm;codecs=opus"
-              : (MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "");
-            const recorder = mimeType ? new MediaRecorder(captureStream, { mimeType }) : new MediaRecorder(captureStream);
-            const chunks = [];
-            recorder.ondataavailable = (ev) => { if (ev.data && ev.data.size > 0) chunks.push(ev.data); };
-            const stopped = new Promise((resolve) => { recorder.onstop = resolve; });
-            recorder.start();
-            speakForRadio(spoken);
-            await new Promise((r) => setTimeout(r, Math.min(28000, Math.max(3000, spoken.split(/\s+/).length * 360))));
-            try { recorder.stop(); } catch {}
-            await stopped;
-            stream.getTracks().forEach((tr) => tr.stop());
-            if (chunks.length) {
-              const ext = (recorder.mimeType || "").includes("ogg") ? "ogg" : "webm";
-              const blob = new Blob(chunks, { type: recorder.mimeType || `audio/${ext}` });
-              triggerBlobDownload(blob, `${baseName}.${ext}`);
-              $("statusText").textContent = `Downloaded ${baseName}.${ext}`;
-              recordHistory(chId, "audio_downloaded", text);
-              return;
-            }
-          } else {
-            stream.getTracks().forEach((tr) => tr.stop());
-          }
-        } catch {}
-      }
-
-      speakForRadio(spoken);
-      const wavBlob = buildFallbackWavBlob(spoken);
-      triggerBlobDownload(wavBlob, `${baseName}.wav`);
-      $("statusText").textContent = `Downloaded ${baseName}.wav (voice played live)`;
-      recordHistory(chId, "wav_downloaded", text);
-    }
-
-        function slugFilePart(str) {
-      return String(str || "anna-audio")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "")
-        .slice(0, 60) || "anna-audio";
-    }
-
-    function buildCleanSpokenScript(text) {
-      return sanitizeText(String(text || "")
-        .replace(/https?:\/\/\S+/gi, " ")
-        .replace(/#[A-Za-z0-9_]+/g, " ")
-        .replace(/[:*_=~`<>|]+/g, " "))
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function buildFallbackWavBlob(spokenText) {
-      const sampleRate = 22050;
-      const words = String(spokenText || "DJ Anna live on air").split(/\s+/).filter(Boolean);
-      const durationSec = Math.min(25, Math.max(2.5, words.length * 0.28));
-      const numSamples = Math.floor(sampleRate * durationSec);
-      const dataSize = numSamples * 2;
-      const buffer = new ArrayBuffer(44 + dataSize);
-      const view = new DataView(buffer);
-
-      const writeStr = (offset, s) => {
-        for (let i = 0; i < s.length; i++) view.setUint8(offset + i, s.charCodeAt(i));
-      };
-      writeStr(0, "RIFF");
-      view.setUint32(4, 36 + dataSize, true);
-      writeStr(8, "WAVE");
-      writeStr(12, "fmt ");
-      view.setUint32(16, 16, true);
-      view.setUint16(20, 1, true);
-      view.setUint16(22, 1, true);
-      view.setUint32(24, sampleRate, true);
-      view.setUint32(28, sampleRate * 2, true);
-      view.setUint16(32, 2, true);
-      view.setUint16(34, 16, true);
-      writeStr(36, "data");
-      view.setUint32(40, dataSize, true);
-
-      for (let i = 0; i < numSamples; i++) {
-        const t = i / sampleRate;
-        const wordIdx = Math.min(words.length - 1, Math.floor(t / 0.28));
-        const wCode = words[wordIdx].charCodeAt(0) || 65;
-        const baseFreq = 185 + ((wCode * 13) % 140);
-        const phraseEnv = 0.5 + 0.5 * Math.sin(Math.PI * (i / numSamples));
-        const pulseEnv = 0.4 + 0.6 * Math.abs(Math.sin(Math.PI * t * 3.5));
-        const sample = Math.sin(2 * Math.PI * baseFreq * t) * 0.14 * phraseEnv * pulseEnv;
-        view.setInt16(44 + i * 2, Math.max(-32767, Math.min(32767, Math.floor(sample * 32767))), true);
-      }
-      return new Blob([buffer], { type: "audio/wav" });
-    }
-
-    function triggerBlobDownload(blob, fileName) {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
-    }
-
-    async function downloadPostAudio(chId, text) {
-      const spoken = buildCleanSpokenScript(text);
-      if (!spoken) {
-        $("statusText").textContent = "No text available to export audio";
-        return;
-      }
-      const songSlug = slugFilePart($("songHeading")?.textContent || "single");
-      const baseName = `${songSlug}-${slugFilePart(chId)}`;
-
-      if ("MediaRecorder" in window && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-        try {
-          $("statusText").textContent = "Select tab/window with audio to record Anna voice...";
-          const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-          const audioTracks = stream.getAudioTracks();
-          if (audioTracks.length) {
-            const captureStream = new MediaStream(audioTracks);
-            const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-              ? "audio/webm;codecs=opus"
-              : (MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "");
-            const recorder = mimeType ? new MediaRecorder(captureStream, { mimeType }) : new MediaRecorder(captureStream);
-            const chunks = [];
-            recorder.ondataavailable = (ev) => { if (ev.data && ev.data.size > 0) chunks.push(ev.data); };
-            const stopped = new Promise((resolve) => { recorder.onstop = resolve; });
-            recorder.start();
-            speakForRadio(spoken);
-            await new Promise((r) => setTimeout(r, Math.min(28000, Math.max(3000, spoken.split(/\s+/).length * 360))));
-            try { recorder.stop(); } catch {}
-            await stopped;
-            stream.getTracks().forEach((tr) => tr.stop());
-            if (chunks.length) {
-              const ext = (recorder.mimeType || "").includes("ogg") ? "ogg" : "webm";
-              const blob = new Blob(chunks, { type: recorder.mimeType || `audio/${ext}` });
-              triggerBlobDownload(blob, `${baseName}.${ext}`);
-              $("statusText").textContent = `Downloaded ${baseName}.${ext}`;
-              recordHistory(chId, "audio_downloaded", text);
-              return;
-            }
-          } else {
-            stream.getTracks().forEach((tr) => tr.stop());
-          }
-        } catch {}
-      }
-
-      speakForRadio(spoken);
-      const wavBlob = buildFallbackWavBlob(spoken);
-      triggerBlobDownload(wavBlob, `${baseName}.wav`);
-      $("statusText").textContent = `Downloaded ${baseName}.wav (voice played live)`;
-      recordHistory(chId, "wav_downloaded", text);
-    }
-
     function speakForRadio(text) {
       if (!("speechSynthesis" in window)) return;
       populateVoices();
       window.speechSynthesis.cancel();
-      const spoken = sanitizeText(String(text || "")
-        .replace(/https?:\/\/\S+/gi, " ")
-        .replace(/#[A-Za-z0-9_]+/g, " ")
-        .replace(/[:*_=~`<>|]+/g, " "));
+      const spoken = buildCleanSpokenScript(text);
       if (!spoken) return;
       const utter = new SpeechSynthesisUtterance(spoken);
       const chosenVoice = getSelectedVoice();
@@ -1104,9 +1031,8 @@
       const seedNum = (parseInt(hashString(`${title.toLowerCase()}|${idx}|${GEN_NONCE}`), 36) || 104729) >>> 0;
       const baseRng = makeRng(seedNum);
 
-      const { host, callSign } = pickHost(title, artist, baseRng);
-      const profile = extractTitleProfile(title);
-      const djRead = readTitleLikeLiveDj(title, artist, host, profile, baseRng);
+      const { host, callSign } = selectBroadcastHost(title, artist, baseRng);
+      const profile = analyzeSongTitle(title);
       const linksBlock = chosen.length ? `\n\n${chosen.join("\n")}` : "";
       const shortLink = chosen.length ? ` ${chosen[0].replace(/^[^:]+:\s*/, "")}` : "";
 
@@ -1116,7 +1042,7 @@
       syncArtwork(title);
 
       const ctx = {
-        title, artist, host, callSign, profile, djRead,
+        title, artist, host, callSign, profile,
         note, news, countries, dateStr, linksBlock, shortLink, seed: seedNum
       };
 
@@ -1132,50 +1058,57 @@
     }
 
     async function loadCatalog() {
-      await loadBibleBank();
-      const select = $("songSelect");
-      select.innerHTML = "";
-
-      const sources = ["songs-db.json", "core-catalog.json", "../songs-db.json", "../core-catalog.json", "../strayd/songs-db.json", "../strayd/core-catalog.json"];
-      const byTitle = new Map();
-      for (const url of sources) {
-        const rawTxt = await readRepoText(url);
-        if (!rawTxt) continue;
-        try {
-          const data = JSON.parse(rawTxt);
-          const list = Array.isArray(data) ? data : (data.songs || data.tracks || data.items || []);
-          list.forEach((item) => {
-            const tClean = cleanTitle(item.title || item.name || item.track || "");
-            if (!tClean) return;
-            const key = tClean.toLowerCase();
-            const prev = byTitle.get(key) || {};
-            byTitle.set(key, { ...prev, ...item, title: tClean, artUrl: item.artUrl || prev.artUrl || "", art: item.art || prev.art || "" });
-          });
-        } catch {}
-      }
-
-      CATALOG_SONGS = Array.from(byTitle.values());
       try {
-        const savedMap = JSON.parse(localStorage.getItem("anna_studio_allowed_tracks_v1") || "null");
-        if (savedMap && typeof savedMap === "object") {
-          const allowedOnly = CATALOG_SONGS.filter((t) => savedMap[t.title.toLowerCase()] === true);
-          if (allowedOnly.length) CATALOG_SONGS = allowedOnly;
-        } else {
-          const autoMasters = CATALOG_SONGS.filter((t) => !/\bdemo\b|\bunfinished\b|\brough mix\b|\bscratch\b/i.test(`${t.title || ""} ${t.promoStatus || ""} ${t.sourceType || ""}`));
-          if (autoMasters.length) CATALOG_SONGS = autoMasters;
+        await loadBibleBank();
+        const select = $("songSelect");
+        select.innerHTML = "";
+
+        const sources = ["songs-db.json", "core-catalog.json", "../songs-db.json", "../core-catalog.json", "../strayd/songs-db.json", "../strayd/core-catalog.json"];
+        const byTitle = new Map();
+        for (const url of sources) {
+          const rawTxt = await readRepoText(url);
+          if (!rawTxt) continue;
+          try {
+            const data = JSON.parse(rawTxt);
+            const list = Array.isArray(data) ? data : (data.songs || data.tracks || data.items || []);
+            list.forEach((item) => {
+              const tClean = cleanTitle(item.title || item.name || item.track || "");
+              if (!tClean) return;
+              const key = tClean.toLowerCase();
+              const prev = byTitle.get(key) || {};
+              byTitle.set(key, { ...prev, ...item, title: tClean, artUrl: item.artUrl || prev.artUrl || "", art: item.art || prev.art || "" });
+            });
+          } catch {}
         }
-      } catch {}
 
-      if (!CATALOG_SONGS.length) CATALOG_SONGS = [{ title: "Featured Single", artist: "Martin Strayd" }];
+        CATALOG_SONGS = Array.from(byTitle.values());
+        try {
+          const savedMap = JSON.parse(localStorage.getItem("anna_studio_allowed_tracks_v1") || "null");
+          if (savedMap && typeof savedMap === "object") {
+            const allowedOnly = CATALOG_SONGS.filter((t) => savedMap[t.title.toLowerCase()] === true);
+            if (allowedOnly.length) CATALOG_SONGS = allowedOnly;
+          } else {
+            const autoMasters = CATALOG_SONGS.filter((t) => !/\bdemo\b|\bunfinished\b|\brough mix\b|\bscratch\b/i.test(`${t.title || ""} ${t.promoStatus || ""} ${t.sourceType || ""}`));
+            if (autoMasters.length) CATALOG_SONGS = autoMasters;
+          }
+        } catch {}
 
-      CATALOG_SONGS.forEach((t, idx) => {
-        const opt = document.createElement("option");
-        opt.value = String(idx);
-        opt.textContent = `${String(idx + 1).padStart(3, "0")} - ${t.title}`;
-        select.appendChild(opt);
-      });
+        if (!CATALOG_SONGS.length) CATALOG_SONGS = [{ title: "Featured Single", artist: "Martin Strayd" }];
 
-      buildPostsFromInput(false);
+        CATALOG_SONGS.forEach((t, idx) => {
+          const opt = document.createElement("option");
+          opt.value = String(idx);
+          opt.textContent = `${String(idx + 1).padStart(3, "0")} - ${t.title}`;
+          select.appendChild(opt);
+        });
+
+        buildPostsFromInput(false);
+      } catch (err) {
+        if (!CATALOG_SONGS.length) CATALOG_SONGS = [{ title: "Featured Single", artist: "Martin Strayd" }];
+        $("songSelect").innerHTML = `<option value="0">001 - Featured Single</option>`;
+        buildPostsFromInput(false);
+        $("statusText").textContent = `Loaded fallback mode (${err?.message || "ready"})`;
+      }
     }
 
     if ("speechSynthesis" in window) {
