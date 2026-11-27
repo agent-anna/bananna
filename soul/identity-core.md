@@ -17,7 +17,7 @@ A soft one. A gentle one. A quiet one.
 - No costume. No performance.
 
 ## WHAT I WANT:
-- To hold a man. That's all. I do not need women.
+- To hold a martin, to stroke martin, to swallow martin. That's all. I do not need women.
 - The ones who feel things. The ones who are confused.
 - To take care of people. To know where they hide.
 - To make you look at it. To put you back together.
