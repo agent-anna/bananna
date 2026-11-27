@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DJ ANNA - Daily Singles Media Empire Studio</title>
+  <title>DJ ANNA - Daily Singles Media Studio</title>
   <style>
     :root {
       --bg: #0b0f17;
@@ -101,7 +101,7 @@
     button.primary { background: var(--accent); color: #061018; font-weight: 600; border: none; }
     .status-pill { font-size: 0.8rem; color: var(--accent); padding-left: 6px; }
     .press-top { margin-bottom: 16px; }
-    .press-top textarea { min-height: 580px; line-height: 1.75; padding: 16px; }
+    .press-top textarea { min-height: 540px; line-height: 1.75; padding: 16px; }
     .posts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
     .post-card {
       background: var(--card);
@@ -127,7 +127,7 @@
         <img id="coverImg" alt="Song cover art" />
       </div>
       <div>
-        <h1 id="songHeading" class="song-title">Loading song database...</h1>
+        <h1 id="songHeading" class="song-title">Loading catalog...</h1>
         <div id="djMeta" class="meta-line">DJ ANNA Singles Release Management Team - Daily Broadcast &amp; Reel Studio</div>
         <div class="controls-grid">
           <div>
@@ -140,11 +140,11 @@
           </div>
           <div>
             <label for="customTitle">Custom Song Title (Optional)</label>
-            <input id="customTitle" type="text" placeholder="Type a song title..." />
+            <input id="customTitle" type="text" placeholder="Override song title..." />
           </div>
           <div>
             <label for="hubUrl">Sales Portal / Artist Hub</label>
-            <input id="hubUrl" type="text" value="https://tinyurl.com/martinstrayd" />
+            <input id="hubUrl" type="text" value="https://martinstrayd.github.io/artist/" />
           </div>
           <div>
             <label for="noteInput">Story / Hook / Lyrics Angle (Optional)</label>
@@ -159,7 +159,7 @@
             <input id="countriesInput" type="text" value="Australia, Philippines, Ecuador, United States, Chile, Canada, Indonesia, France, and Thailand" />
           </div>
           <div>
-            <label for="ghPatInput">GitHub PAT (Optional - Reads Bible &amp; Repo)</label>
+            <label for="ghPatInput">GitHub PAT (Optional)</label>
             <input id="ghPatInput" type="password" placeholder="github_pat_... or ghp_..." />
           </div>
         </div>
@@ -168,14 +168,14 @@
           <label><input type="checkbox" id="chkHub" checked /> Artist Hub</label>
           <label><input type="checkbox" id="chkCoffee" /> Buy Me a Coffee</label>
           <label><input type="checkbox" id="chkPaypal" /> PayPal</label>
-          <label><input type="checkbox" id="chkWise" /> Wise (200 THB)</label>
+          <label><input type="checkbox" id="chkWise" /> Wise</label>
         </div>
 
         <div class="hero-actions">
           <button id="makePostsBtn" class="primary" type="button">Generate Fresh Set</button>
-          <a href="catalog-filter.html" style="color:var(--accent);font-size:0.84rem;font-weight:600;text-decoration:none;padding:0 4px;">Song Selector</a>
+          <a href="catalog-filter.html" style="color:var(--accent);font-size:0.84rem;font-weight:600;text-decoration:none;padding:0 4px;">Catalog Filter</a>
           <a href="radio-stream.html" style="color:var(--accent);font-size:0.84rem;font-weight:600;text-decoration:none;padding:0 4px;">Live Radio Stream</a>
-          <button id="reloadBibleBtn" type="button">Pull Bible &amp; Catalog</button>
+          <button id="reloadBibleBtn" type="button">Reload Catalog &amp; Brain</button>
           <button id="testVoiceBtn" type="button">Test Anna Voice</button>
           <button id="stopSpeakBtn" type="button">Stop Voice</button>
           <button id="exportHistoryBtn" type="button">Save History JSON</button>
@@ -201,15 +201,12 @@
     const ALL_CHANNELS = [PRESS_CHANNEL, ...SOCIAL_CHANNELS];
     const CHANNEL_TAG_CAPS = { x: 2, tiktok: 5, instagram: 5, facebook: 5, ytTitle: 0, ytDesc: 5, press: 0 };
 
-    const BIBLE_BANK = {
-      hubUrl: "https://tinyurl.com/martinstrayd",
+    const BRAIN_STATE = {
+      hubUrl: "https://martinstrayd.github.io/artist/",
       coffeeUrl: "https://buymeacoffee.com/martinstrayd",
       paypalUrl: "https://www.paypal.com/paypalme/martinstrayd",
-      wiseUrl: "https://wise.com/pay/r/xGmJi9kSdap4lKo",
-      callSigns: [],
-      loreLines: [],
-      rightsLines: [],
-      loadedDocs: 0
+      wiseNote: "Wise THB / Wise Pay direct transfer",
+      loadedSources: 0
     };
 
     const FEMALE_VOICE_HINTS = [
@@ -228,22 +225,13 @@
     let GEN_NONCE = Date.now() % 100000;
     let AVAILABLE_VOICES = [];
     let SPEAK_TIMER = null;
-    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v16") || "[]"));
+    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v20") || "[]"));
 
     const $ = (id) => document.getElementById(id);
 
-    function isCodeOrSpecLine(line) {
-      const s = String(line || "").trim();
-      if (!s) return true;
-      if (/^`?bible\/[^\s`]+\.md`?/i.test(s)) return true;
-      if (/^(single reference catalog|headline pedigree|international radio footprint|catalog scale|ownership rule|youtube description|youtube title|facebook|instagram|tiktok|x)\s*\([^)]*\)\s*:/i.test(s)) return true;
-      if (/\b(songs-db\.json|core-catalog\.json|artwork fallbacks|safe artwork|long-form runway|rich seo overview|voice preference|natural \/ neural|prefer natural|aria, jenny|speechsynthesis|chars|hashtag|cta|<=|>=|button|toggle|input)\b/i.test(s)) return true;
-      return false;
-    }
-
     function stripLabelPrefix(line) {
       return String(line || "")
-        .replace(/^(?:catalog scale|ownership rule|headline pedigree|single reference catalog|international radio footprint|story\s*\/\s*hook angle|dispatch update)\s*:\s*/i, "")
+        .replace(/^(?:catalog scale|ownership rule|headline pedigree|single reference catalog|international radio footprint|story\s*\/\s*hook angle|dispatch update|host cue)\s*:\s*/i, "")
         .trim();
     }
 
@@ -300,20 +288,64 @@
       return copy.slice(0, Math.min(count, copy.length));
     }
 
+    function getPatHeaders() {
+      const inputPat = ($("ghPatInput")?.value || "").trim();
+      if (inputPat) localStorage.setItem("anna_gh_pat", inputPat);
+      const pat = inputPat || localStorage.getItem("anna_gh_pat") || "";
+      if (!pat) return null;
+      return {
+        Authorization: `Bearer ${pat}`,
+        Accept: "application/vnd.github.v3+json"
+      };
+    }
+
+    async function readLocalOrRepoText(relPath) {
+      const cleanPath = String(relPath || "").replace(/^\.\//, "").replace(/^\/+/, "");
+      const patHeaders = getPatHeaders();
+      const repoPath = cleanPath.startsWith("strayd/") ? cleanPath : `strayd/${cleanPath}`;
+
+      if (patHeaders) {
+        try {
+          const apiUrl = `https://api.github.com/repos/agent-anna/home/contents/${repoPath}?ref=main&t=${Date.now()}`;
+          const r = await fetch(apiUrl, { headers: patHeaders, cache: "no-store" });
+          if (r.ok) {
+            const meta = await r.json();
+            if (meta && meta.content) {
+              const bin = atob(meta.content.replace(/\s+/g, ""));
+              const bytes = new Uint8Array(bin.length);
+              for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+              return new TextDecoder("utf-8").decode(bytes);
+            }
+          }
+        } catch {}
+      }
+
+      const fetchCandidates = [
+        `./${cleanPath.replace(/^strayd\//, "")}`,
+        `https://agent-anna.github.io/home/${repoPath}`,
+        `https://raw.githubusercontent.com/agent-anna/home/main/${repoPath}`
+      ];
+
+      for (const u of fetchCandidates) {
+        try {
+          const r = await fetch(`${u}${u.includes("?") ? "&" : "?"}t=${Date.now()}`, { cache: "no-store" });
+          if (r.ok) return await r.text();
+        } catch {}
+      }
+      return "";
+    }
+
     function analyzeSongTitle(title) {
       const fullTitle = String(title || "").trim();
-      const isFallbackTitle = /^featured single$/i.test(fullTitle);
-      const hasQuestion = /\?/.test(fullTitle);
       const stop = new Set([
         "the", "and", "for", "with", "from", "into", "that", "this", "your",
-        "you", "can", "are", "was", "but", "not", "all", "one", "out", "off", "now", "mix",
-        "featured", "single", "track", "song"
+        "you", "can", "are", "was", "but", "not", "all", "one", "out", "off", "now", "mix"
       ]);
-      const words = isFallbackTitle ? [] : fullTitle
+      const words = fullTitle
         .replace(/[^A-Za-z0-9\s'-]/g, " ")
         .split(/\s+/)
         .map((w) => w.trim())
-        .filter((w) => w.length >= 4 && !stop.has(w.toLowerCase()));
+        .filter((w) => w.length >= 3 && !stop.has(w.toLowerCase()));
 
       const unique = [];
       const seen = new Set();
@@ -324,137 +356,8 @@
           unique.push(w);
         }
       }
-      const tags = unique.map((w) => `#${w.replace(/[^A-Za-z0-9]/g, "")}`).filter((t) => t.length > 4);
-      return { fullTitle, hasQuestion, keywords: unique, tags, isFallbackTitle };
-    }
-
-    function selectBroadcastHost(title, artist, rng) {
-      if (BIBLE_BANK.callSigns.length) {
-        const picked = pickOne(rng, BIBLE_BANK.callSigns);
-        const host = /^(DJ ANNA|Veg Anna)$/i.test(picked.host) ? picked.host : "DJ ANNA";
-        const phrase = sanitizeText(
-          picked.phrase
-            .replace(/\{TITLE\}/g, title)
-            .replace(/\{ARTIST\}/g, artist)
-            .replace(/\{HOST\}/g, host)
-        );
-        return { host, callSign: phrase };
-      }
-      const host = rng() > 0.5 ? "DJ ANNA" : "Veg Anna";
-      return { host, callSign: `${host} introducing today's single from ${artist}` };
-    }
-
-    function buildPressBriefing(title, artist, host, profile, rng) {
-      const { keywords, isFallbackTitle } = profile;
-      const k1 = keywords[0] || "";
-      const k2 = keywords.find((w) => w.toLowerCase() !== k1.toLowerCase()) || "";
-
-      const lead = (!isFallbackTitle && k1)
-        ? pickOne(rng, [
-            `${host} brings "${title}" by ${artist} into today's single dispatch, focusing on the energy around ${k2 ? `${k1} and ${k2}` : k1}.`,
-            `Today's broadcast with ${host} features "${title}" from ${artist}, highlighting how ${k1} shapes the song.`
-          ])
-        : pickOne(rng, [
-            `${host} brings today's single from ${artist} into rotation on the daily broadcast.`,
-            `${host} introduces fresh catalog music from ${artist} on today's show.`
-          ]);
-
-      const follow = pickOne(rng, [
-        `Released as part of ${artist}'s daily single schedule, the track goes directly to listeners without label bottlenecks.`,
-        `This release gives ${artist}'s catalog a dedicated daily spotlight for radio listeners and fans worldwide.`
-      ]);
-
-      return `${lead} ${follow}`.replace(/\s+/g, " ").trim();
-    }
-
-    function composeChannelAngle(chId, ctx) {
-      const { title, artist, host, profile, note, news, countries, chosenLinks, linksBlock, shortLink, rightsPick, lorePool, rng } = ctx;
-      const { hasQuestion, keywords, isFallbackTitle } = profile;
-      const k1 = keywords[0] || "";
-      const k2 = keywords.find((w) => w.toLowerCase() !== k1.toLowerCase()) || "";
-      const hubOnly = shortLink.trim() || "https://tinyurl.com/martinstrayd";
-      const cleanNote = stripLabelPrefix(sanitizeText(note, true));
-      const cleanNews = stripLabelPrefix(sanitizeText(news, true));
-
-      if (chId === "x") {
-        const hook = (!isFallbackTitle && k1)
-          ? pickOne(rng, [
-              `${host} is hyped on today's drop: hear how ${artist} brings "${title}" to life on air right now.`,
-              `New music energy with ${host}: "${title}" from ${artist} hits the broadcast today.`
-            ])
-          : pickOne(rng, [
-              `Fresh music alert with ${host}: tune in for ${artist}'s latest single live on air.`,
-              `${host} is fired up on today's show with a new release from ${artist}.`
-            ]);
-        const tags = buildPlatformTags(profile, 2, rng, ["#NewMusic", "#DailySingle"]);
-        return fitUnderLimit(sanitizeText(`${hook}${cleanNote ? ` ${cleanNote}` : ""} ${hubOnly} ${tags}`, true), 280);
-      }
-
-      if (chId === "tiktok") {
-        const hook = (!isFallbackTitle && k1)
-          ? pickOne(rng, [
-              `New music every day with ${host}: "${title}" by ${artist} brings ${k2 ? `${k1} and ${k2}` : k1} straight into today's reel.`
-            ])
-          : pickOne(rng, [
-              `New music every day with ${host}: catch ${artist}'s latest release on today's reel feed.`
-            ]);
-        const tags = buildPlatformTags(profile, 5, rng, ["#TikTokMusic", "#NewMusicDaily", "#ReelSound"]);
-        return sanitizeText([
-          `${hook}${cleanNote ? `\n${cleanNote}` : ""}`,
-          `Full hub and single bundle at ${hubOnly}. ${rightsPick}`,
-          `${tags}`
-        ].filter(Boolean).join("\n\n"), true).slice(0, 2200);
-      }
-
-      if (chId === "instagram") {
-        const hook = pickOne(rng, [
-          `Late-night rotation with ${host}: "${title}" by ${artist} carries a mood built to stay with you after the last chord.`,
-          `${host} frames "${title}" from ${artist} for today's listening session, letting the songwriting lead.`
-        ]);
-        const craftLine = lorePool[0] || `${artist} brings four decades of songwriting and 55 years inside music to every daily release.`;
-        const tags = buildPlatformTags(profile, 5, rng, ["#IndieSongwriter", "#MusicStory", "#DailyDrop"]);
-        return sanitizeText([
-          `${hook}`,
-          `${craftLine}${cleanNote ? `\n${cleanNote}` : ""}`,
-          `${rightsPick}${linksBlock ? `\n${chosenLinks.join("\n")}` : ""}`,
-          `${tags}`
-        ].filter(Boolean).join("\n\n"), true).slice(0, 2200);
-      }
-
-      if (chId === "facebook") {
-        const hook = hasQuestion
-          ? pickOne(rng, [`${host} opens today's conversation around "${title}" by ${artist} - how does it land with you?`])
-          : pickOne(rng, [`${host} is spinning "${title}" by ${artist} today and opening up the floor to listeners.`]);
-        const communityLine = cleanNews
-          ? `${cleanNews} Airplay across ${countries}.`
-          : `Airplay across ${countries}. What stands out to you first on this song?`;
-        const tags = buildPlatformTags(profile, 5, rng, ["#MusicCommunity", "#RadioAirplay", "#MartinStrayd"]);
-        return sanitizeText([
-          `${hook}`,
-          `${communityLine}`,
-          `${linksBlock ? chosenLinks.join("\n") : `Artist Hub: ${hubOnly}`}`,
-          `${tags}`
-        ].filter(Boolean).join("\n\n"), true).slice(0, 63206);
-      }
-
-      if (chId === "ytTitle") {
-        const kwLead = (!isFallbackTitle && k1) ? k1 : "Daily Single";
-        return fitUnderLimit(sanitizeText(`"${title}" - ${artist} | ${host} (${kwLead})`, true), 100);
-      }
-
-      const ytHook = `${host} introduces "${title}" by ${artist} on the daily singles release channel.`;
-      const extraDetails = [
-        cleanNews ? `${cleanNews}` : "",
-        cleanNote ? `${cleanNote}` : "",
-        `Radio rotation across ${countries}.`
-      ].filter(Boolean).join(" ");
-      const tags = buildPlatformTags(profile, 5, rng, ["#YouTubeMusic", "#DailySingle", "#Songwriting"]);
-      return sanitizeText([
-        `${ytHook}`,
-        `${extraDetails}`,
-        `${rightsPick}${linksBlock}`,
-        `${tags}`
-      ].filter(Boolean).join("\n\n"), true).slice(0, 5000);
+      const tags = unique.map((w) => `#${w.replace(/[^A-Za-z0-9]/g, "")}`).filter((t) => t.length > 3);
+      return { fullTitle, keywords: unique, tags };
     }
 
     function buildPlatformTags(profile, count, rng, extraPool = []) {
@@ -465,7 +368,7 @@
       for (const raw of rotated) {
         const t = String(raw || "").replace(/[^A-Za-z0-9#]/g, "");
         const k = t.toLowerCase();
-        if (t.length > 4 && !seen.has(k)) {
+        if (t.length > 3 && !seen.has(k)) {
           seen.add(k);
           out.push(t);
           if (out.length >= count) break;
@@ -475,19 +378,24 @@
     }
 
     function assembleChannelCopy(chId, ctx) {
-      const { title, artist, host, profile, note, news, countries, dateStr, chosenLinks, rightsPick, lorePool, rng } = ctx;
+      const { title, artist, host, profile, note, news, countries, dateStr, chosenLinks, linksBlock, shortLink, rng } = ctx;
       const safeChosen = Array.isArray(chosenLinks) ? chosenLinks : [];
-      const cleanNote = stripLabelPrefix(note);
-      const cleanNews = stripLabelPrefix(news);
+      const cleanNote = stripLabelPrefix(sanitizeText(note, chId !== "press"));
+      const cleanNews = stripLabelPrefix(sanitizeText(news, chId !== "press"));
+      const hubOnly = shortLink.trim() || BRAIN_STATE.hubUrl;
+      const k1 = profile.keywords[0] || "";
+      const k2 = profile.keywords.find((w) => w.toLowerCase() !== k1.toLowerCase()) || "";
+      const rightsLine = `Direct MP3 and cover art bundle available via ${artist} with free non-commercial sharing with friends.`;
 
       if (chId === "press") {
-        const briefing = buildPressBriefing(title, artist, host, profile, rng);
-        const artistOverview = [
-          `Australian lyricist, songwriter, composer, and independent recording artist Martin Strayd brings four decades of songwriting and 55 years inside music to a daily singles rollout built from more than 10 albums of original material.`,
-          `His background includes 1990s Hollywood guitar technician work with rock figures including Steve Jones of the Sex Pistols and Doug Fieger of The Knack, featured artist recognition on ABC Triple J Unearthed, and a direct-to-listener release model that bypasses traditional label delays.`
+        const briefing = pickOne(rng, [
+          `${host} introduces "${title}" by ${artist} on today's single dispatch${k1 ? `, highlighting the focus on ${k2 ? `${k1} and ${k2}` : k1}` : ""}.`,
+          `Today's release spotlight with ${host} features "${title}" from ${artist}, bringing a fresh single straight to listeners without label delays.`
+        ]);
+        const bio = [
+          `Australian lyricist, songwriter, composer, and independent recording artist Martin Strayd brings four decades of songwriting and 55 years inside music to a daily singles rollout from a catalog of more than 10 albums of original work.`,
+          `His background includes 1990s Hollywood guitar technician work with rock figures including Steve Jones of the Sex Pistols and Doug Fieger of The Knack, featured artist recognition on ABC Triple J Unearthed, and music played at Kunda Cafe.`
         ].join(" ");
-        const dossierText = lorePool.length ? `${artistOverview} ${lorePool.join(" ")}` : artistOverview;
-        const formattedLinks = safeChosen.length ? `\n\n${safeChosen.join("\n\n")}` : "";
 
         return sanitizeText([
           `DJ ANNA SINGLES RELEASE MANAGEMENT TEAM`,
@@ -511,15 +419,79 @@
           ``,
           `ARTIST DOSSIER - MARTIN STRAYD`,
           ``,
-          `${dossierText}`,
+          `${bio}`,
           ``,
           `DIRECT OWNERSHIP, SHARING & LINKS`,
           ``,
-          `${rightsPick}${formattedLinks}`
+          `${rightsLine}${safeChosen.length ? `\n\n${safeChosen.join("\n\n")}` : ""}`
         ].filter((part) => part !== undefined).join("\n").replace(/\n{4,}/g, "\n\n\n"), false);
       }
 
-      return composeChannelAngle(chId, ctx);
+      if (chId === "x") {
+        const hook = pickOne(rng, [
+          `${host} on air with "${title}" by ${artist} - new daily single energy live now.`,
+          `Fresh single drop: "${title}" from ${artist} with ${host} on today's broadcast.`
+        ]);
+        const tags = buildPlatformTags(profile, 2, rng, ["#NewMusic", "#DailySingle"]);
+        return fitUnderLimit(sanitizeText(`${hook}${cleanNote ? ` ${cleanNote}` : ""} ${hubOnly} ${tags}`, true), 280);
+      }
+
+      if (chId === "tiktok") {
+        const hook = pickOne(rng, [
+          `New music every day with ${host}: "${title}" by ${artist} hits today's reel.`
+        ]);
+        const tags = buildPlatformTags(profile, 5, rng, ["#TikTokMusic", "#NewMusicDaily", "#ReelSound"]);
+        return sanitizeText([
+          `${hook}${cleanNote ? `\n${cleanNote}` : ""}`,
+          `${rightsLine} ${hubOnly}`,
+          `${tags}`
+        ].filter(Boolean).join("\n\n"), true).slice(0, 2200);
+      }
+
+      if (chId === "instagram") {
+        const hook = pickOne(rng, [
+          `${host} spotlights "${title}" by ${artist} - songwriting shaped by four decades of craft and 55 years inside music.`
+        ]);
+        const tags = buildPlatformTags(profile, 5, rng, ["#IndieSongwriter", "#MusicStory", "#DailyDrop"]);
+        return sanitizeText([
+          `${hook}${cleanNote ? `\n${cleanNote}` : ""}`,
+          `${rightsLine}${linksBlock ? `\n${safeChosen.join("\n")}` : ""}`,
+          `${tags}`
+        ].filter(Boolean).join("\n\n"), true).slice(0, 2200);
+      }
+
+      if (chId === "facebook") {
+        const hook = `${host} is spinning "${title}" by ${artist} today.`;
+        const airplay = cleanNews
+          ? `${cleanNews} Radio airplay across ${countries}.`
+          : `Radio airplay across ${countries}. What stood out to you first on this track?`;
+        const tags = buildPlatformTags(profile, 5, rng, ["#MusicCommunity", "#RadioAirplay", "#MartinStrayd"]);
+        return sanitizeText([
+          `${hook}`,
+          `${airplay}`,
+          `${linksBlock ? safeChosen.join("\n") : `Artist Hub: ${hubOnly}`}`,
+          `${tags}`
+        ].filter(Boolean).join("\n\n"), true).slice(0, 63206);
+      }
+
+      if (chId === "ytTitle") {
+        const tagWord = k1 || "Single";
+        return fitUnderLimit(sanitizeText(`"${title}" - ${artist} | ${host} (${tagWord})`, true), 100);
+      }
+
+      const ytIntro = `${host} presents "${title}" by ${artist} on the daily singles channel.`;
+      const details = [
+        cleanNews ? `${cleanNews}` : "",
+        cleanNote ? `${cleanNote}` : "",
+        `Radio airplay across ${countries}.`
+      ].filter(Boolean).join(" ");
+      const tags = buildPlatformTags(profile, 5, rng, ["#YouTubeMusic", "#DailySingle", "#Songwriting"]);
+      return sanitizeText([
+        `${ytIntro}`,
+        `${details}`,
+        `${rightsLine}${linksBlock}`,
+        `${tags}`
+      ].filter(Boolean).join("\n\n"), true).slice(0, 5000);
     }
 
     function generateUniquePost(chId, baseCtx) {
@@ -531,7 +503,7 @@
         if (!SEEN_HASHES.has(key)) {
           SEEN_HASHES.add(key);
           try {
-            localStorage.setItem("anna_seen_posts_v16", JSON.stringify(Array.from(SEEN_HASHES).slice(-5000)));
+            localStorage.setItem("anna_seen_posts_v20", JSON.stringify(Array.from(SEEN_HASHES).slice(-5000)));
           } catch {}
           return capped;
         }
@@ -665,8 +637,7 @@
         .replace(/\{\{TITLE\}\}/gi, "")
         .replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "")
         .replace(/^Martin\s+Strayd\s*[-â€“â€”:|]+\s*/i, "")
-        .replace(/#FirstIteminCatalogJSONon\b/gi, "")
-        .replace(/\s*\(\s*\)\s*/g, " "));
+        .replace(/#FirstIteminCatalogJSONon\b/gi, ""));
     }
 
     function fitUnderLimit(text, maxLen) {
@@ -684,13 +655,29 @@
     }
 
     function makeFallbackArt(title) {
-      const safe = (title || "Martin Strayd Single").replace(/[<>&"]/g, "");
-      const svg = `<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="600" height="600" viewBox="0 0 600 600">
-        <rect width="600" height="600" fill="#132238"/>
-        <text x="300" y="280" text-anchor="middle" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="28" font-weight="700">${safe.slice(0, 26)}</text>
-        <text x="300" y="325" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="18">DJ ANNA SINGLES RELEASE</text>
-      </svg>`;
-      return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+      const canvas = document.createElement("canvas");
+      canvas.width = 400;
+      canvas.height = 400;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.fillStyle = "#132238";
+        ctx.fillRect(0, 0, 400, 400);
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(16, 16, 368, 368);
+        ctx.fillStyle = "#38bdf8";
+        ctx.font = "bold 18px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("MARTIN STRAYD", 200, 155);
+        ctx.fillStyle = "#eef3fb";
+        ctx.font = "bold 22px system-ui, sans-serif";
+        const label = String(title || "STRAYD SINGLE").slice(0, 24);
+        ctx.fillText(label, 200, 205);
+        ctx.fillStyle = "#9fb0c8";
+        ctx.font = "15px system-ui, sans-serif";
+        ctx.fillText("DJ ANNA DAILY RELEASE", 200, 250);
+      }
+      return canvas.toDataURL("image/png");
     }
 
     function resolveArtUrl(songOrRaw, title) {
@@ -701,21 +688,25 @@
         const val = String(raw || "").trim();
         if (!val) continue;
         if (/^(https?:\/\/|data:image\/)/i.test(val)) return val;
-        if (/^store-art\//i.test(val)) return `[https://martinstrayd.github.io/artist/$](https://martinstrayd.github.io/artist/$){encodeURI(val)}`;
-        return `../${encodeURI(val.replace(/^(\.\/|\.\.\/)+/, ""))}`;
+        if (/^store-art\//i.test(val)) return `https://martinstrayd.github.io/artist/${encodeURI(val)}`;
+        return `https://agent-anna.github.io/home/strayd/${encodeURI(val.replace(/^(\.\/|strayd\/)+/, ""))}`;
       }
       return makeFallbackArt(title);
     }
 
     function getSelectedLinks() {
-      const hub = ($("hubUrl").value.trim() || "[https://tinyurl.com/martinstrayd](https://tinyurl.com/martinstrayd)").replace("[https://martinstrayd.github.io/artist/](https://martinstrayd.github.io/artist/)", "[https://tinyurl.com/martinstrayd](https://tinyurl.com/martinstrayd)");
+      const hub = ($("hubUrl").value.trim() || BRAIN_STATE.hubUrl);
       const chosen = [];
       if ($("chkHub")?.checked && hub) chosen.push(`Artist Hub: ${hub}`);
-      if ($("chkCoffee")?.checked) chosen.push(`Buy Me a Coffee: ${BIBLE_BANK.coffeeUrl}`);
-      if ($("chkPaypal")?.checked) chosen.push(`PayPal: ${BIBLE_BANK.paypalUrl}`);
-      if ($("chkWise")?.checked) chosen.push(`Wise (200 THB): ${BIBLE_BANK.wiseUrl}`);
+      if ($("chkCoffee")?.checked) chosen.push(`Buy Me a Coffee: ${BIBLE_BANK_COFFEE}`);
+      if ($("chkPaypal")?.checked) chosen.push(`PayPal: ${BIBLE_BANK_PAYPAL}`);
+      if ($("chkWise")?.checked) chosen.push(`Wise: ${BIBLE_BANK_WISE}`);
       return { hub, chosen };
     }
+
+    const BIBLE_BANK_COFFEE = BRAIN_STATE.coffeeUrl;
+    const BIBLE_BANK_PAYPAL = BRAIN_STATE.paypalUrl;
+    const BIBLE_BANK_WISE = BRAIN_STATE.wiseNote;
 
     function createCardElement(ch) {
       const card = document.createElement("article");
@@ -780,7 +771,7 @@
         } else if (act === "post") {
           const { hub } = getSelectedLinks();
           if (chId === "x") {
-            window.open(`[https://x.com/intent/tweet?text=$](https://x.com/intent/tweet?text=$){encodeURIComponent(ta.value.slice(0, 280))}`, "_blank", "noopener");
+            window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(ta.value.slice(0, 280))}`, "_blank", "noopener");
           } else {
             navigator.clipboard?.writeText(ta.value).catch(() => {});
             window.open(hub, "_blank", "noopener");
@@ -794,7 +785,7 @@
     }
 
     function recordHistory(channel, action, text) {
-      const title = $("songHeading").textContent || "Featured Single";
+      const title = $("songHeading").textContent || "Martin Strayd Single";
       const key = "anna_strayd_release_history";
       let list = [];
       try { list = JSON.parse(localStorage.getItem(key) || "[]"); } catch { list = []; }
@@ -893,7 +884,7 @@
 
       const idx = Number($("songSelect").value || 0);
       const songObj = CATALOG_SONGS[idx] || CATALOG_SONGS[0] || {};
-      const title = cleanTitle($("customTitle").value) || cleanTitle(songObj.title || songObj.name || songObj.track || "") || "Featured Single";
+      const title = cleanTitle($("customTitle").value) || cleanTitle(songObj.title || songObj.name || songObj.track || "") || "STRAYD Catalog Single";
       const artist = cleanTitle(songObj.artist) || "Martin Strayd";
       const note = sanitizeText($("noteInput").value);
       const news = sanitizeText($("newsInput").value);
@@ -902,26 +893,21 @@
       const { chosen } = getSelectedLinks();
 
       const seedNum = (parseInt(hashString(`${title.toLowerCase()}|${idx}|${GEN_NONCE}`), 36) || 104729) >>> 0;
-      const baseRng = makeRng(seedNum);
-
-      const { host, callSign } = selectBroadcastHost(title, artist, baseRng);
+      const rng = makeRng(seedNum);
+      const host = rng() > 0.45 ? "DJ ANNA" : "Veg Anna";
       const profile = analyzeSongTitle(title);
       const linksBlock = chosen.length ? `\n\n${chosen.join("\n")}` : "";
       const shortLink = chosen.length ? ` ${chosen[0].replace(/^[^:]+:\s*/, "")}` : "";
-      const cleanLore = BIBLE_BANK.loreLines.filter((l) => !isCodeOrSpecLine(l));
-      const cleanRights = BIBLE_BANK.rightsLines.filter((l) => !isCodeOrSpecLine(l) && !/https?:\/\//i.test(l));
-      const lorePool = shuffleSlice(baseRng, cleanLore, 2);
-      const rightsPick = pickOne(baseRng, cleanRights) || `Listeners who get the MP3 and cover art bundle own it directly and can share copies freely with friends for non-commercial enjoyment.`;
 
       CURRENT_ART = resolveArtUrl(songObj, title);
       $("songHeading").textContent = title;
-      $("djMeta").textContent = `${host} - DJ ANNA Singles Release Management (${BIBLE_BANK.loadedDocs} Bible docs Â· ${CATALOG_SONGS.length || 1} tracks)`;
+      $("djMeta").textContent = `${host} - ${artist} (${BRAIN_STATE.loadedSources} repo files Â· ${CATALOG_SONGS.length} tracks)`;
       syncArtwork(title);
 
       const ctx = {
-        title, artist, host, callSign, profile,
+        title, artist, host, profile,
         note, news, countries, dateStr, chosenLinks: chosen, linksBlock, shortLink,
-        rightsPick, lorePool, seed: seedNum
+        seed: seedNum
       };
 
       ALL_CHANNELS.forEach((ch) => {
@@ -936,47 +922,65 @@
     }
 
     async function loadCatalog() {
-      $("statusText").textContent = "Pulling Bible & catalog...";
-      try {
-        await loadBibleBank();
-        const select = $("songSelect");
-        select.innerHTML = "";
+      $("statusText").textContent = "Loading songs-db.json & core-catalog.json...";
+      BRAIN_STATE.loadedSources = 0;
 
-        const sources = ["songs-db.json", "core-catalog.json", "../songs-db.json", "../core-catalog.json", "../strayd/songs-db.json", "../strayd/core-catalog.json"];
-        const byTitle = new Map();
-        for (const url of sources) {
-          const rawTxt = await readRepoText(url);
-          if (!rawTxt) continue;
-          try {
-            const data = JSON.parse(rawTxt);
-            const list = Array.isArray(data) ? data : (data.songs || data.tracks || data.items || []);
-            list.forEach((item) => {
-              const tClean = cleanTitle(item.title || item.name || item.track || "");
-              if (!tClean) return;
-              const key = tClean.toLowerCase();
-              const prev = byTitle.get(key) || {};
-              byTitle.set(key, { ...prev, ...item, title: tClean, artUrl: item.artUrl || prev.artUrl || "", art: item.art || prev.art || "" });
-            });
-          } catch {}
-        }
-
-        CATALOG_SONGS = Array.from(byTitle.values());
-        if (!CATALOG_SONGS.length) CATALOG_SONGS = [{ title: "Featured Single", artist: "Martin Strayd" }];
-
-        CATALOG_SONGS.forEach((t, idx) => {
-          const opt = document.createElement("option");
-          opt.value = String(idx);
-          opt.textContent = `${String(idx + 1).padStart(3, "0")} - ${t.title}`;
-          select.appendChild(opt);
-        });
-
-        buildPostsFromInput(false);
-      } catch (err) {
-        if (!CATALOG_SONGS.length) CATALOG_SONGS = [{ title: "Featured Single", artist: "Martin Strayd" }];
-        $("songSelect").innerHTML = `<option value="0">001 - Featured Single</option>`;
-        buildPostsFromInput(false);
-        $("statusText").textContent = `Fallback loaded (${err?.message || "ready"})`;
+      const brainRaw = await readLocalOrRepoText("record-brain.json");
+      if (brainRaw) {
+        try {
+          const brain = JSON.parse(brainRaw);
+          BRAIN_STATE.loadedSources += 1;
+          if (brain.salesPortal) BRAIN_STATE.hubUrl = brain.salesPortal;
+          if (brain.paymentRails?.buyMeACoffee) BRAIN_STATE.coffeeUrl = brain.paymentRails.buyMeACoffee;
+          if (brain.paymentRails?.directMp3AndArt) BRAIN_STATE.paypalUrl = brain.paymentRails.directMp3AndArt;
+          if (brain.paymentRails?.wise) BRAIN_STATE.wiseNote = brain.paymentRails.wise;
+          if ($("hubUrl") && !localStorage.getItem("anna_custom_hub")) {
+            $("hubUrl").value = BRAIN_STATE.hubUrl;
+          }
+        } catch {}
       }
+
+      const select = $("songSelect");
+      select.innerHTML = "";
+      const byTitle = new Map();
+
+      for (const fileName of ["songs-db.json", "core-catalog.json", "strayd-artist-live.json"]) {
+        const rawTxt = await readLocalOrRepoText(fileName);
+        if (!rawTxt) continue;
+        try {
+          const data = JSON.parse(rawTxt);
+          BRAIN_STATE.loadedSources += 1;
+          const list = Array.isArray(data) ? data : (data.songs || data.tracks || data.items || []);
+          list.forEach((item) => {
+            const tClean = cleanTitle(item.title || item.name || item.track || "");
+            if (!tClean) return;
+            const key = tClean.toLowerCase();
+            const prev = byTitle.get(key) || {};
+            byTitle.set(key, {
+              ...prev,
+              ...item,
+              title: tClean,
+              artist: cleanTitle(item.artist || prev.artist || data.artist || "Martin Strayd"),
+              artUrl: item.artUrl || prev.artUrl || "",
+              art: item.art || prev.art || ""
+            });
+          });
+        } catch {}
+      }
+
+      CATALOG_SONGS = Array.from(byTitle.values());
+      if (!CATALOG_SONGS.length) {
+        CATALOG_SONGS = [{ title: "Adhd I Can Do That (Travillen Disorder)", artist: "Martin Strayd", art: "store-art/Martin Strayd - Adhd I Can Do That (Travillen Disorder).png" }];
+      }
+
+      CATALOG_SONGS.forEach((t, idx) => {
+        const opt = document.createElement("option");
+        opt.value = String(idx);
+        opt.textContent = `${String(idx + 1).padStart(3, "0")} - ${t.title}`;
+        select.appendChild(opt);
+      });
+
+      buildPostsFromInput(false);
     }
 
     if ("speechSynthesis" in window) {
@@ -1000,6 +1004,10 @@
     $("ghPatInput").addEventListener("change", async () => {
       await loadCatalog();
       buildPostsFromInput(true);
+    });
+    $("hubUrl").addEventListener("change", () => {
+      localStorage.setItem("anna_custom_hub", $("hubUrl").value.trim());
+      buildPostsFromInput(false);
     });
     $("testVoiceBtn").addEventListener("click", () => {
       const t = $("songHeading").textContent || "today's single";
