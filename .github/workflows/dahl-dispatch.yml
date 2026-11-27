@@ -1,0 +1,71 @@
+name: Agent Anna Dahl Dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      song_index:
+        description: "0-based track index in strayd/songs-db.json"
+        required: false
+        default: "0"
+      angle:
+        description: "Optional hook or story angle"
+        required: false
+        default: ""
+permissions:
+  contents: write
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT || github.token }}
+      - name: Run Dahl MiniMax-M2.7 generator
+        env:
+          DAHL_API_KEY: ${{ secrets.DAHL_KEY }}
+          SONG_INDEX: ${{ github.event.inputs.song_index || '0' }}
+          ANGLE: ${{ github.event.inputs.angle || '' }}
+        run: |
+          python3 - << 'PY'
+          import json, os, pathlib, urllib.request
+          key = os.environ.get("DAHL_API_KEY", "").strip()
+          if not key:
+              raise SystemExit("DAHL_KEY secret is empty")
+          idx = int(os.environ.get("SONG_INDEX", "0") or "0")
+          angle = os.environ.get("ANGLE", "").strip()
+          ctx = []
+          for folder in ("body", "bible", "soul", "character"):
+              p = pathlib.Path(folder)
+              if p.exists():
+                  for f in sorted(p.glob("*"))[:3]:
+                      if f.is_file():
+                          ctx.append(f"[{f}]\n" + f.read_text(encoding="utf-8", errors="ignore")[:800])
+          songs_path = pathlib.Path("strayd/songs-db.json")
+          songs = []
+          if songs_path.exists():
+              raw = json.loads(songs_path.read_text(encoding="utf-8", errors="ignore"))
+              songs = raw if isinstance(raw, list) else (raw.get("songs") or raw.get("tracks") or [])
+          track = songs[idx] if songs and 0 <= idx < len(songs) else {"title": "Adhd I Can Do That (Travillen Disorder)", "artist": "Martin Strayd"}
+          title = track.get("title") or track.get("name") or "Single"
+          artist = track.get("artist") or "Martin Strayd"
+          sys_msg = "You are Agent Anna. Use the repo context to write a fresh press release and distinct social posts (x, tiktok, instagram, facebook, ytTitle, ytDesc) for ONE song without repeating sentences or hashtags across channels.\n" + "\n\n".join(ctx)[:2800]
+          usr_msg = f"Track: {title}\nArtist: {artist}\nAngle: {angle}\nReturn JSON with keys press, x, tiktok, instagram, facebook, ytTitle, ytDesc."
+          req = urllib.request.Request(
+              "https://inference.dahl.global/v1/chat/completions",
+              data=json.dumps({"model": "MiniMaxAI/MiniMax-M2.7", "messages": [{"role": "system", "content": sys_msg}, {"role": "user", "content": usr_msg}]}).encode("utf-8"),
+              headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json", "User-Agent": "Agent-Anna-GH"},
+              method="POST"
+          )
+          with urllib.request.urlopen(req, timeout=45) as resp:
+              data = json.loads(resp.read().decode("utf-8"))
+          out_path = pathlib.Path("strayd/last-dahl-dispatch.json")
+          out_path.write_text(json.dumps({"track": title, "artist": artist, "raw": data["choices"][0]["message"]["content"]}, indent=2), encoding="utf-8")
+          print("Wrote", out_path)
+          PY
+      - name: Commit generated dispatch
+        run: |
+          git config user.name "agent-anna"
+          git config user.email "agent-anna@users.noreply.github.com"
+          git add strayd/last-dahl-dispatch.json
+          git diff --staged --quiet || git commit -m "chore(dispatch): generate via Dahl MiniMaxAI/MiniMax-M2.7"
+          git push
