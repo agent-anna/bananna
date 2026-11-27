@@ -101,7 +101,7 @@
     button.primary { background: var(--accent); color: #061018; font-weight: 600; border: none; }
     .status-pill { font-size: 0.8rem; color: var(--accent); padding-left: 6px; }
     .press-top { margin-bottom: 16px; }
-    .press-top textarea { min-height: 440px; line-height: 1.6; }
+    .press-top textarea { min-height: 460px; line-height: 1.6; }
     .posts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
     .post-card {
       background: var(--card);
@@ -128,7 +128,7 @@
       </div>
       <div>
         <h1 id="songHeading" class="song-title">Loading song database...</h1>
-        <div id="djMeta" class="meta-line">DJ ANNA - Live Non-Repeating Daily Singles Studio</div>
+        <div id="djMeta" class="meta-line">DJ ANNA / Veg Anna - Record Release Command Studio</div>
         <div class="controls-grid">
           <div>
             <label for="songSelect">1. Pick Song from Catalog</label>
@@ -184,7 +184,7 @@
   </div>
 
   <script>
-    const PRESS_CHANNEL = { id: "press", label: "Official Wire Press Release (Dated - 3/4-Page A4 - Full Bio)", max: 12000 };
+    const PRESS_CHANNEL = { id: "press", label: "Record Release Dispatch (Dated - Lead Single Focus)", max: 12000 };
     const SOCIAL_CHANNELS = [
       { id: "x", label: "X", max: 280 },
       { id: "tiktok", label: "TikTok", max: 2200 },
@@ -200,7 +200,7 @@
       coffeeUrl: "https://buymeacoffee.com/martinstrayd",
       paypalUrl: "https://www.paypal.com/paypalme/martinstrayd",
       wiseUrl: "https://wise.com/pay/r/xGmJi9kSdap4lKo",
-      callSignFragments: []
+      callSignPhrases: []
     };
 
     const FEMALE_VOICE_HINTS = [
@@ -218,12 +218,13 @@
     let CURRENT_ART = "";
     let GEN_NONCE = Date.now() % 100000;
     let AVAILABLE_VOICES = [];
-    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v1") || "[]"));
+    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v2") || "[]"));
 
     const $ = (id) => document.getElementById(id);
 
     function sanitizeText(str) {
       return String(str || "")
+        .replace(/\*\*.*?\*\*/g, "")
         .replace(/[\u2013\u2014\u2015]/g, "-")
         .replace(/\s+-\s+/g, " - ")
         .replace(/\s{2,}/g, " ")
@@ -251,36 +252,46 @@
       return arr[Math.floor(rng() * arr.length)];
     }
 
-    function extractTitleTokens(title) {
-      const stop = new Set(["the", "and", "for", "with", "from", "into", "that", "this", "your", "you", "can", "are", "was", "but", "not", "all", "one", "out", "off"]);
+    function extractDistinctKeywords(title) {
+      const stop = new Set(["the", "and", "for", "with", "from", "into", "that", "this", "your", "you", "can", "are", "was", "but", "not", "all", "one", "out", "off", "disorder", "track", "song"]);
       const words = String(title || "")
         .replace(/[^A-Za-z0-9\s'-]/g, " ")
         .split(/\s+/)
         .map((w) => w.trim())
         .filter((w) => w.length >= 3 && !stop.has(w.toLowerCase()));
-      return Array.from(new Set(words));
+      const unique = [];
+      const seen = new Set();
+      for (const w of words) {
+        const k = w.toLowerCase();
+        if (!seen.has(k)) {
+          seen.add(k);
+          unique.push(w);
+        }
+      }
+      return unique;
     }
 
-    function parseBibleCallSigns(md) {
-      const list = [];
+    function parseCallSignsOnly(md) {
+      const parsed = [];
+      let activeSection = false;
       md.split(/\r?\n/).forEach((raw) => {
-        if (!/^-\s+/.test(raw)) return;
-        const clean = sanitizeText(raw.replace(/^-\s+/, ""));
+        if (/^##\s+HOST NAMES & CALL SIGNS/i.test(raw)) { activeSection = true; return; }
+        if (/^##\s+/.test(raw)) { activeSection = false; return; }
+        if (!activeSection || !/^-\s+/.test(raw)) return;
+        const clean = raw.replace(/^-\s+/, "").replace(/\*\*.*?\*\*/g, "").trim();
+        if (!clean || clean.length > 180) return;
         const parts = clean.split("|").map((p) => p.trim());
-        const host = /^(DJ ANNA|Veg Anna)$/i.test(parts[0]) ? parts[0] : (parts.length > 1 ? "DJ ANNA" : "Veg Anna");
-        const phrase = parts.length > 1 ? parts[1] : parts[0];
-        if (phrase) list.push({ host, phrase });
+        const host = /^(DJ ANNA|Veg Anna)$/i.test(parts[0]) ? parts[0] : "DJ ANNA";
+        const phrase = sanitizeText(parts.length > 1 ? parts[1] : parts[0]);
+        if (phrase) parsed.push({ host, phrase });
       });
-      if (list.length) BIBLE.callSignFragments = list;
+      if (parsed.length) BIBLE.callSignPhrases = parsed;
     }
 
     async function loadBible() {
       const docs = [
-        "../bible/00-bible-index.md",
         "../bible/02-links.md",
-        "../bible/03-master-pages.md",
         "../bible/04-voice-and-broadcast-law.md",
-        "../bible/05-mission-manifesto.md",
         "../bible/06-dj-anna-persona.md"
       ];
       for (const path of docs) {
@@ -288,7 +299,7 @@
           const r = await fetch(path, { cache: "no-store" });
           if (!r.ok) continue;
           const txt = await r.text();
-          if (path.endsWith("06-dj-anna-persona.md")) parseBibleCallSigns(txt);
+          if (path.endsWith("06-dj-anna-persona.md")) parseCallSignsOnly(txt);
           const hubMatch = txt.match(/https:\/\/martinstrayd\.github\.io\/artist\/[^\s)]*/i);
           if (hubMatch) BIBLE.hubUrl = hubMatch[0];
           const coffeeMatch = txt.match(/https:\/\/buymeacoffee\.com\/martinstrayd[^\s)]*/i);
@@ -367,7 +378,7 @@
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
         <rect width="600" height="600" fill="#132238"/>
         <text x="300" y="280" text-anchor="middle" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="28" font-weight="700">${safe.slice(0, 26)}</text>
-        <text x="300" y="325" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="18">DAILY SINGLE BROADCAST</text>
+        <text x="300" y="325" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="18">DAILY SINGLE COMMAND</text>
       </svg>`;
       return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
     }
@@ -384,20 +395,6 @@
         return `../${encodeURI(val.replace(/^(\.\/|\.\.\/)+/, ""))}`;
       }
       return makeFallbackArt(title);
-    }
-
-    function getCompanionTitles(currentIdx, rng) {
-      if (CATALOG_SONGS.length <= 1) return `"365"`;
-      const picks = new Set();
-      let guard = 0;
-      while (picks.size < Math.min(3, CATALOG_SONGS.length - 1) && guard < 30) {
-        guard += 1;
-        const pickIdx = Math.floor(rng() * CATALOG_SONGS.length);
-        if (pickIdx !== currentIdx && CATALOG_SONGS[pickIdx]?.title) {
-          picks.add(`"${CATALOG_SONGS[pickIdx].title}"`);
-        }
-      }
-      return Array.from(picks).join(", ") || `"365"`;
     }
 
     function getSelectedLinks() {
@@ -548,126 +545,107 @@
       $("statusText").textContent = `On Air (${chosenVoice ? chosenVoice.name : "Female Voice"})...`;
     }
 
-    function assembleUniqueCandidate(chId, ctx) {
-      const { title, artist, host, callSign, kw1, kw2, peers, note, news, countries, dateStr, linksBlock, shortLink, rng } = ctx;
-      const notePart = note ? ` ${note}` : "";
-      const newsPart = news ? ` ${news}` : "";
+    function assembleChannelCopy(chId, ctx) {
+      const { title, artist, host, callSign, kw1, kw2, note, news, countries, dateStr, linksBlock, shortLink, rng } = ctx;
+      const hasSecondDistinctKw = Boolean(kw2 && kw2.toLowerCase() !== kw1.toLowerCase());
+      const themePhrase = hasSecondDistinctKw ? `${kw1} and ${kw2}` : kw1;
+      const tagSlug = (kw1 || "DailySingle").replace(/[^A-Za-z0-9]/g, "") || "DailySingle";
+      const noteLine = note ? ` ${note}` : "";
+      const newsLine = news ? ` ${news}` : "";
+
+      if (chId === "press") {
+        return [
+          `RECORD RELEASE DISPATCH - ${dateStr}`,
+          `COMMAND DIRECTIVE: DAILY SINGLE LAUNCH - "${title.toUpperCase()}" BY ${artist.toUpperCase()}`,
+          `ON-AIR COMMAND: ${host} - GLOBAL DAILY SINGLES OPERATION`,
+          ``,
+          `1. LEAD SINGLE BRIEFING`,
+          `${callSign}. Today's official single release is "${title}" by ${artist}, centered on the title and theme angle of ${themePhrase}. Built for daily release momentum, "${title}" goes straight from songwriter to listeners without label delay.`,
+          ``,
+          `2. INTERNATIONAL RADIO & GLOBAL STREAMING DISTRIBUTION`,
+          `"${title}" is distributed worldwide across Spotify, Apple Music, iTunes, YouTube Music, and Shazam, with international radio airplay spanning ${countries}.${note ? `\nRelease Angle: ${note}` : ""}${news ? `\nField Dispatch: ${news}` : ""}`,
+          ``,
+          `3. ARTIST DOSSIER - MARTIN STRAYD`,
+          `Australian lyricist, songwriter, composer, and independent recording artist Martin Strayd brings 55 years inside music and four decades of songwriting to the daily singles campaign. Prior to launching his solo releases, Strayd served in Hollywood during the 1990s as a celebrity guitar technician for rock figures including Steve Jones of the Sex Pistols and Doug Fieger of The Knack, and is a featured artist on ABC Triple J Unearthed.`,
+          ``,
+          `4. DIRECT ACQUISITION & SHARING RIGHTS`,
+          `Listeners can acquire the official "${title}" MP3 and cover art bundle directly for permanent personal ownership and share copies freely with friends for non-commercial enjoyment.${linksBlock}`
+        ].join("\n");
+      }
 
       if (chId === "x") {
-        const openers = [
-          `Caught "${title}" (${artist}) spinning via ${host} - zero label polish, focus on ${kw1}.`,
-          `${host} just put "${title}" by ${artist} in rotation. What happens when ${kw1} meets ${kw2}?`,
-          `Daily single spotlight: "${title}" from ${artist}. ${host} flags ${kw1} before the hook settles.`,
-          `Why skip a track built on ${kw1}? ${artist} delivers "${title}" with ${host} on the mic.`
+        const xFrames = [
+          `"${title}" (${artist}) - ${host} locks in on ${kw1}.${noteLine}${shortLink} #MartinStrayd #${tagSlug}`,
+          `Daily release active: "${title}" by ${artist}, spotlighting ${kw1} with ${host}.${noteLine}${shortLink} #DailySingle #MartinStrayd`,
+          `${host} flags "${title}" from ${artist} - theme focus: ${kw1}.${noteLine}${shortLink} #MartinStrayd #IndieMusic`
         ];
-        const closers = [`${shortLink} #MartinStrayd`, `${shortLink} #DailySingle`, `${shortLink} #IndieMusic`];
-        return fitUnderLimit(`${pickOne(rng, openers)}${notePart}${pickOne(rng, closers)}`, 280);
+        return fitUnderLimit(pickOne(rng, xFrames), 280);
       }
 
       if (chId === "tiktok") {
-        const hooks = [
-          `Hold up on "${title}" by ${artist} - ${callSign} and ${kw1} hits immediately.`,
-          `${callSign}. When ${kw1} shows up in a daily release from ${artist}, you pay attention.`,
-          `Listen closely to how ${artist} shapes ${kw1} inside "${title}" - ${callSign}.`,
-          `Fresh single in the feed: "${title}" (${artist}). ${callSign} with a sharp look at ${kw1}.`
+        const ttFrames = [
+          `${callSign}. "${title}" by ${artist} puts ${themePhrase} front and center on today's single drop.${noteLine}${newsLine} Own the "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n#MartinStrayd #DailySingle #${tagSlug}`,
+          `Today's single drop: "${title}" from ${artist} with ${host} on air, built around ${themePhrase}.${noteLine}${newsLine} Grab the MP3 and cover art bundle to own outright and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n#MartinStrayd #${tagSlug} #Songwriting`
         ];
-        const body = pickOne(rng, [
-          `One new song every day from a 10+ album catalog without waiting on corporate gatekeepers.`,
-          `Built across four decades of songwriting and rolling out a single every single day.`,
-          `Direct from ${artist} to listeners and radio worldwide, one daily release at a time.`
-        ]);
-        const offer = `Grab the "${title}" MP3 and cover art bundle to own outright and share freely with friends for non-commercial enjoyment. Companion tracks: ${peers}.${notePart}${newsPart}${linksBlock}`;
-        return sanitizeText(`${pickOne(rng, hooks)} ${body} ${offer}\n\n#MartinStrayd #DailySingle #${kw1.replace(/[^A-Za-z0-9]/g, "") || "Music"}`).slice(0, 2200);
+        return sanitizeText(pickOne(rng, ttFrames)).slice(0, 2200);
       }
 
       if (chId === "instagram") {
-        const moodLead = pickOne(rng, [
-          `${callSign} - letting "${title}" by ${artist} settle in around ${kw1}.`,
-          `Late-night frequency with ${host}: "${title}" from ${artist} carries the weight of ${kw1} and ${kw2}.`,
-          `${callSign} with "${title}" by ${artist}, shaped by four decades of songwriting and 55 years inside music.`
-        ]);
-        const craft = pickOne(rng, [
-          `Real songwriting has a different pulse when it goes straight from the artist to the listener.`,
-          `Every release in this daily run adds another human chapter to the archive.`
-        ]);
-        const own = `Own the "${title}" MP3 and cover art bundle and share copies freely with friends for non-commercial enjoyment.${notePart}${linksBlock}`;
-        return sanitizeText(`${moodLead} ${craft} ${own}\n\n#MartinStrayd #Songwriting #IndieMusic`).slice(0, 2200);
+        const igFrames = [
+          `${callSign} - "${title}" by ${artist} brings ${themePhrase} into sharp focus. Four decades of songwriting and 55 years in music behind every daily release.${noteLine} Own the "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n#MartinStrayd #${tagSlug} #IndieMusic`,
+          `On air with ${host}: "${title}" from ${artist}, shaped around ${themePhrase}.${noteLine}${newsLine} Collect the "${title}" MP3 and cover art bundle for permanent personal ownership and free non-commercial sharing with friends.${linksBlock}\n\n#MartinStrayd #DailySingle #${tagSlug}`
+        ];
+        return sanitizeText(pickOne(rng, igFrames)).slice(0, 2200);
       }
 
       if (chId === "facebook") {
-        const lead = pickOne(rng, [
-          `${callSign} with "${title}" by ${artist}. Where does ${kw1} take you on first listen?`,
-          `${host} in the booth highlighting "${title}" from ${artist} - spotlighting ${kw1} and ${kw2}.`,
-          `Daily single broadcast with ${host}: "${title}" by ${artist}.`
-        ]);
-        const bioSnippet = pickOne(rng, [
-          `${artist} brings 55 years of music history and four decades of songwriting, including 1990s Hollywood guitar technician work alongside Steve Jones of the Sex Pistols and Doug Fieger of The Knack, into a daily single rollout.`,
-          `From ABC Triple J Unearthed roots to radio across ${countries}, ${artist} releases one new licensed single every single day.`
-        ]);
-        const prompt = `Tell us what stands out on "${title}" and check out ${peers} in the catalog. Own the MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${notePart}${newsPart}${linksBlock}`;
-        return sanitizeText(`${lead} ${bioSnippet} ${prompt}\n\n#MartinStrayd #Radio #DailySingle`).slice(0, 63206);
+        const fbFrames = [
+          `${callSign} with "${title}" by ${artist}, exploring ${themePhrase}. Backed by 55 years in music, four decades of songwriting, 1990s Hollywood guitar tech credits with Steve Jones (Sex Pistols) and Doug Fieger (The Knack), and radio across ${countries}.${noteLine}${newsLine} Own the "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n#MartinStrayd #DailySingle #${tagSlug}`,
+          `Daily single broadcast with ${host}: "${title}" by ${artist} (${themePhrase}). What hits you first on "${title}"?${noteLine}${newsLine} Own the MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n#MartinStrayd #Radio #${tagSlug}`
+        ];
+        return sanitizeText(pickOne(rng, fbFrames)).slice(0, 63206);
       }
 
       if (chId === "ytTitle") {
-        const patterns = [
+        const ytTitles = [
           `"${title}" - ${artist} | ${host} (${kw1})`,
           `${artist} - "${title}" | ${host} Daily Single`,
-          `"${title}" by ${artist} - ${kw1} | ${host}`
+          `"${title}" by ${artist} | ${host} Official Single`
         ];
-        return fitUnderLimit(pickOne(rng, patterns), 100);
-      }
-
-      if (chId === "ytDesc") {
-        return sanitizeText([
-          `${callSign}.`,
-          ``,
-          `FEATURED RELEASE: "${title}" by ${artist} (focus: ${kw1}, ${kw2}).`,
-          `Part of a continuous single-a-day launch from a catalog spanning more than 10 albums of original music, streaming worldwide on Spotify, Apple Music, iTunes, YouTube Music, and Shazam, with international radio airplay across ${countries}.`,
-          ``,
-          `ARTIST BACKGROUND:`,
-          `Australian songwriter and composer Martin Strayd brings 55 years of experience in music, four decades of songwriting, 1990s Hollywood guitar technician credits with Steve Jones (Sex Pistols) and Doug Fieger (The Knack), and ABC Triple J Unearthed history.`,
-          ``,
-          `CATALOG UNIVERSE & OWNERSHIP:`,
-          `Also in the catalog: ${peers}.${notePart}${newsPart}`,
-          `Collect the "${title}" MP3 and cover art bundle for permanent personal ownership and free non-commercial sharing with friends.${linksBlock}`,
-          ``,
-          `#MartinStrayd #DailySingle #Songwriting #IndieMusic`
-        ].join("\n")).slice(0, 5000);
+        return fitUnderLimit(pickOne(rng, ytTitles), 100);
       }
 
       return sanitizeText([
-        `FOR IMMEDIATE RELEASE - ${dateStr}`,
-        `THE DAILY SINGLES MEDIA EMPIRE - "${title}" BY ${artist}`,
-        `Daily Single Rollout - Hosted on Air by ${host}`,
+        `${callSign}.`,
         ``,
-        `${callSign}. Today's release spotlight centers on "${title}" (key themes: ${kw1}, ${kw2}) by Australian lyricist, songwriter, composer, and recording artist Martin Strayd, connecting listeners to more than 10 albums of original, licensed music (${CATALOG_SONGS.length || "100+"} catalog entries).`,
+        `SINGLE OF THE DAY: "${title}" by ${artist} (Theme Focus: ${themePhrase}).`,
+        `Released as part of a continuous single-a-day rollout from a catalog of more than 10 albums of original music, streaming worldwide and heard on radio across ${countries}.`,
         ``,
-        `GLOBAL STREAMING & INTERNATIONAL RADIO`,
-        `"${title}" streams worldwide across Spotify, Apple Music, iTunes, YouTube Music, and Shazam, supported by radio airplay across ${countries}. Companion catalog releases include ${peers}.${note ? `\n\nSONG NOTES\n${note}` : ""}${news ? `\n\nLATEST NEWS & DISPATCH\n${news}` : ""}`,
+        `ARTIST BACKGROUND:`,
+        `Australian lyricist, songwriter, composer, and recording artist Martin Strayd brings 55 years of experience in music and four decades of songwriting, including 1990s Hollywood guitar technician work with Steve Jones (Sex Pistols) and Doug Fieger (The Knack) and ABC Triple J Unearthed feature history.`,
         ``,
-        `ABOUT MARTIN STRAYD`,
-        `With 55 years of experience in music and four decades of songwriting, Australian artist Martin Strayd brings veteran craft and direct artist-to-listener distribution to the daily singles model. Prior to launching his solo catalog, Strayd worked behind the scenes in Hollywood during the 1990s as a celebrity guitar technician for rock legends including Steve Jones of the Sex Pistols and Doug Fieger of The Knack, and is a featured artist on ABC Triple J Unearthed.`,
+        `OWNERSHIP & SHARING:`,
+        `Acquire the official "${title}" MP3 and cover art bundle for permanent personal ownership and free non-commercial sharing with friends.${note ? `\nNotes: ${note}` : ""}${news ? `\nNews: ${news}` : ""}${linksBlock}`,
         ``,
-        `LISTENER OWNERSHIP & SHARING RIGHTS`,
-        `Listeners can acquire the official "${title}" MP3 and cover art bundle directly for permanent personal ownership and share copies freely with friends for non-commercial enjoyment.${linksBlock}`
-      ].join("\n"));
+        `#MartinStrayd #DailySingle #${tagSlug} #IndieMusic`
+      ].join("\n")).slice(0, 5000);
     }
 
-    function generateNeverRepeatedText(chId, baseCtx) {
+    function generateUniquePost(chId, baseCtx) {
       for (let attempt = 0; attempt < 25; attempt++) {
         const rng = makeRng((baseCtx.seed + attempt * 7919) >>> 0);
-        const candidate = sanitizeText(assembleUniqueCandidate(chId, { ...baseCtx, rng }));
-        const key = `${chId}:${hashString(candidate)}`;
+        const text = sanitizeText(assembleChannelCopy(chId, { ...baseCtx, rng }));
+        const key = `${chId}:${hashString(text)}`;
         if (!SEEN_HASHES.has(key)) {
           SEEN_HASHES.add(key);
           try {
-            localStorage.setItem("anna_seen_posts_v1", JSON.stringify(Array.from(SEEN_HASHES).slice(-2000)));
+            localStorage.setItem("anna_seen_posts_v2", JSON.stringify(Array.from(SEEN_HASHES).slice(-2500)));
           } catch {}
-          return candidate;
+          return text;
         }
       }
       const fallbackRng = makeRng((baseCtx.seed + Date.now()) >>> 0);
-      return sanitizeText(assembleUniqueCandidate(chId, { ...baseCtx, rng: fallbackRng }));
+      return sanitizeText(assembleChannelCopy(chId, { ...baseCtx, rng: fallbackRng }));
     }
 
     function buildPostsFromInput(advanceRefresh = false) {
@@ -689,23 +667,22 @@
       const fallbackSigns = [
         { host: "DJ ANNA", phrase: `tuning you into "${title}" by {ARTIST} on the daily singles frequency` },
         { host: "Veg Anna", phrase: `Veg Anna live on air with "${title}" from {ARTIST}` },
-        { host: "DJ ANNA", phrase: `DJ ANNA in the studio with "${title}" by {ARTIST}` },
+        { host: "DJ ANNA", phrase: `DJ ANNA in the booth with "${title}" by {ARTIST}` },
         { host: "Veg Anna", phrase: `late-night broadcast with Veg Anna spinning "${title}" from {ARTIST}` }
       ];
-      const pool = BIBLE.callSignFragments.length ? BIBLE.callSignFragments : fallbackSigns;
-      const pickedSign = pickOne(baseRng, pool);
-      const host = /^(DJ ANNA|Veg Anna)$/i.test(pickedSign.host) ? pickedSign.host : "DJ ANNA";
+      const pool = BIBLE.callSignPhrases.length ? BIBLE.callSignPhrases : fallbackSigns;
+      const picked = pickOne(baseRng, pool);
+      const host = /^(DJ ANNA|Veg Anna)$/i.test(picked.host) ? picked.host : "DJ ANNA";
       const callSign = sanitizeText(
-        pickedSign.phrase
+        picked.phrase
           .replace(/\{TITLE\}/g, title)
           .replace(/\{ARTIST\}/g, artist)
           .replace(/\{HOST\}/g, host)
       );
 
-      const tokens = extractTitleTokens(title);
-      const kw1 = tokens[Math.floor(baseRng() * tokens.length)] || title;
-      const kw2 = tokens[Math.floor(baseRng() * tokens.length)] || "daily single";
-      const peers = getCompanionTitles(idx, baseRng);
+      const distinctKws = extractDistinctKeywords(title);
+      const kw1 = distinctKws[0] || title;
+      const kw2 = distinctKws[1] || "";
       const linksBlock = chosen.length ? `\n\n${chosen.join("\n")}` : "";
       const shortLink = chosen.length ? ` ${chosen[0].replace(/^[^:]+:\s*/, "")}` : "";
 
@@ -715,19 +692,19 @@
       syncArtwork(title);
 
       const ctx = {
-        title, artist, host, callSign, kw1, kw2, peers,
+        title, artist, host, callSign, kw1, kw2,
         note, news, countries, dateStr, linksBlock, shortLink, seed: seedNum
       };
 
       ALL_CHANNELS.forEach((ch) => {
         const ta = $(`ta-${ch.id}`);
         if (ta) {
-          ta.value = generateNeverRepeatedText(ch.id, ctx);
+          ta.value = generateUniquePost(ch.id, ctx);
           updateCounter(ch.id, ch.max);
         }
       });
 
-      $("statusText").textContent = `${host} - "${title}" (unique set #${GEN_NONCE % 10000})`;
+      $("statusText").textContent = `${host} - "${title}" (set #${GEN_NONCE % 10000})`;
     }
 
     async function loadCatalog() {
