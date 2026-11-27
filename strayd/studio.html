@@ -232,11 +232,11 @@
 
     const $ = (id) => document.getElementById(id);
 
-    function isCodeOrSpecLine(line) {
+        function isCodeOrSpecLine(line) {
       const s = String(line || "").trim();
       if (!s) return true;
       if (/^`?bible\/[^\s`]+\.md`?/i.test(s)) return true;
-      if (/^(single reference catalog|headline pedigree|youtube description|youtube title|facebook|instagram|tiktok|x)\s*\([^)]*\)\s*:/i.test(s)) return true;
+      if (/^(single reference catalog|headline pedigree|international radio footprint|youtube description|youtube title|facebook|instagram|tiktok|x)\s*\([^)]*\)\s*:/i.test(s)) return true;
       if (/\b(songs-db\.json|core-catalog\.json|artwork fallbacks|safe artwork|long-form runway|rich seo overview|voice preference|natural \/ neural|prefer natural|aria, jenny|speechsynthesis|chars|hashtag|cta|<=|>=|button|toggle|input)\b/i.test(s)) return true;
       return false;
     }
@@ -294,126 +294,6 @@
       return copy.slice(0, Math.min(count, copy.length));
     }
 
-    function getPatHeaders() {
-      const inputPat = ($("ghPatInput")?.value || "").trim();
-      if (inputPat) localStorage.setItem("anna_gh_pat", inputPat);
-      const pat = inputPat || localStorage.getItem("anna_gh_pat") || "";
-      if (!pat) return null;
-      return {
-        Authorization: `Bearer ${pat}`,
-        Accept: "application/vnd.github.v3+json"
-      };
-    }
-
-    async function listRepoDir(dirPath) {
-      const patHeaders = getPatHeaders();
-      const cleanDir = String(dirPath || "").replace(/^\/+|\/+$/g, "");
-      if (patHeaders) {
-        try {
-          const url = `https://api.github.com/repos/agent-anna/home/contents/${cleanDir}?ref=main&t=${Date.now()}`;
-          const r = await fetch(url, { headers: patHeaders, cache: "no-store" });
-          if (r.ok) {
-            const items = await r.json();
-            if (Array.isArray(items)) return items.map((it) => it.path).filter(Boolean);
-          }
-        } catch {}
-      }
-      return [];
-    }
-
-    async function readRepoText(relPath) {
-      const patHeaders = getPatHeaders();
-      const cleanPath = String(relPath || "").replace(/^(\.\.\/)+/, "").replace(/^\/+/, "");
-      if (patHeaders) {
-        try {
-          const apiUrl = `https://api.github.com/repos/agent-anna/home/contents/${cleanPath}?ref=main&t=${Date.now()}`;
-          const r = await fetch(apiUrl, { headers: patHeaders, cache: "no-store" });
-          if (r.ok) {
-            const meta = await r.json();
-            if (meta && meta.content) {
-              const bin = atob(meta.content.replace(/\s+/g, ""));
-              const bytes = new Uint8Array(bin.length);
-              for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-              return new TextDecoder("utf-8").decode(bytes);
-            }
-          }
-        } catch {}
-      }
-      try {
-        const fetchTarget = relPath.startsWith("..") ? relPath : `../${cleanPath}`;
-        const r = await fetch(fetchTarget, { cache: "no-store" });
-        if (r.ok) return await r.text();
-      } catch {}
-      return "";
-    }
-
-    function ingestMarkdownIntoBank(md) {
-      if (!md) return;
-      BIBLE_BANK.loadedDocs += 1;
-
-      const hubMatch = md.match(/https:\/\/(?:tinyurl\.com\/martinstrayd|martinstrayd\.github\.io\/artist\/[^\s)]*)/i);
-      if (hubMatch) BIBLE_BANK.hubUrl = "https://tinyurl.com/martinstrayd";
-      const coffeeMatch = md.match(/https:\/\/buymeacoffee\.com\/martinstrayd[^\s)]*/i);
-      if (coffeeMatch) BIBLE_BANK.coffeeUrl = coffeeMatch[0];
-      const ppMatch = md.match(/https:\/\/www\.paypal\.com\/paypalme\/martinstrayd[^\s)]*/i);
-      if (ppMatch) BIBLE_BANK.paypalUrl = ppMatch[0];
-      const wiseMatch = md.match(/https:\/\/wise\.com\/pay\/r\/[^\s)]*/i);
-      if (wiseMatch) BIBLE_BANK.wiseUrl = wiseMatch[0];
-
-      const lines = md.split(/\r?\n/);
-      let currentHeading = "";
-      for (const raw of lines) {
-        const trimmed = raw.trim();
-        if (!trimmed || /^```/.test(trimmed)) continue;
-
-        const hMatch = trimmed.match(/^#{1,4}\s+(.+)/);
-        if (hMatch) {
-          currentHeading = hMatch[1].trim().toLowerCase();
-          continue;
-        }
-
-        const candidate = sanitizeText(trimmed.replace(/^[-*â€¢]\s+/, "").replace(/\*\*/g, ""));
-        if (!candidate || candidate.length < 15 || /^https?:\/\//i.test(candidate) || isCodeOrSpecLine(candidate)) continue;
-
-        const pipeParts = candidate.split("|").map((p) => p.trim());
-        if (/host|call sign|dj anna|veg anna/i.test(currentHeading) && pipeParts.length >= 2) {
-          const host = /^(DJ ANNA|Veg Anna)$/i.test(pipeParts[0]) ? pipeParts[0] : "DJ ANNA";
-          BIBLE_BANK.callSigns.push({ host, phrase: pipeParts.slice(1).join(" - ") });
-        } else if (/strayd|bio|artist|mythology|manifesto|mission/i.test(currentHeading)) {
-          BIBLE_BANK.loreLines.push(candidate);
-        } else if (/link|rights|ownership|share|bundle|support/i.test(currentHeading)) {
-          BIBLE_BANK.rightsLines.push(candidate);
-        }
-      }
-    }
-
-    async function loadBibleBank() {
-      BIBLE_BANK.callSigns = [];
-      BIBLE_BANK.loreLines = [];
-      BIBLE_BANK.rightsLines = [];
-      BIBLE_BANK.loadedDocs = 0;
-
-      const foundBiblePaths = await listRepoDir("bible");
-      const mdPaths = foundBiblePaths.filter((p) => /\.md$/i.test(p));
-      const pathsToLoad = mdPaths.length ? mdPaths : [
-        "bible/00-bible-index.md",
-        "bible/01-system-architecture.md",
-        "bible/02-links.md",
-        "bible/03-master-pages.md",
-        "bible/04-voice-and-broadcast-law.md",
-        "bible/05-mission-manifesto.md",
-        "bible/06-dj-anna-persona.md",
-        "bible/07-platform-cadence-and-hashtags.md"
-      ];
-
-      for (const path of pathsToLoad) {
-        const txt = await readRepoText(path);
-        if (txt) ingestMarkdownIntoBank(txt);
-      }
-
-      if (!$("hubUrl").value.trim()) $("hubUrl").value = "[https://tinyurl.com/martinstrayd](https://tinyurl.com/martinstrayd)";
-    }
-
     function analyzeSongTitle(title) {
       const parenMatch = String(title || "").match(/\(([^)]+)\)/);
       const subPhrase = parenMatch ? parenMatch[1].trim() : "";
@@ -455,7 +335,30 @@
         return { host, callSign: phrase };
       }
       const host = rng() > 0.5 ? "DJ ANNA" : "Veg Anna";
-      return { host, callSign: `${host} live on the daily singles frequency with "${title}" by ${artist}` };
+      return { host, callSign: `${host} introducing today's single from ${artist}` };
+    }
+
+    function buildHumanBriefing(title, artist, host, profile, rng) {
+      const { mainPhrase, subPhrase, keywords } = profile;
+      const k1 = keywords[0] || mainPhrase;
+      const k2 = keywords.find((w) => w.toLowerCase() !== k1.toLowerCase()) || "";
+
+      const leadOptions = subPhrase
+        ? [
+            `${host} brings "${title}" by ${artist} into the spotlight, noting how "${mainPhrase}" and "${subPhrase}" pull against each other before the track even opens.`,
+            `When ${host} cues up "${title}" from ${artist}, the contrast between "${mainPhrase}" and "${subPhrase}" sets up a sharp turn for listeners.`
+          ]
+        : [
+            `${host} introduces "${title}" by ${artist} on today's broadcast, highlighting how ${k2 ? `${k1} and ${k2}` : k1} anchors the arrangement.`,
+            `${host} puts "${title}" from ${artist} in front of listeners today, letting ${k1} carry the opening impression.`
+          ];
+
+      const followOptions = [
+        `Instead of rushing past it, ${host} lets the arrangement breathe so listeners hear what ${artist} built into the song.`,
+        `This release is part of an ongoing daily single rollout from ${artist}, giving each song room of its own on air and online.`
+      ];
+
+      return `${pickOne(rng, leadOptions)} ${pickOne(rng, followOptions)}`;
     }
 
     function composeChannelHook(title, artist, host, profile, rng, channelId) {
@@ -466,12 +369,12 @@
       if (channelId === "x") {
         const opts = subPhrase
           ? [
-              `${host} spinning "${title}" by ${artist}: "${mainPhrase}" meets "${subPhrase}" on air.`,
-              `Why does "${title}" pair "${mainPhrase}" with "${subPhrase}"? ${host} cues it up now.`
+              `${host} on air: why does "${mainPhrase}" collide with "${subPhrase}" on ${artist}'s latest single?`,
+              `${artist} drops a sharp twist between "${mainPhrase}" and "${subPhrase}" - ${host} has it spinning now.`
             ]
           : [
-              `${host} on air with "${title}" by ${artist}: hear how ${k1} hits first listen.`,
-              `Daily single spotlight from ${host}: "${title}" by ${artist} puts ${k1} right up front.`
+              `What makes ${artist}'s new single pull you in on the first bar? ${host} cues it up live.`,
+              `${host} puts ${artist}'s latest track (${k1}) under the mic today - hear where it takes you.`
             ];
         return pickOne(rng, opts);
       }
@@ -479,12 +382,10 @@
       if (channelId === "tiktok") {
         const opts = subPhrase
           ? [
-              `Look at "${title}" by ${artist}: "${mainPhrase}" and "${subPhrase}" collide right inside the title before the chorus drops.`,
-              `${host} calls out "${title}" on the daily single feed - "${mainPhrase}" alongside "${subPhrase}" hooks listeners fast.`
+              `Hear what happens when "${mainPhrase}" meets "${subPhrase}" on ${artist}'s new track - ${host} breaks it down right now.`
             ]
           : [
-              `Read "${title}" by ${artist} and hit play with ${host} - ${k2 ? `${k1} and ${k2}` : k1} grabs attention fast.`,
-              `${host} drops "${title}" into today's single feed with ${artist} for an immediate hook.`
+              `One track, zero filler: ${host} highlights how ${artist} turns ${k2 ? `${k1} and ${k2}` : k1} into an instant hook.`
             ];
         return pickOne(rng, opts);
       }
@@ -492,12 +393,10 @@
       if (channelId === "instagram") {
         const opts = subPhrase
           ? [
-              `"${title}" by ${artist} lives in the pull between "${mainPhrase}" and "${subPhrase}" - ${host} frames it for late-night listening.`,
-              `There is real tension in "${title}" where "${mainPhrase}" meets "${subPhrase}" under ${host}'s spotlight.`
+              `There is a lingering tension between "${mainPhrase}" and "${subPhrase}" in this release from ${artist} that ${host} keeps in heavy rotation.`
             ]
           : [
-              `"${title}" by ${artist} builds a mood around ${k2 ? `${k1} and ${k2}` : k1} with ${host} at the mic.`,
-              `${host} frames "${title}" by ${artist} around ${k1}, letting the melody and lyric settle in.`
+              `${host} sets the mood for ${artist}'s latest release, where ${k1} gives the melody an unmistakable edge.`
             ];
         return pickOne(rng, opts);
       }
@@ -505,19 +404,15 @@
       if (channelId === "facebook") {
         const opts = subPhrase
           ? [
-              `${host} is talking through "${title}" by ${artist} today, looking at how "${mainPhrase}" and "${subPhrase}" shape the song.`,
-              `On air with ${host}: "${title}" brings "${mainPhrase}" and "${subPhrase}" together in a daily single release.`
+              `${host} is talking through how "${mainPhrase}" and "${subPhrase}" shape this single from ${artist} on today's show.`
             ]
           : (hasQuestion
-              ? [`"${title}" opens with a direct question on air with ${host} - how does ${artist} answer it when the track plays?`]
-              : [`${host} is spinning "${title}" by ${artist} today, exploring ${k2 ? `${k1} and ${k2}` : k1} with listeners.`]);
+              ? [`${host} opens up today's broadcast with a question from ${artist} - how do you hear the answer in the music?`]
+              : [`${host} is spinning a fresh single from ${artist} today around ${k2 ? `${k1} and ${k2}` : k1} and opening up the floor to listeners.`]);
         return pickOne(rng, opts);
       }
 
-      const pressOpts = subPhrase
-        ? [`On air with ${host}, "${title}" pairs "${mainPhrase}" with "${subPhrase}" so listeners feel the contrast right from the title.`]
-        : [`${host} introduces "${title}" by ${artist} on the daily singles broadcast, spotlighting ${k2 ? `${k1} and ${k2}` : k1}.`];
-      return pickOne(rng, pressOpts);
+      return buildHumanBriefing(title, artist, host, profile, rng);
     }
 
     function buildPlatformTags(profile, count, rng, extraPool = []) {
@@ -538,18 +433,18 @@
     }
 
     function assembleChannelCopy(chId, ctx) {
-      const { title, artist, host, callSign, profile, note, news, countries, dateStr, chosenLinks, linksBlock, shortLink, rng } = ctx;
+      const { title, artist, host, profile, note, news, countries, dateStr, chosenLinks, linksBlock, shortLink, rng } = ctx;
       const safeChosen = Array.isArray(chosenLinks) ? chosenLinks : [];
       const cleanLore = BIBLE_BANK.loreLines.filter((l) => !isCodeOrSpecLine(l));
       const cleanRights = BIBLE_BANK.rightsLines.filter((l) => !isCodeOrSpecLine(l) && !/https?:\/\//i.test(l));
 
       const lorePool = shuffleSlice(rng, cleanLore, 2);
-      const rightsPick = pickOne(rng, cleanRights) || `Listeners who get the official "${title}" MP3 and cover art bundle own it directly and can share copies freely with friends for non-commercial enjoyment.`;
+      const rightsPick = pickOne(rng, cleanRights) || `Listeners who pick up the official MP3 and cover art bundle own it directly and can share copies freely with friends for non-commercial enjoyment.`;
       const noteLine = note ? `\nStory / Hook Angle: ${sanitizeText(note, chId !== "press")}` : "";
       const newsLine = news ? `\nDispatch Update: ${sanitizeText(news, chId !== "press")}` : "";
 
       if (chId === "press") {
-        const briefing = composeChannelHook(title, artist, host, profile, rng, "press");
+        const briefing = buildHumanBriefing(title, artist, host, profile, rng);
         const artistOverview = [
           `New to Martin Strayd? Australian lyricist, songwriter, composer, and independent recording artist Martin Strayd brings four decades of songwriting and 55 years inside music to a daily singles rollout built from more than 10 albums of original material.`,
           `His background includes 1990s Hollywood guitar technician work with rock figures including Steve Jones of the Sex Pistols and Doug Fieger of The Knack, featured artist recognition on ABC Triple J Unearthed, and a direct-to-listener release model that bypasses traditional label delays.`
@@ -570,8 +465,6 @@
           `ON-AIR BRIEFING`,
           ``,
           `${briefing}`,
-          ``,
-          `${callSign}.`,
           note ? `\nStory & Hook Angle:\n${note}\n` : ``,
           news ? `\nBroadcast & Territory Dispatch:\n${news}\n` : ``,
           ``,
@@ -600,7 +493,7 @@
         const ttTags = buildPlatformTags(profile, 5, rng, ["#TikTokMusic", "#DailySingle", "#NewSong"]);
         return sanitizeText([
           `${ttHook}${noteLine}${newsLine}`,
-          `${rightsPick}${linksBlock}`,
+          `Full hub and daily single drops live at ${shortLink.trim() || "https://tinyurl.com/martinstrayd"}. ${rightsPick}${linksBlock}`,
           `${ttTags}`
         ].filter(Boolean).join("\n\n"), true).slice(0, 2200);
       }
@@ -623,7 +516,7 @@
         const loreSnippet = lorePool[0] || "";
         return sanitizeText([
           `${fbHook}${noteLine}${newsLine}`,
-          `${loreSnippet ? `${loreSnippet} ` : ""}Radio across ${countries}. What stands out to you on "${title}"?`,
+          `${loreSnippet ? `${loreSnippet} ` : ""}Airplay across ${countries}. What stands out to you on this release?`,
           `${rightsPick}${linksBlock}`,
           `${fbTags}`
         ].filter(Boolean).join("\n\n"), true).slice(0, 63206);
@@ -654,7 +547,7 @@
         if (!SEEN_HASHES.has(key)) {
           SEEN_HASHES.add(key);
           try {
-            localStorage.setItem("anna_seen_posts_v14", JSON.stringify(Array.from(SEEN_HASHES).slice(-4000)));
+            localStorage.setItem("anna_seen_posts_v15", JSON.stringify(Array.from(SEEN_HASHES).slice(-5000)));
           } catch {}
           return capped;
         }
