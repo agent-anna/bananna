@@ -1,5 +1,5 @@
 # ANNA Living Tree of Life System Map
-_Auto-generated on push to `bible/` at `2026-11-27T07:40:22.203250+00:00`_
+_Auto-generated on push to `bible/` at `2026-11-27T07:53:35.890562+00:00`_
 
 ## The Roots (Core Config & Memory)
 - `memory/brain.json`
@@ -9,7 +9,6 @@ _Auto-generated on push to `bible/` at `2026-11-27T07:40:22.203250+00:00`_
 - `strayd/record-brain.json`
 
 ## The Trunk (Cockpit & UI Engine)
-- `soul/slut/big-juicy-bananna.md
 - `body/anna-sound-system.html`
 - `body/audio.js`
 - `body/doc-reader.html`
@@ -36,7 +35,6 @@ _Auto-generated on push to `bible/` at `2026-11-27T07:40:22.203250+00:00`_
 - `strayd/social.html`
 - `strayd/studio.html`
 - `strayd/viewer.html`
-- `soul/*`
 
 ## The Branches (Active GitHub Actions Workflows)
 - **Anna Bible, Catalog & Feed Action** (`.github/workflows/aa01-bible-and-feed.yml`)
