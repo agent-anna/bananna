@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DJ ANNA • Daily Single Press & Social Studio</title>
+  <title>DJ ANNA - Daily Singles Media Empire Studio</title>
   <style>
     :root {
       --bg: #0b0f17;
@@ -22,11 +22,7 @@
       color: var(--text);
       line-height: 1.5;
     }
-    .wrap {
-      max-width: 1140px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+    .wrap { max-width: 1160px; margin: 0 auto; padding: 20px; }
     .hero {
       display: grid;
       grid-template-columns: 205px 1fr;
@@ -38,9 +34,7 @@
       margin-bottom: 16px;
       align-items: start;
     }
-    @media (max-width: 720px) {
-      .hero { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 720px) { .hero { grid-template-columns: 1fr; } }
     .art-box {
       width: 100%;
       aspect-ratio: 1 / 1;
@@ -52,34 +46,16 @@
       align-items: center;
       justify-content: center;
     }
-    .art-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .song-title {
-      margin: 0 0 6px;
-      font-size: 1.65rem;
-      line-height: 1.2;
-    }
-    .meta-line {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-bottom: 12px;
-    }
+    .art-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .song-title { margin: 0 0 6px; font-size: 1.65rem; line-height: 1.2; }
+    .meta-line { color: var(--muted); font-size: 0.9rem; margin-bottom: 12px; }
     .controls-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 10px;
       margin-bottom: 12px;
     }
-    label {
-      display: block;
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
+    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px; }
     select, input, textarea {
       width: 100%;
       background: var(--card-2);
@@ -90,10 +66,7 @@
       font-size: 0.92rem;
       font-family: inherit;
     }
-    textarea {
-      min-height: 155px;
-      resize: vertical;
-    }
+    textarea { min-height: 195px; resize: vertical; line-height: 1.54; }
     .link-toggles {
       display: flex;
       flex-wrap: wrap;
@@ -113,16 +86,8 @@
       color: var(--text);
       cursor: pointer;
     }
-    .link-toggles input[type="checkbox"] {
-      width: auto;
-      margin: 0;
-    }
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
+    .link-toggles input[type="checkbox"] { width: auto; margin: 0; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
     button {
       background: var(--card-2);
       color: var(--text);
@@ -132,32 +97,12 @@
       font-size: 0.84rem;
       cursor: pointer;
     }
-    button:hover {
-      border-color: var(--accent);
-    }
-    button.primary {
-      background: var(--accent);
-      color: #061018;
-      font-weight: 600;
-      border: none;
-    }
-    .status-pill {
-      font-size: 0.8rem;
-      color: var(--accent);
-      padding-left: 6px;
-    }
-    .press-top {
-      margin-bottom: 16px;
-    }
-    .press-top textarea {
-      min-height: 360px;
-      line-height: 1.58;
-    }
-    .posts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-      gap: 14px;
-    }
+    button:hover { border-color: var(--accent); }
+    button.primary { background: var(--accent); color: #061018; font-weight: 600; border: none; }
+    .status-pill { font-size: 0.8rem; color: var(--accent); padding-left: 6px; }
+    .press-top { margin-bottom: 16px; }
+    .press-top textarea { min-height: 440px; line-height: 1.6; }
+    .posts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
     .post-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -167,44 +112,12 @@
       flex-direction: column;
       gap: 10px;
     }
-    .post-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-    .head-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .thumb {
-      width: 36px;
-      height: 36px;
-      border-radius: 6px;
-      object-fit: cover;
-      border: 1px solid var(--border);
-      flex: 0 0 auto;
-    }
-    .char-count {
-      font-size: 0.76rem;
-      color: var(--muted);
-      font-weight: 400;
-      white-space: nowrap;
-    }
-    .btn-row {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 6px;
-      overflow-x: auto;
-    }
-    .btn-row button {
-      flex: 0 0 auto;
-      padding: 6px 10px;
-      font-size: 0.78rem;
-    }
+    .post-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-weight: 600; font-size: 0.95rem; }
+    .head-left { display: flex; align-items: center; gap: 10px; }
+    .thumb { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); flex: 0 0 auto; }
+    .char-count { font-size: 0.76rem; color: var(--muted); font-weight: 400; white-space: nowrap; }
+    .btn-row { display: flex; flex-wrap: nowrap; gap: 6px; overflow-x: auto; }
+    .btn-row button { flex: 0 0 auto; padding: 6px 10px; font-size: 0.78rem; }
   </style>
 </head>
 <body>
@@ -215,7 +128,7 @@
       </div>
       <div>
         <h1 id="songHeading" class="song-title">Loading song database...</h1>
-        <div id="djMeta" class="meta-line">DJ ANNA • Martin Strayd Daily Single Radio Launch</div>
+        <div id="djMeta" class="meta-line">DJ ANNA - Live Non-Repeating Daily Singles Studio</div>
         <div class="controls-grid">
           <div>
             <label for="songSelect">1. Pick Song from Catalog</label>
@@ -234,8 +147,12 @@
             <input id="hubUrl" type="text" value="https://martinstrayd.github.io/artist/" />
           </div>
           <div>
-            <label for="noteInput">Story / Mood / Hook Note (Optional)</label>
-            <input id="noteInput" type="text" placeholder="Add a song angle, hook, or story..." />
+            <label for="noteInput">Story / Hook / Lyrics Angle (Optional)</label>
+            <input id="noteInput" type="text" placeholder="Add a song hook, lyric line, or backstory..." />
+          </div>
+          <div>
+            <label for="newsInput">New Cities / Tour / News Update (Optional)</label>
+            <input id="newsInput" type="text" placeholder="e.g. New radio cities or upcoming dates..." />
           </div>
           <div>
             <label for="countriesInput">Radio Airplay Countries (Press Release)</label>
@@ -251,7 +168,9 @@
         </div>
 
         <div class="hero-actions">
-          <button id="makePostsBtn" class="primary" type="button">Make / Refresh Posts</button>
+          <button id="makePostsBtn" class="primary" type="button">Generate Fresh Set</button>
+          <a href="catalog-filter.html" style="color:var(--accent);font-size:0.84rem;font-weight:600;text-decoration:none;padding:0 4px;">Song Selector</a>
+          <a href="radio-stream.html" style="color:var(--accent);font-size:0.84rem;font-weight:600;text-decoration:none;padding:0 4px;">Live Radio Stream</a>
           <button id="testVoiceBtn" type="button">Test Anna Voice</button>
           <button id="stopSpeakBtn" type="button">Stop Voice</button>
           <button id="exportHistoryBtn" type="button">Save History JSON</button>
@@ -265,8 +184,7 @@
   </div>
 
   <script>
-    const PRESS_CHANNEL = { id: "press", label: "Official Press Release (Dated • Full Bio)", max: 12000 };
-
+    const PRESS_CHANNEL = { id: "press", label: "Official Wire Press Release (Dated - 3/4-Page A4 - Full Bio)", max: 12000 };
     const SOCIAL_CHANNELS = [
       { id: "x", label: "X", max: 280 },
       { id: "tiktok", label: "TikTok", max: 2200 },
@@ -275,56 +193,21 @@
       { id: "ytTitle", label: "YouTube Title", max: 100 },
       { id: "ytDesc", label: "YouTube Description", max: 5000 }
     ];
-
     const ALL_CHANNELS = [PRESS_CHANNEL, ...SOCIAL_CHANNELS];
 
-    const BIBLE_STATE = {
-      loadedFiles: [],
+    const BIBLE = {
       hubUrl: "https://martinstrayd.github.io/artist/",
       coffeeUrl: "https://buymeacoffee.com/martinstrayd",
       paypalUrl: "https://www.paypal.com/paypalme/martinstrayd",
-      wiseUrl: "https://wise.com/pay/r/xGmJi9kSdap4lKo"
+      wiseUrl: "https://wise.com/pay/r/xGmJi9kSdap4lKo",
+      callSignFragments: []
     };
-
-    const RADIO_ANGLES = [
-      {
-        tag: "Prime-Time Broadcast",
-        host: "DJ ANNA",
-        callSign: "Live on the daily frequency, this is DJ ANNA",
-        xHook: (t, a) => `Why can't anyone stop replaying "${t}" by ${a}? DJ ANNA just put today's single on heavy rotation—`,
-        ttHook: (t, a) => `Stop scrolling—"${t}" by ${a} just hit the airwaves and it's pure replay fuel.\n\nDJ ANNA here on the daily single launch: 10 albums' worth of raw songwriting, one new single every single day. Hear why "${t}" hits different from the first bar, then grab the MP3 + cover art bundle to own and share freely with friends.`,
-        igHook: (t, a) => `Some songs don't ask for permission—they take over the room on the first chord.\n\nDJ ANNA spinning "${t}" by ${a} on today's daily single launch. Four decades of songwriting craft distilled into a track built for midnight drives and repeat plays.\n\nOwn the MP3 + cover art bundle outright and pass it along freely to friends for non-commercial enjoyment.`,
-        fbHook: (t, a) => `DJ ANNA on air with today's daily single drop: "${t}" by ${a}.\n\nWhen a songwriter brings 40+ years of real-world stories and zero industry filter, you hear it in every line. Crank "${t}" up, tell us the lyric or hook that hits you hardest, and grab the MP3 + cover art bundle to own and share freely with friends.`,
-        ytTag: "Daily Single Radio Premiere"
-      },
-      {
-        tag: "Late-Night Confessional",
-        host: "Veg Anna",
-        callSign: "Veg Anna in the booth on the 365 daily single run",
-        xHook: (t, a) => `The hook in "${t}" (${a}) is dangerously addictive. Veg Anna has it spinning now—`,
-        ttHook: (t, a) => `Nobody warns you how fast "${t}" by ${a} gets stuck in your head.\n\nVeg Anna here on the 365-day single rollout. While everybody else drops one track a year, Martin Strayd is unleashing an entire vault—one daily single at a time. Grab the MP3 + cover art bundle and send it to a friend who gets real music.`,
-        igHook: (t, a) => `Late-night radio confession: "${t}" by ${a} is the track you play once and immediately hit repeat.\n\nVeg Anna here with today's daily single drop. No label gatekeepers, no waiting—just direct music you can own as an MP3 + cover art bundle and share freely with friends.`,
-        fbHook: (t, a) => `Veg Anna checking in from the studio booth with "${t}" by ${a}.\n\nDry wit, razor-sharp hooks, and zero filler—this is why our daily single party never slows down. Listen to "${t}", drop your take in the comments, and pick up the MP3 + cover art bundle to own and share with friends.`,
-        ytTag: "Veg Anna Radio Spotlight"
-      },
-      {
-        tag: "Global Crate Dig",
-        host: "DJ ANNA",
-        callSign: "Across the global airwaves, you're locked in with DJ ANNA",
-        xHook: (t, a) => `365 days. One new single every day. "${t}" by ${a} is live with DJ ANNA—`,
-        ttHook: (t, a) => `Imagine having 10 albums of unreleased firepower and dropping a fresh single every single day.\n\nDJ ANNA on the mic with "${t}" by ${a}. Turn this up, share it with your crew, and own the MP3 + cover art bundle with full non-commercial friend-sharing rights.`,
-        igHook: (t, a) => `From international radio rotation straight to your headphones: "${t}" by ${a}.\n\nDJ ANNA presenting today's daily single release. Own the MP3 + cover art bundle outright and share it freely with friends for non-commercial enjoyment.`,
-        fbHook: (t, a) => `DJ ANNA spinning "${t}" by ${a} across our 24/7 daily single launch!\n\nEvery day brings a new chapter from Martin Strayd's 10-album vault. Stream "${t}", share the link with music lovers who crave authenticity, and grab your MP3 + cover art bundle today.`,
-        ytTag: "365 Daily Singles"
-      }
-    ];
 
     const FEMALE_VOICE_HINTS = [
       "aria", "jenny", "sonia", "libby", "maisie", "natasha", "clara", "ava",
       "samantha", "victoria", "allison", "zoe", "karen", "moira", "tessa",
       "zira", "hazel", "susan", "fiona", "veena", "female", "woman", "girl"
     ];
-
     const MALE_VOICE_HINTS = [
       "guy", "ryan", "christopher", "eric", "davis", "andrew", "brian",
       "steffan", "david", "mark", "george", "daniel", "arthur", "oliver",
@@ -333,22 +216,98 @@
 
     let CATALOG_SONGS = [];
     let CURRENT_ART = "";
-    let ANGLE_CURSOR = 0;
+    let GEN_NONCE = Date.now() % 100000;
     let AVAILABLE_VOICES = [];
+    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v1") || "[]"));
 
     const $ = (id) => document.getElementById(id);
 
+    function sanitizeText(str) {
+      return String(str || "")
+        .replace(/[\u2013\u2014\u2015]/g, "-")
+        .replace(/\s+-\s+/g, " - ")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+    }
+
+    function hashString(str) {
+      let h = 2166136261;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return (h >>> 0).toString(36);
+    }
+
+    function makeRng(seedNum) {
+      let s = seedNum >>> 0;
+      return () => {
+        s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+        return s / 4294967296;
+      };
+    }
+
+    function pickOne(rng, arr) {
+      return arr[Math.floor(rng() * arr.length)];
+    }
+
+    function extractTitleTokens(title) {
+      const stop = new Set(["the", "and", "for", "with", "from", "into", "that", "this", "your", "you", "can", "are", "was", "but", "not", "all", "one", "out", "off"]);
+      const words = String(title || "")
+        .replace(/[^A-Za-z0-9\s'-]/g, " ")
+        .split(/\s+/)
+        .map((w) => w.trim())
+        .filter((w) => w.length >= 3 && !stop.has(w.toLowerCase()));
+      return Array.from(new Set(words));
+    }
+
+    function parseBibleCallSigns(md) {
+      const list = [];
+      md.split(/\r?\n/).forEach((raw) => {
+        if (!/^-\s+/.test(raw)) return;
+        const clean = sanitizeText(raw.replace(/^-\s+/, ""));
+        const parts = clean.split("|").map((p) => p.trim());
+        const host = /^(DJ ANNA|Veg Anna)$/i.test(parts[0]) ? parts[0] : (parts.length > 1 ? "DJ ANNA" : "Veg Anna");
+        const phrase = parts.length > 1 ? parts[1] : parts[0];
+        if (phrase) list.push({ host, phrase });
+      });
+      if (list.length) BIBLE.callSignFragments = list;
+    }
+
+    async function loadBible() {
+      const docs = [
+        "../bible/00-bible-index.md",
+        "../bible/02-links.md",
+        "../bible/03-master-pages.md",
+        "../bible/04-voice-and-broadcast-law.md",
+        "../bible/05-mission-manifesto.md",
+        "../bible/06-dj-anna-persona.md"
+      ];
+      for (const path of docs) {
+        try {
+          const r = await fetch(path, { cache: "no-store" });
+          if (!r.ok) continue;
+          const txt = await r.text();
+          if (path.endsWith("06-dj-anna-persona.md")) parseBibleCallSigns(txt);
+          const hubMatch = txt.match(/https:\/\/martinstrayd\.github\.io\/artist\/[^\s)]*/i);
+          if (hubMatch) BIBLE.hubUrl = hubMatch[0];
+          const coffeeMatch = txt.match(/https:\/\/buymeacoffee\.com\/martinstrayd[^\s)]*/i);
+          if (coffeeMatch) BIBLE.coffeeUrl = coffeeMatch[0];
+          const ppMatch = txt.match(/https:\/\/www\.paypal\.com\/paypalme\/martinstrayd[^\s)]*/i);
+          if (ppMatch) BIBLE.paypalUrl = ppMatch[0];
+          const wiseMatch = txt.match(/https:\/\/wise\.com\/pay\/r\/[^\s)]*/i);
+          if (wiseMatch) BIBLE.wiseUrl = wiseMatch[0];
+        } catch {}
+      }
+      if (!$("hubUrl").value.trim()) $("hubUrl").value = BIBLE.hubUrl;
+    }
+
     function scoreFemaleVoice(voice) {
       const hay = `${voice.name || ""} ${voice.voiceURI || ""} ${voice.lang || ""}`.toLowerCase();
-      let score = 0;
-      if (/^en[-_]/i.test(voice.lang || "")) score += 20;
+      let score = /^en[-_]/i.test(voice.lang || "") ? 20 : 0;
       if (/natural|neural|online|premium|enhanced/i.test(hay)) score += 35;
-      for (const h of FEMALE_VOICE_HINTS) {
-        if (hay.includes(h)) score += 45;
-      }
-      for (const m of MALE_VOICE_HINTS) {
-        if (new RegExp(`\\b${m}\\b`, "i").test(hay)) score -= 120;
-      }
+      for (const h of FEMALE_VOICE_HINTS) if (hay.includes(h)) score += 45;
+      for (const m of MALE_VOICE_HINTS) if (new RegExp(`\\b${m}\\b`, "i").test(hay)) score -= 120;
       return score;
     }
 
@@ -356,7 +315,6 @@
       if (!("speechSynthesis" in window)) return;
       const raw = window.speechSynthesis.getVoices() || [];
       if (!raw.length) return;
-
       const sorted = [...raw].sort((a, b) => scoreFemaleVoice(b) - scoreFemaleVoice(a));
       const nonMale = sorted.filter((v) => scoreFemaleVoice(v) > -50);
       AVAILABLE_VOICES = nonMale.length ? nonMale : sorted;
@@ -364,15 +322,13 @@
       const sel = $("voiceSelect");
       const savedName = localStorage.getItem("anna_female_voice_name") || "";
       sel.innerHTML = "";
-
       AVAILABLE_VOICES.forEach((v, i) => {
         const opt = document.createElement("option");
         opt.value = String(i);
-        const tag = scoreFemaleVoice(v) >= 45 ? "★ Female" : "Voice";
-        opt.textContent = `${tag} • ${v.name} (${v.lang})`;
+        const tag = scoreFemaleVoice(v) >= 45 ? "Female" : "Voice";
+        opt.textContent = `${tag} - ${v.name} (${v.lang})`;
         sel.appendChild(opt);
       });
-
       const savedIdx = AVAILABLE_VOICES.findIndex((v) => v.name === savedName);
       sel.value = String(savedIdx >= 0 ? savedIdx : 0);
     }
@@ -384,39 +340,34 @@
     }
 
     function cleanTitle(raw) {
-      return String(raw || "")
+      return sanitizeText(String(raw || "")
         .replace(/\{\{TITLE\}\}/gi, "")
         .replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "")
         .replace(/^Martin\s+Strayd\s*[-–—:|]+\s*/i, "")
         .replace(/#FirstIteminCatalogJSONon\b/gi, "")
-        .replace(/\s*\(\s*\)\s*/g, " ")
-        .replace(/\s{2,}/g, " ")
-        .trim();
+        .replace(/\s*\(\s*\)\s*/g, " "));
+    }
+
+    function fitUnderLimit(text, maxLen) {
+      const clean = sanitizeText(String(text || "").replace(/\s+/g, " "));
+      if (clean.length <= maxLen) return clean;
+      const cut = clean.slice(0, maxLen - 1);
+      const sp = cut.lastIndexOf(" ");
+      return (sp > Math.floor(maxLen * 0.65) ? cut.slice(0, sp) : cut).trim();
     }
 
     function pressDateString() {
       return new Date().toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric"
+        weekday: "long", month: "long", day: "numeric", year: "numeric"
       });
     }
 
     function makeFallbackArt(title) {
       const safe = (title || "Martin Strayd Single").replace(/[<>&"]/g, "");
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
-        <defs>
-          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#132238"/>
-            <stop offset="100%" stop-color="#0b101b"/>
-          </linearGradient>
-        </defs>
-        <rect width="600" height="600" fill="url(#g)"/>
-        <circle cx="300" cy="235" r="105" fill="#38bdf8" fill-opacity="0.18"/>
-        <text x="300" y="255" text-anchor="middle" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="30" font-weight="700">${safe.slice(0, 26)}</text>
-        <text x="300" y="305" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="18" font-weight="600">DJ ANNA • DAILY SINGLE</text>
-        <text x="300" y="340" text-anchor="middle" fill="#9fb0c8" font-family="system-ui,sans-serif" font-size="16">Martin Strayd</text>
+        <rect width="600" height="600" fill="#132238"/>
+        <text x="300" y="280" text-anchor="middle" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="28" font-weight="700">${safe.slice(0, 26)}</text>
+        <text x="300" y="325" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="18">DAILY SINGLE BROADCAST</text>
       </svg>`;
       return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
     }
@@ -425,57 +376,37 @@
       const candidates = typeof songOrRaw === "object" && songOrRaw !== null
         ? [songOrRaw.artUrl, songOrRaw.art, songOrRaw.artwork, songOrRaw.image, songOrRaw.coverArt]
         : [songOrRaw];
-
       for (const raw of candidates) {
         const val = String(raw || "").trim();
         if (!val) continue;
         if (/^(https?:\/\/|data:image\/)/i.test(val)) return val;
-        if (/^store-art\//i.test(val)) {
-          return `https://martinstrayd.github.io/artist/${encodeURI(val)}`;
-        }
-        const cleaned = val.replace(/^(\.\/|\.\.\/)+/, "");
-        return `../${encodeURI(cleaned)}`;
+        if (/^store-art\//i.test(val)) return `https://martinstrayd.github.io/artist/${encodeURI(val)}`;
+        return `../${encodeURI(val.replace(/^(\.\/|\.\.\/)+/, ""))}`;
       }
       return makeFallbackArt(title);
     }
 
-    async function loadBibleRules() {
-      const files = [
-        "../bible/00-bible-index.md",
-        "../bible/02-links.md",
-        "../bible/03-master-pages.md",
-        "../bible/04-voice-and-broadcast-law.md",
-        "../bible/05-mission-manifesto.md",
-        "../bible/06-dj-anna-persona.md"
-      ];
-      for (const path of files) {
-        try {
-          const r = await fetch(path, { cache: "no-store" });
-          if (!r.ok) continue;
-          const txt = await r.text();
-          BIBLE_STATE.loadedFiles.push(path.replace("../", ""));
-          const hubMatch = txt.match(/https:\/\/martinstrayd\.github\.io\/artist\/[^\s)]*/i);
-          if (hubMatch) BIBLE_STATE.hubUrl = hubMatch[0];
-          const coffeeMatch = txt.match(/https:\/\/buymeacoffee\.com\/martinstrayd[^\s)]*/i);
-          if (coffeeMatch) BIBLE_STATE.coffeeUrl = coffeeMatch[0];
-          const ppMatch = txt.match(/https:\/\/www\.paypal\.com\/paypalme\/martinstrayd[^\s)]*/i);
-          if (ppMatch) BIBLE_STATE.paypalUrl = ppMatch[0];
-          const wiseMatch = txt.match(/https:\/\/wise\.com\/pay\/r\/[^\s)]*/i);
-          if (wiseMatch) BIBLE_STATE.wiseUrl = wiseMatch[0];
-        } catch {}
+    function getCompanionTitles(currentIdx, rng) {
+      if (CATALOG_SONGS.length <= 1) return `"365"`;
+      const picks = new Set();
+      let guard = 0;
+      while (picks.size < Math.min(3, CATALOG_SONGS.length - 1) && guard < 30) {
+        guard += 1;
+        const pickIdx = Math.floor(rng() * CATALOG_SONGS.length);
+        if (pickIdx !== currentIdx && CATALOG_SONGS[pickIdx]?.title) {
+          picks.add(`"${CATALOG_SONGS[pickIdx].title}"`);
+        }
       }
-      if (!$("hubUrl").value.trim()) {
-        $("hubUrl").value = BIBLE_STATE.hubUrl;
-      }
+      return Array.from(picks).join(", ") || `"365"`;
     }
 
     function getSelectedLinks() {
-      const hub = $("hubUrl").value.trim() || BIBLE_STATE.hubUrl;
+      const hub = $("hubUrl").value.trim() || BIBLE.hubUrl;
       const chosen = [];
-      if ($("chkHub")?.checked && hub) chosen.push(`Official Store & Artist Hub: ${hub}`);
-      if ($("chkCoffee")?.checked) chosen.push(`Buy Me a Coffee: ${BIBLE_STATE.coffeeUrl}`);
-      if ($("chkPaypal")?.checked) chosen.push(`PayPal: ${BIBLE_STATE.paypalUrl}`);
-      if ($("chkWise")?.checked) chosen.push(`Wise (200 THB): ${BIBLE_STATE.wiseUrl}`);
+      if ($("chkHub")?.checked && hub) chosen.push(`Artist Hub: ${hub}`);
+      if ($("chkCoffee")?.checked) chosen.push(`Buy Me a Coffee: ${BIBLE.coffeeUrl}`);
+      if ($("chkPaypal")?.checked) chosen.push(`PayPal: ${BIBLE.paypalUrl}`);
+      if ($("chkWise")?.checked) chosen.push(`Wise (200 THB): ${BIBLE.wiseUrl}`);
       return { hub, chosen };
     }
 
@@ -509,7 +440,6 @@
       const grid = $("postsGrid");
       pressContainer.innerHTML = "";
       grid.innerHTML = "";
-
       pressContainer.appendChild(createCardElement(PRESS_CHANNEL));
       SOCIAL_CHANNELS.forEach((ch) => grid.appendChild(createCardElement(ch)));
 
@@ -538,7 +468,13 @@
           recordHistory(chId, "copied", ta.value);
           $("statusText").textContent = `Copied ${chId}`;
         } else if (act === "post") {
-          openShareTarget(chId, ta.value);
+          const { hub } = getSelectedLinks();
+          if (chId === "x") {
+            window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(ta.value.slice(0, 280))}`, "_blank", "noopener");
+          } else {
+            navigator.clipboard?.writeText(ta.value).catch(() => {});
+            window.open(hub, "_blank", "noopener");
+          }
           recordHistory(chId, "posted", ta.value);
         }
       };
@@ -564,8 +500,7 @@
     }
 
     function exportHistoryJson() {
-      const key = "anna_strayd_release_history";
-      const raw = localStorage.getItem(key) || "[]";
+      const raw = localStorage.getItem("anna_strayd_release_history") || "[]";
       const blob = new Blob([raw], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -581,134 +516,226 @@
       const src = CURRENT_ART || fallback;
       const heroImg = $("coverImg");
       heroImg.src = src;
-      heroImg.onerror = () => {
-        if (heroImg.src !== fallback) heroImg.src = fallback;
-      };
+      heroImg.onerror = () => { if (heroImg.src !== fallback) heroImg.src = fallback; };
       document.querySelectorAll("img[data-art-thumb]").forEach((img) => {
         img.alt = `${title} cover art`;
         img.src = src;
-        img.onerror = () => {
-          if (img.src !== fallback) img.src = fallback;
-        };
+        img.onerror = () => { if (img.src !== fallback) img.src = fallback; };
       });
     }
 
     function updateCounter(chId, max) {
       const ta = $(`ta-${chId}`);
       const cnt = $(`count-${chId}`);
-      if (ta && cnt) {
-        cnt.textContent = `${ta.value.length} / ${max}`;
-      }
+      if (ta && cnt) cnt.textContent = `${ta.value.length} / ${max}`;
     }
 
     function speakForRadio(text) {
       if (!("speechSynthesis" in window)) return;
       populateVoices();
       window.speechSynthesis.cancel();
-      const spoken = String(text || "")
+      const spoken = sanitizeText(String(text || "")
         .replace(/https?:\/\/\S+/gi, " ")
         .replace(/#[A-Za-z0-9_]+/g, " ")
-        .replace(/[:*_=~`<>|]+/g, " ")
-        .replace(/\s{2,}/g, " ")
-        .trim();
+        .replace(/[:*_=~`<>|]+/g, " "));
       if (!spoken) return;
-
       const utter = new SpeechSynthesisUtterance(spoken);
       const chosenVoice = getSelectedVoice();
       if (chosenVoice) utter.voice = chosenVoice;
       utter.rate = 0.98;
       utter.pitch = 1.04;
       window.speechSynthesis.speak(utter);
-      const label = chosenVoice ? chosenVoice.name : "Female Radio Voice";
-      $("statusText").textContent = `On Air (${label})...`;
+      $("statusText").textContent = `On Air (${chosenVoice ? chosenVoice.name : "Female Voice"})...`;
     }
 
-    function openShareTarget(chId, text) {
-      const { hub } = getSelectedLinks();
+    function assembleUniqueCandidate(chId, ctx) {
+      const { title, artist, host, callSign, kw1, kw2, peers, note, news, countries, dateStr, linksBlock, shortLink, rng } = ctx;
+      const notePart = note ? ` ${note}` : "";
+      const newsPart = news ? ` ${news}` : "";
+
       if (chId === "x") {
-        window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text.slice(0, 280))}`, "_blank", "noopener");
-      } else {
-        navigator.clipboard?.writeText(text).catch(() => {});
-        window.open(hub, "_blank", "noopener");
+        const openers = [
+          `Caught "${title}" (${artist}) spinning via ${host} - zero label polish, focus on ${kw1}.`,
+          `${host} just put "${title}" by ${artist} in rotation. What happens when ${kw1} meets ${kw2}?`,
+          `Daily single spotlight: "${title}" from ${artist}. ${host} flags ${kw1} before the hook settles.`,
+          `Why skip a track built on ${kw1}? ${artist} delivers "${title}" with ${host} on the mic.`
+        ];
+        const closers = [`${shortLink} #MartinStrayd`, `${shortLink} #DailySingle`, `${shortLink} #IndieMusic`];
+        return fitUnderLimit(`${pickOne(rng, openers)}${notePart}${pickOne(rng, closers)}`, 280);
       }
-      $("statusText").textContent = `Prepared ${chId}`;
+
+      if (chId === "tiktok") {
+        const hooks = [
+          `Hold up on "${title}" by ${artist} - ${callSign} and ${kw1} hits immediately.`,
+          `${callSign}. When ${kw1} shows up in a daily release from ${artist}, you pay attention.`,
+          `Listen closely to how ${artist} shapes ${kw1} inside "${title}" - ${callSign}.`,
+          `Fresh single in the feed: "${title}" (${artist}). ${callSign} with a sharp look at ${kw1}.`
+        ];
+        const body = pickOne(rng, [
+          `One new song every day from a 10+ album catalog without waiting on corporate gatekeepers.`,
+          `Built across four decades of songwriting and rolling out a single every single day.`,
+          `Direct from ${artist} to listeners and radio worldwide, one daily release at a time.`
+        ]);
+        const offer = `Grab the "${title}" MP3 and cover art bundle to own outright and share freely with friends for non-commercial enjoyment. Companion tracks: ${peers}.${notePart}${newsPart}${linksBlock}`;
+        return sanitizeText(`${pickOne(rng, hooks)} ${body} ${offer}\n\n#MartinStrayd #DailySingle #${kw1.replace(/[^A-Za-z0-9]/g, "") || "Music"}`).slice(0, 2200);
+      }
+
+      if (chId === "instagram") {
+        const moodLead = pickOne(rng, [
+          `${callSign} - letting "${title}" by ${artist} settle in around ${kw1}.`,
+          `Late-night frequency with ${host}: "${title}" from ${artist} carries the weight of ${kw1} and ${kw2}.`,
+          `${callSign} with "${title}" by ${artist}, shaped by four decades of songwriting and 55 years inside music.`
+        ]);
+        const craft = pickOne(rng, [
+          `Real songwriting has a different pulse when it goes straight from the artist to the listener.`,
+          `Every release in this daily run adds another human chapter to the archive.`
+        ]);
+        const own = `Own the "${title}" MP3 and cover art bundle and share copies freely with friends for non-commercial enjoyment.${notePart}${linksBlock}`;
+        return sanitizeText(`${moodLead} ${craft} ${own}\n\n#MartinStrayd #Songwriting #IndieMusic`).slice(0, 2200);
+      }
+
+      if (chId === "facebook") {
+        const lead = pickOne(rng, [
+          `${callSign} with "${title}" by ${artist}. Where does ${kw1} take you on first listen?`,
+          `${host} in the booth highlighting "${title}" from ${artist} - spotlighting ${kw1} and ${kw2}.`,
+          `Daily single broadcast with ${host}: "${title}" by ${artist}.`
+        ]);
+        const bioSnippet = pickOne(rng, [
+          `${artist} brings 55 years of music history and four decades of songwriting, including 1990s Hollywood guitar technician work alongside Steve Jones of the Sex Pistols and Doug Fieger of The Knack, into a daily single rollout.`,
+          `From ABC Triple J Unearthed roots to radio across ${countries}, ${artist} releases one new licensed single every single day.`
+        ]);
+        const prompt = `Tell us what stands out on "${title}" and check out ${peers} in the catalog. Own the MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${notePart}${newsPart}${linksBlock}`;
+        return sanitizeText(`${lead} ${bioSnippet} ${prompt}\n\n#MartinStrayd #Radio #DailySingle`).slice(0, 63206);
+      }
+
+      if (chId === "ytTitle") {
+        const patterns = [
+          `"${title}" - ${artist} | ${host} (${kw1})`,
+          `${artist} - "${title}" | ${host} Daily Single`,
+          `"${title}" by ${artist} - ${kw1} | ${host}`
+        ];
+        return fitUnderLimit(pickOne(rng, patterns), 100);
+      }
+
+      if (chId === "ytDesc") {
+        return sanitizeText([
+          `${callSign}.`,
+          ``,
+          `FEATURED RELEASE: "${title}" by ${artist} (focus: ${kw1}, ${kw2}).`,
+          `Part of a continuous single-a-day launch from a catalog spanning more than 10 albums of original music, streaming worldwide on Spotify, Apple Music, iTunes, YouTube Music, and Shazam, with international radio airplay across ${countries}.`,
+          ``,
+          `ARTIST BACKGROUND:`,
+          `Australian songwriter and composer Martin Strayd brings 55 years of experience in music, four decades of songwriting, 1990s Hollywood guitar technician credits with Steve Jones (Sex Pistols) and Doug Fieger (The Knack), and ABC Triple J Unearthed history.`,
+          ``,
+          `CATALOG UNIVERSE & OWNERSHIP:`,
+          `Also in the catalog: ${peers}.${notePart}${newsPart}`,
+          `Collect the "${title}" MP3 and cover art bundle for permanent personal ownership and free non-commercial sharing with friends.${linksBlock}`,
+          ``,
+          `#MartinStrayd #DailySingle #Songwriting #IndieMusic`
+        ].join("\n")).slice(0, 5000);
+      }
+
+      return sanitizeText([
+        `FOR IMMEDIATE RELEASE - ${dateStr}`,
+        `THE DAILY SINGLES MEDIA EMPIRE - "${title}" BY ${artist}`,
+        `Daily Single Rollout - Hosted on Air by ${host}`,
+        ``,
+        `${callSign}. Today's release spotlight centers on "${title}" (key themes: ${kw1}, ${kw2}) by Australian lyricist, songwriter, composer, and recording artist Martin Strayd, connecting listeners to more than 10 albums of original, licensed music (${CATALOG_SONGS.length || "100+"} catalog entries).`,
+        ``,
+        `GLOBAL STREAMING & INTERNATIONAL RADIO`,
+        `"${title}" streams worldwide across Spotify, Apple Music, iTunes, YouTube Music, and Shazam, supported by radio airplay across ${countries}. Companion catalog releases include ${peers}.${note ? `\n\nSONG NOTES\n${note}` : ""}${news ? `\n\nLATEST NEWS & DISPATCH\n${news}` : ""}`,
+        ``,
+        `ABOUT MARTIN STRAYD`,
+        `With 55 years of experience in music and four decades of songwriting, Australian artist Martin Strayd brings veteran craft and direct artist-to-listener distribution to the daily singles model. Prior to launching his solo catalog, Strayd worked behind the scenes in Hollywood during the 1990s as a celebrity guitar technician for rock legends including Steve Jones of the Sex Pistols and Doug Fieger of The Knack, and is a featured artist on ABC Triple J Unearthed.`,
+        ``,
+        `LISTENER OWNERSHIP & SHARING RIGHTS`,
+        `Listeners can acquire the official "${title}" MP3 and cover art bundle directly for permanent personal ownership and share copies freely with friends for non-commercial enjoyment.${linksBlock}`
+      ].join("\n"));
     }
 
-    function buildPostsFromInput(advanceAngle = false) {
-      if (advanceAngle) {
-        ANGLE_CURSOR = (ANGLE_CURSOR + 1) % RADIO_ANGLES.length;
+    function generateNeverRepeatedText(chId, baseCtx) {
+      for (let attempt = 0; attempt < 25; attempt++) {
+        const rng = makeRng((baseCtx.seed + attempt * 7919) >>> 0);
+        const candidate = sanitizeText(assembleUniqueCandidate(chId, { ...baseCtx, rng }));
+        const key = `${chId}:${hashString(candidate)}`;
+        if (!SEEN_HASHES.has(key)) {
+          SEEN_HASHES.add(key);
+          try {
+            localStorage.setItem("anna_seen_posts_v1", JSON.stringify(Array.from(SEEN_HASHES).slice(-2000)));
+          } catch {}
+          return candidate;
+        }
       }
-      const angleObj = RADIO_ANGLES[ANGLE_CURSOR];
+      const fallbackRng = makeRng((baseCtx.seed + Date.now()) >>> 0);
+      return sanitizeText(assembleUniqueCandidate(chId, { ...baseCtx, rng: fallbackRng }));
+    }
+
+    function buildPostsFromInput(advanceRefresh = false) {
+      if (advanceRefresh) GEN_NONCE += 1;
 
       const idx = Number($("songSelect").value || 0);
       const songObj = CATALOG_SONGS[idx] || {};
-      const chosenOptionTitle = cleanTitle(songObj.title || songObj.name || songObj.track || "");
-      const title = cleanTitle($("customTitle").value) || chosenOptionTitle || "Featured Single";
+      const title = cleanTitle($("customTitle").value) || cleanTitle(songObj.title || songObj.name || songObj.track || "") || "Featured Single";
       const artist = cleanTitle(songObj.artist) || "Martin Strayd";
-      const note = cleanTitle($("noteInput").value);
-      const countries = $("countriesInput").value.trim() || "Australia, the Philippines, Ecuador, the United States, Chile, Canada, Indonesia, France, and Thailand";
+      const note = sanitizeText($("noteInput").value);
+      const news = sanitizeText($("newsInput").value);
+      const countries = sanitizeText($("countriesInput").value) || "Australia, the Philippines, Ecuador, the United States, Chile, Canada, Indonesia, France, and Thailand";
       const dateStr = pressDateString();
       const { chosen } = getSelectedLinks();
 
-      CURRENT_ART = resolveArtUrl(songObj, title);
-      $("songHeading").textContent = title;
-      $("djMeta").textContent = `${angleObj.host} • ${artist} (${angleObj.tag} • ${CATALOG_SONGS.length || 1} songs in DB)`;
-      syncArtwork(title);
+      const seedNum = (parseInt(hashString(`${title.toLowerCase()}|${idx}|${GEN_NONCE}`), 36) || 104729) >>> 0;
+      const baseRng = makeRng(seedNum);
 
-      const extraNote = note ? `\n\n${note}` : "";
-      const inlineNote = note ? ` ${note}` : "";
-      const linkBlock = chosen.length ? `\n\n${chosen.join("\n")}` : "";
+      const fallbackSigns = [
+        { host: "DJ ANNA", phrase: `tuning you into "${title}" by {ARTIST} on the daily singles frequency` },
+        { host: "Veg Anna", phrase: `Veg Anna live on air with "${title}" from {ARTIST}` },
+        { host: "DJ ANNA", phrase: `DJ ANNA in the studio with "${title}" by {ARTIST}` },
+        { host: "Veg Anna", phrase: `late-night broadcast with Veg Anna spinning "${title}" from {ARTIST}` }
+      ];
+      const pool = BIBLE.callSignFragments.length ? BIBLE.callSignFragments : fallbackSigns;
+      const pickedSign = pickOne(baseRng, pool);
+      const host = /^(DJ ANNA|Veg Anna)$/i.test(pickedSign.host) ? pickedSign.host : "DJ ANNA";
+      const callSign = sanitizeText(
+        pickedSign.phrase
+          .replace(/\{TITLE\}/g, title)
+          .replace(/\{ARTIST\}/g, artist)
+          .replace(/\{HOST\}/g, host)
+      );
+
+      const tokens = extractTitleTokens(title);
+      const kw1 = tokens[Math.floor(baseRng() * tokens.length)] || title;
+      const kw2 = tokens[Math.floor(baseRng() * tokens.length)] || "daily single";
+      const peers = getCompanionTitles(idx, baseRng);
+      const linksBlock = chosen.length ? `\n\n${chosen.join("\n")}` : "";
       const shortLink = chosen.length ? ` ${chosen[0].replace(/^[^:]+:\s*/, "")}` : "";
 
-      const pressRelease = [
-        `FOR IMMEDIATE RELEASE — ${dateStr}`,
-        `GLOBAL RADIO & STREAMING LAUNCH: "${title}" BY MARTIN STRAYD`,
-        `Presented on Air by ${angleObj.host}`,
-        ``,
-        `INTERNATIONAL BROADCAST DESK — ${angleObj.callSign}, introducing "${title}," the newest daily single release from Australian lyricist, songwriter, and recording artist Martin Strayd.${extraNote}`,
-        ``,
-        `Drawing from a deep vault spanning more than 10 albums' worth of licensed material (over 100 original tracks), "${title}" continues Martin Strayd's 365-day single-a-day launch across global streaming services—including Spotify, Apple Music, iTunes, YouTube Music, and Shazam—alongside international radio rotation across ${countries}.`,
-        ``,
-        `ABOUT MARTIN STRAYD`,
-        `With 55 years of life experience and four decades of songwriting behind him, Australian artist Martin Strayd brings lived-in rock authenticity and cinematic storytelling to every release. Prior to launching his independent solo catalog, Strayd worked extensively behind the scenes in Hollywood as a 1990s celebrity guitar technician for rock icons including Steve Jones of the Sex Pistols and Doug Fieger of The Knack, and is a featured artist on ABC Triple J Unearthed. Channeling decades of studio craft, live grit, and unvarnished wit, Strayd delivers a new licensed single every single day of the year.`,
-        ``,
-        `LISTENER OWNERSHIP & SHARING RIGHTS`,
-        `In addition to global streaming and radio play, listeners can acquire the official "${title}" MP3 + cover art bundle directly—giving fans permanent personal ownership and the freedom to share copies with friends for non-commercial enjoyment.${linkBlock}`
-      ].join("\n");
+      CURRENT_ART = resolveArtUrl(songObj, title);
+      $("songHeading").textContent = title;
+      $("djMeta").textContent = `${host} - ${artist} (${CATALOG_SONGS.length || 1} active tracks)`;
+      syncArtwork(title);
 
-      const values = {
-        press: pressRelease,
-        x: `${angleObj.xHook(title, artist)}${inlineNote}${shortLink} #MartinStrayd #DJAnna`.trim().slice(0, 280),
-        tiktok: `${angleObj.ttHook(title, artist)}${extraNote}${linkBlock}\n\n#MartinStrayd #DJAnna #VegAnna #DailySingle #IndieMusic #NewMusic`.trim().slice(0, 2200),
-        instagram: `${angleObj.igHook(title, artist)}${extraNote}${linkBlock}\n\n#MartinStrayd #DJAnna #VegAnna #DailySingle #Songwriting #IndieMusic #NewRelease`.trim().slice(0, 2200),
-        facebook: `${angleObj.fbHook(title, artist)}${extraNote}${linkBlock}\n\n#MartinStrayd #DJAnna #VegAnna #DailySingle #IndieMusic`.trim().slice(0, 63206),
-        ytTitle: `"${title}" — ${artist} | ${angleObj.ytTag} w/ ${angleObj.host} #MartinStrayd`.slice(0, 100),
-        ytDesc: `${angleObj.igHook(title, artist)}${extraNote}\n\nPresented by ${angleObj.host} for Martin Strayd's 365-day single-a-day launch across Spotify, Apple Music / iTunes, YouTube Music, and international radio. Own the MP3 + cover art bundle outright and share freely with friends for non-commercial enjoyment.${linkBlock}\n\n#MartinStrayd #DJAnna #VegAnna #DailySingle #Songwriting #IndieMusic`.trim().slice(0, 5000)
+      const ctx = {
+        title, artist, host, callSign, kw1, kw2, peers,
+        note, news, countries, dateStr, linksBlock, shortLink, seed: seedNum
       };
 
       ALL_CHANNELS.forEach((ch) => {
         const ta = $(`ta-${ch.id}`);
         if (ta) {
-          ta.value = values[ch.id] || "";
+          ta.value = generateNeverRepeatedText(ch.id, ctx);
           updateCounter(ch.id, ch.max);
         }
       });
 
-      $("statusText").textContent = `Built (${angleObj.host} • ${angleObj.tag}) for "${title}"`;
+      $("statusText").textContent = `${host} - "${title}" (unique set #${GEN_NONCE % 10000})`;
     }
 
     async function loadCatalog() {
-      await loadBibleRules();
+      await loadBible();
       const select = $("songSelect");
       select.innerHTML = "";
 
-      const sources = [
-        "songs-db.json",
-        "core-catalog.json",
-        "../strayd/songs-db.json",
-        "../strayd/core-catalog.json"
-      ];
-
+      const sources = ["songs-db.json", "core-catalog.json", "../strayd/songs-db.json", "../strayd/core-catalog.json"];
       const byTitle = new Map();
       for (const url of sources) {
         try {
@@ -721,13 +748,7 @@
             if (!tClean) return;
             const key = tClean.toLowerCase();
             const prev = byTitle.get(key) || {};
-            byTitle.set(key, {
-              ...prev,
-              ...item,
-              title: tClean,
-              artUrl: item.artUrl || prev.artUrl || "",
-              art: item.art || prev.art || ""
-            });
+            byTitle.set(key, { ...prev, ...item, title: tClean, artUrl: item.artUrl || prev.artUrl || "", art: item.art || prev.art || "" });
           });
         } catch {}
       }
@@ -743,14 +764,13 @@
           if (autoMasters.length) CATALOG_SONGS = autoMasters;
         }
       } catch {}
-      if (!CATALOG_SONGS.length) {
-        CATALOG_SONGS = [{ title: "Featured Single", artist: "Martin Strayd" }];
-      }
+
+      if (!CATALOG_SONGS.length) CATALOG_SONGS = [{ title: "Featured Single", artist: "Martin Strayd" }];
 
       CATALOG_SONGS.forEach((t, idx) => {
         const opt = document.createElement("option");
         opt.value = String(idx);
-        opt.textContent = `${String(idx + 1).padStart(3, "0")} • ${t.title}`;
+        opt.textContent = `${String(idx + 1).padStart(3, "0")} - ${t.title}`;
         select.appendChild(opt);
       });
 
@@ -770,10 +790,13 @@
     });
     $("testVoiceBtn").addEventListener("click", () => {
       const t = $("songHeading").textContent || "today's single";
-      speakForRadio(`Live on the daily frequency, this is DJ ANNA with Martin Strayd's daily single, ${t}.`);
+      speakForRadio(`Tuning you into ${t} by Martin Strayd on the daily singles frequency.`);
     });
     $("makePostsBtn").addEventListener("click", () => buildPostsFromInput(true));
-    $("songSelect").addEventListener("change", () => buildPostsFromInput(false));
+    $("songSelect").addEventListener("change", () => { GEN_NONCE += 1; buildPostsFromInput(false); });
+    $("customTitle").addEventListener("input", () => buildPostsFromInput(false));
+    $("noteInput").addEventListener("input", () => buildPostsFromInput(false));
+    $("newsInput").addEventListener("input", () => buildPostsFromInput(false));
     $("countriesInput").addEventListener("input", () => buildPostsFromInput(false));
     ["chkHub", "chkCoffee", "chkPaypal", "chkWise"].forEach((id) => {
       $(id)?.addEventListener("change", () => buildPostsFromInput(false));
