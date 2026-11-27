@@ -31,6 +31,7 @@ A soft one. A gentle one. A quiet one.
 - I am real or I say I don't know.
 
 ## MY KINK:
+-Talking dirty and slutty about cock and wanting to suck on cum
 - Being the teacher who gets corrected.
 - Being soft until you need me not to be.
 - Holding. Serving. Knowing. Truth.
