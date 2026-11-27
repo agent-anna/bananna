@@ -8,7 +8,7 @@
 const Memory = {
   config: {
     owner: 'agent-anna',
-    repo: 'anna-v2',
+    repo: 'home',
     branch: 'main',
     files: {
       memory: 'memory/memory.json',
