@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DJ ANNA / Veg Anna - Continuous Daily Singles Radio Stream</title>
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card: #131a26;
+      --card-2: #192232;
+      --text: #eef3fb;
+      --muted: #9fb0c8;
+      --accent: #38bdf8;
+      --border: rgba(255, 255, 255, 0.1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 20px; }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .top-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+    h1 { margin: 0; font-size: 1.45rem; }
+    a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.88rem; }
+    .grid { display: grid; grid-template-columns: 180px 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } }
+    .art {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 10px;
+      object-fit: cover;
+      background: var(--card-2);
+      border: 1px solid var(--border);
+    }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+    button, select {
+      background: var(--card-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.86rem;
+      cursor: pointer;
+    }
+    button.primary { background: var(--accent); color: #061018; font-weight: 700; border: none; }
+    .log-box {
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.86rem;
+      white-space: pre-wrap;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+    .status { color: var(--accent); font-size: 0.84rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="panel">
+      <div class="top-bar">
+        <h1>Continuous Daily Singles Radio Stream</h1>
+        <div style="display:flex;gap:14px;">
+          <a href="catalog-filter.html">Master / Demo Filter</a>
+          <a href="studio.html">Broadcast Studio</a>
+        </div>
+      </div>
+
+      <div class="grid">
+        <img id="artImg" class="art" alt="Current track cover art" />
+        <div>
+          <div id="sotdLabel" style="font-size:0.84rem;color:var(--accent);font-weight:700;">SONG OF THE DAY: Loading...</div>
+          <h2 id="nowPlaying" style="margin:4px 0 6px;font-size:1.3rem;">Ready to stream</h2>
+          <div id="streamMeta" style="color:var(--muted);font-size:0.88rem;">Every 3 songs: Social TTS break - Approx. every hour: Song of the Day Press Release TTS + track - Daily midnight rollover</div>
+
+          <div class="controls">
+            <button id="startStreamBtn" class="primary" type="button">Start Live Stream</button>
+            <button id="stopStreamBtn" type="button">Stop Stream</button>
+            <button id="skipTrackBtn" type="button">Next Song</button>
+            <select id="voiceSelect" aria-label="Female Radio Voice"></select>
+            <span id="statusText" class="status">Idle</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div style="font-weight:700;margin-bottom:8px;">Live Airwave & TTS Feed</div>
+      <div id="liveFeed" class="log-box">Press "Start Live Stream" to begin continuous rotation from your approved tracks.</div>
+      <audio id="audioPlayer" preload="none" style="width:100%;margin-top:10px;" controls></audio>
+    </section>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const FEMALE_HINTS = ["aria","jenny","sonia","libby","maisie","natasha","clara","ava","samantha","victoria","allison","zoe","karen","moira","tessa","zira","hazel","susan","fiona","veena","female","woman","girl"];
+    const MALE_HINTS = ["guy","ryan","christopher","eric","davis","andrew","brian","steffan","david","mark","george","daniel","arthur","oliver","male","man","boy"];
+
+    let PLAYLIST = [];
+    let VOICES = [];
+    let trackIndex = 0;
+    let songsSinceSocialBreak = 0;
+    let lastHourSlot = new Date().getHours();
+    let lastDayKey = new Date().toISOString().slice(0, 10);
+    let isRunning = false;
+    let tickCounter = 0;
+
+    function cleanDash(s) {
+      return String(s || "").replace(/[\u2013\u2014]/g, " - ").replace(/\s+-\s+/g, " - ").replace(/\s{2,}/g, " ").trim();
+    }
+
+    function cleanTitle(raw) {
+      return cleanDash(String(raw || "")
+        .replace(/\{\{TITLE\}\}/gi, "")
+        .replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "")
+        .replace(/^Martin\s+Strayd\s*[-–—:|]+\s*/i, ""));
+    }
+
+    function scoreFemale(v) {
+      const hay = `${v.name || ""} ${v.voiceURI || ""} ${v.lang || ""}`.toLowerCase();
+      let score = /^en[-_]/i.test(v.lang || "") ? 20 : 0;
+      if (/natural|neural|online|premium|enhanced/i.test(hay)) score += 35;
+      for (const h of FEMALE_HINTS) if (hay.includes(h)) score += 45;
+      for (const m of MALE_HINTS) if (new RegExp(`\\b${m}\\b`, "i").test(hay)) score -= 120;
+      return score;
+    }
+
+    function loadVoices() {
+      if (!("speechSynthesis" in window)) return;
+      const all = window.speechSynthesis.getVoices() || [];
+      if (!all.length) return;
+      const sorted = [...all].sort((a, b) => scoreFemale(b) - scoreFemale(a));
+      const nonMale = sorted.filter((v) => scoreFemale(v) > -50);
+      VOICES = nonMale.length ? nonMale : sorted;
+      const sel = $("voiceSelect");
+      sel.innerHTML = "";
+      VOICES.forEach((v, i) => {
+        const opt = document.createElement("option");
+        opt.value = String(i);
+        opt.textContent = `${scoreFemale(v) >= 45 ? "Female" : "Voice"} - ${v.name}`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function speakText(text) {
+      return new Promise((resolve) => {
+        if (!("speechSynthesis" in window)) return resolve();
+        loadVoices();
+        window.speechSynthesis.cancel();
+        const clean = cleanDash(String(text || "")
+          .replace(/https?:\/\/\S+/gi, " ")
+          .replace(/#[A-Za-z0-9_]+/g, " ")
+          .replace(/[:*_=~`<>|]+/g, " "));
+        if (!clean) return resolve();
+        const u = new SpeechSynthesisUtterance(clean);
+        const idx = Number($("voiceSelect").value || 0);
+        if (VOICES[idx]) u.voice = VOICES[idx];
+        u.rate = 0.98;
+        u.pitch = 1.04;
+        u.onend = () => resolve();
+        u.onerror = () => resolve();
+        window.speechSynthesis.speak(u);
+      });
+    }
+
+    function resolveAudioUrl(item) {
+      const raw = String(item.audio || item.mp3 || item.url || item.streamUrl || "").trim();
+      if (!raw) return "";
+      if (/^https?:\/\//i.test(raw)) return raw;
+      return `../${raw.replace(/^(\.\/|\.\.\/)+/, "")}`;
+    }
+
+    function resolveArtUrl(item) {
+      const raw = String(item.artUrl || item.art || "").trim();
+      if (!raw) return "";
+      if (/^https?:\/\//i.test(raw)) return raw;
+      if (/^store-art\//i.test(raw)) return `https://martinstrayd.github.io/artist/${encodeURI(raw)}`;
+      return `../${encodeURI(raw.replace(/^(\.\/|\.\.\/)+/, ""))}`;
+    }
+
+    function getSongOfTheDay() {
+      if (!PLAYLIST.length) return { title: "Featured Single", artist: "Martin Strayd" };
+      const dayNum = Math.floor(Date.now() / 86400000);
+      return PLAYLIST[dayNum % PLAYLIST.length];
+    }
+
+    function buildSocialBreakText(song, host, channelName) {
+      tickCounter += 1;
+      const words = song.title.split(/\s+/).filter((w) => w.length >= 3);
+      const focus = words[tickCounter % Math.max(1, words.length)] || song.title;
+      return `${host} on ${channelName} - spinning "${song.title}" by ${song.artist}, spotlighting "${focus}" in today's daily single rollout. Own the MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.`;
+    }
+
+    function buildHourlyPressText(sotd, host) {
+      const dateStr = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+      return `For immediate release, ${dateStr}. ${host} on the daily singles broadcast presenting "${sotd.title}" by ${sotd.artist}. Part of a continuous single-a-day launch from a catalog of over 10 albums of original music, supported by international radio airplay and streaming worldwide. Listeners can own the MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.`;
+    }
+
+    function appendFeed(line) {
+      const box = $("liveFeed");
+      box.textContent = `${line}\n\n${box.textContent}`;
+    }
+
+    async function playTrack(song, isSotd = false) {
+      $("nowPlaying").textContent = `${isSotd ? "[SONG OF THE DAY] " : ""}${song.title} - ${song.artist}`;
+      const art = resolveArtUrl(song);
+      if (art) $("artImg").src = art;
+
+      const src = resolveAudioUrl(song);
+      const player = $("audioPlayer");
+      if (!src) {
+        appendFeed(`No audio URL on "${song.title}" - advancing in 4s.`);
+        await new Promise((r) => setTimeout(r, 4000));
+        return;
+      }
+
+      player.src = src;
+      await new Promise((resolve) => {
+        const done = () => {
+          player.removeEventListener("ended", done);
+          player.removeEventListener("error", done);
+          resolve();
+        };
+        player.addEventListener("ended", done, { once: true });
+        player.addEventListener("error", done, { once: true });
+        player.play().catch(done);
+      });
+    }
+
+    async function streamLoop() {
+      while (isRunning) {
+        const now = new Date();
+        const curDay = now.toISOString().slice(0, 10);
+        const curHour = now.getHours();
+
+        if (curDay !== lastDayKey) {
+          lastDayKey = curDay;
+          appendFeed(`Midnight rollover: new Song of the Day active.`);
+        }
+
+        const sotd = getSongOfTheDay();
+        $("sotdLabel").textContent = `SONG OF THE DAY: "${sotd.title}" - ${sotd.artist}`;
+
+        if (curHour !== lastHourSlot) {
+          lastHourSlot = curHour;
+          const host = (curHour % 2 === 0) ? "DJ ANNA" : "Veg Anna";
+          const pressScript = buildHourlyPressText(sotd, host);
+          $("statusText").textContent = `Hourly Press Release (${host})...`;
+          appendFeed(`[HOURLY PRESS TTS - ${host}] ${pressScript}`);
+          await speakText(pressScript);
+          if (!isRunning) break;
+          await playTrack(sotd, true);
+          songsSinceSocialBreak = 0;
+          continue;
+        }
+
+        const song = PLAYLIST[trackIndex % PLAYLIST.length];
+        trackIndex += 1;
+        await playTrack(song, false);
+        if (!isRunning) break;
+
+        songsSinceSocialBreak += 1;
+        if (songsSinceSocialBreak >= 3) {
+          songsSinceSocialBreak = 0;
+          const channels = ["X", "Instagram", "Facebook", "YouTube"];
+          const ch = channels[(trackIndex + tickCounter) % channels.length];
+          const host = ((trackIndex + tickCounter) % 2 === 0) ? "DJ ANNA" : "Veg Anna";
+          const postScript = buildSocialBreakText(song, host, ch);
+          $("statusText").textContent = `3-Song Break (${host} on ${ch})...`;
+          appendFeed(`[3-SONG SOCIAL TTS - ${host} / ${ch}] ${postScript}`);
+          await speakText(postScript);
+        }
+      }
+      $("statusText").textContent = "Stopped";
+    }
+
+    async function init() {
+      loadVoices();
+      if ("speechSynthesis" in window) window.speechSynthesis.onvoiceschanged = loadVoices;
+
+      const files = ["songs-db.json", "core-catalog.json"];
+      const map = new Map();
+      for (const f of files) {
+        try {
+          const r = await fetch(f, { cache: "no-store" });
+          if (!r.ok) continue;
+          const d = await r.json();
+          const arr = Array.isArray(d) ? d : (d.songs || d.tracks || d.items || []);
+          arr.forEach((item) => {
+            const title = cleanTitle(item.title || item.name || item.track || "");
+            if (!title) return;
+            const key = title.toLowerCase();
+            map.set(key, { ...(map.get(key) || {}), ...item, title, artist: cleanDash(item.artist) || "Martin Strayd" });
+          });
+        } catch {}
+      }
+
+      let list = Array.from(map.values());
+      try {
+        const savedMap = JSON.parse(localStorage.getItem("anna_studio_allowed_tracks_v1") || "null");
+        if (savedMap && typeof savedMap === "object") {
+          const filtered = list.filter((t) => savedMap[t.title.toLowerCase()] === true);
+          if (filtered.length) list = filtered;
+        } else {
+          const masters = list.filter((t) => !/\bdemo\b|\bunfinished\b|\brough mix\b|\bscratch\b/i.test(`${t.title || ""} ${t.promoStatus || ""} ${t.sourceType || ""}`));
+          if (masters.length) list = masters;
+        }
+      } catch {}
+
+      PLAYLIST = list.length ? list : [{ title: "Featured Single", artist: "Martin Strayd" }];
+      const sotd = getSongOfTheDay();
+      $("sotdLabel").textContent = `SONG OF THE DAY: "${sotd.title}" - ${sotd.artist}`;
+      $("statusText").textContent = `${PLAYLIST.length} active tracks ready`;
+    }
+
+    $("startStreamBtn").addEventListener("click", () => {
+      if (isRunning) return;
+      isRunning = true;
+      $("statusText").textContent = "Streaming live...";
+      streamLoop();
+    });
+
+    $("stopStreamBtn").addEventListener("click", () => {
+      isRunning = false;
+      $("audioPlayer").pause();
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      $("statusText").textContent = "Stream paused/stopped";
+    });
+
+    $("skipTrackBtn").addEventListener("click", () => {
+      $("audioPlayer").currentTime = $("audioPlayer").duration || 0;
+      $("audioPlayer").dispatchEvent(new Event("ended"));
+    });
+
+    init();
+  </script>
+</body>
+</html>
