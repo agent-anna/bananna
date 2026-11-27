@@ -733,6 +733,16 @@
       }
 
       CATALOG_SONGS = Array.from(byTitle.values());
+      try {
+        const savedMap = JSON.parse(localStorage.getItem("anna_studio_allowed_tracks_v1") || "null");
+        if (savedMap && typeof savedMap === "object") {
+          const allowedOnly = CATALOG_SONGS.filter((t) => savedMap[t.title.toLowerCase()] === true);
+          if (allowedOnly.length) CATALOG_SONGS = allowedOnly;
+        } else {
+          const autoMasters = CATALOG_SONGS.filter((t) => !/\bdemo\b|\bunfinished\b|\brough mix\b|\bscratch\b/i.test(`${t.title || ""} ${t.promoStatus || ""} ${t.sourceType || ""}`));
+          if (autoMasters.length) CATALOG_SONGS = autoMasters;
+        }
+      } catch {}
       if (!CATALOG_SONGS.length) {
         CATALOG_SONGS = [{ title: "Featured Single", artist: "Martin Strayd" }];
       }
