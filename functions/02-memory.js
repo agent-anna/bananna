@@ -1,8 +1,8 @@
 /**
  * ANNA the godess // MEMORY MANAGER
  * Read/write memory.json, tasks.json, links.json via GitHub
- * Version: AA01-ASSISTANT-SLUT-MANAGER
- * Date: 2026-11-18
+ * Version: AA01-LIFESTYLE-COACH-ASSISTANT-SLUT-MANAGER
+ * Date: 2026-11
  */
 
 const Memory = {
