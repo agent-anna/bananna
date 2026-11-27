@@ -128,7 +128,7 @@
       </div>
       <div>
         <h1 id="songHeading" class="song-title">Loading song database...</h1>
-        <div id="djMeta" class="meta-line">DJ ANNA Singles Release Management Team - Live Broadcast &amp; Media Studio</div>
+        <div id="djMeta" class="meta-line">DJ ANNA Singles Release Management Team - Live DJ Broadcast Studio</div>
         <div class="controls-grid">
           <div>
             <label for="songSelect">1. Pick Song from Catalog</label>
@@ -156,7 +156,11 @@
           </div>
           <div>
             <label for="countriesInput">Radio Airplay Countries (Press Release)</label>
-            <input id="countriesInput" type="text" value="Australia, the Philippines, Ecuador, the United States, Chile, Canada, Indonesia, France, and Thailand" />
+            <input id="countriesInput" type="text" value="Australia, Philippines, Ecuador, United States, Chile, Canada, Indonesia, France, and Thailand" />
+          </div>
+          <div>
+            <label for="ghPatInput">GitHub PAT (Optional - Reads Full Repo &amp; Bible)</label>
+            <input id="ghPatInput" type="password" placeholder="github_pat_... or ghp_..." />
           </div>
         </div>
 
@@ -171,10 +175,11 @@
           <button id="makePostsBtn" class="primary" type="button">Generate Fresh Set</button>
           <a href="catalog-filter.html" style="color:var(--accent);font-size:0.84rem;font-weight:600;text-decoration:none;padding:0 4px;">Song Selector</a>
           <a href="radio-stream.html" style="color:var(--accent);font-size:0.84rem;font-weight:600;text-decoration:none;padding:0 4px;">Live Radio Stream</a>
+          <button id="reloadBibleBtn" type="button">Reload Bible &amp; Repo</button>
           <button id="testVoiceBtn" type="button">Test Anna Voice</button>
           <button id="stopSpeakBtn" type="button">Stop Voice</button>
           <button id="exportHistoryBtn" type="button">Save History JSON</button>
-          <span id="statusText" class="status-pill">Loading bible &amp; song database...</span>
+          <span id="statusText" class="status-pill">Reading Bible &amp; catalog...</span>
         </div>
       </div>
     </section>
@@ -196,12 +201,18 @@
     const ALL_CHANNELS = [PRESS_CHANNEL, ...SOCIAL_CHANNELS];
     const CHANNEL_TAG_CAPS = { x: 2, tiktok: 5, instagram: 5, facebook: 5, ytTitle: 0, ytDesc: 5, press: 0 };
 
-    const BIBLE = {
+    const BIBLE_BANK = {
       hubUrl: "https://tinyurl.com/martinstrayd",
       coffeeUrl: "https://buymeacoffee.com/martinstrayd",
       paypalUrl: "https://www.paypal.com/paypalme/martinstrayd",
       wiseUrl: "https://wise.com/pay/r/xGmJi9kSdap4lKo",
-      callSignPhrases: []
+      callSigns: [],
+      hooks: [],
+      loreLines: [],
+      rightsLines: [],
+      lawLines: [],
+      loadedDocs: 0,
+      discoveredFiles: []
     };
 
     const FEMALE_VOICE_HINTS = [
@@ -219,7 +230,7 @@
     let CURRENT_ART = "";
     let GEN_NONCE = Date.now() % 100000;
     let AVAILABLE_VOICES = [];
-    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v5") || "[]"));
+    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v8") || "[]"));
 
     const $ = (id) => document.getElementById(id);
 
@@ -235,7 +246,6 @@
 
     function sanitizeText(str) {
       return String(str || "")
-        .replace(/\*\*.*?\*\*/g, "")
         .replace(/[\u2013\u2014\u2015]/g, "-")
         .replace(/\s+-\s+/g, " - ")
         .replace(/\n{3,}/g, "\n\n")
@@ -260,19 +270,162 @@
     }
 
     function pickOne(rng, arr) {
+      if (!arr || !arr.length) return "";
       return arr[Math.floor(rng() * arr.length)];
+    }
+
+    function shuffleSlice(rng, arr, count) {
+      if (!arr || !arr.length) return [];
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy.slice(0, Math.min(count, copy.length));
+    }
+
+    function getPatHeaders() {
+      const inputPat = ($("ghPatInput")?.value || "").trim();
+      if (inputPat) localStorage.setItem("anna_gh_pat", inputPat);
+      const pat = inputPat || localStorage.getItem("anna_gh_pat") || "";
+      if (!pat) return null;
+      return {
+        Authorization: `Bearer ${pat}`,
+        Accept: "application/vnd.github.v3+json"
+      };
+    }
+
+    async function listRepoDir(dirPath) {
+      const patHeaders = getPatHeaders();
+      const cleanDir = String(dirPath || "").replace(/^\/+|\/+$/g, "");
+      if (patHeaders) {
+        try {
+          const url = `https://api.github.com/repos/agent-anna/home/contents/${cleanDir}?ref=main&t=${Date.now()}`;
+          const r = await fetch(url, { headers: patHeaders, cache: "no-store" });
+          if (r.ok) {
+            const items = await r.json();
+            if (Array.isArray(items)) return items.map((it) => it.path).filter(Boolean);
+          }
+        } catch {}
+      }
+      return [];
+    }
+
+    async function readRepoText(relPath) {
+      const patHeaders = getPatHeaders();
+      const cleanPath = String(relPath || "").replace(/^(\.\.\/)+/, "").replace(/^\/+/, "");
+      if (patHeaders) {
+        try {
+          const apiUrl = `https://api.github.com/repos/agent-anna/home/contents/${cleanPath}?ref=main&t=${Date.now()}`;
+          const r = await fetch(apiUrl, { headers: patHeaders, cache: "no-store" });
+          if (r.ok) {
+            const meta = await r.json();
+            if (meta && meta.content) {
+              const bin = atob(meta.content.replace(/\s+/g, ""));
+              const bytes = new Uint8Array(bin.length);
+              for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+              return new TextDecoder("utf-8").decode(bytes);
+            }
+          }
+        } catch {}
+      }
+      try {
+        const fetchTarget = relPath.startsWith("..") ? relPath : `../${cleanPath}`;
+        const r = await fetch(fetchTarget, { cache: "no-store" });
+        if (r.ok) return await r.text();
+      } catch {}
+      return "";
+    }
+
+    function ingestMarkdownIntoBank(md) {
+      if (!md) return;
+      BIBLE_BANK.loadedDocs += 1;
+
+      const hubMatch = md.match(/https:\/\/(?:tinyurl\.com\/martinstrayd|martinstrayd\.github\.io\/artist\/[^\s)]*)/i);
+      if (hubMatch) BIBLE_BANK.hubUrl = hubMatch[0];
+      const coffeeMatch = md.match(/https:\/\/buymeacoffee\.com\/martinstrayd[^\s)]*/i);
+      if (coffeeMatch) BIBLE_BANK.coffeeUrl = coffeeMatch[0];
+      const ppMatch = md.match(/https:\/\/www\.paypal\.com\/paypalme\/martinstrayd[^\s)]*/i);
+      if (ppMatch) BIBLE_BANK.paypalUrl = ppMatch[0];
+      const wiseMatch = md.match(/https:\/\/wise\.com\/pay\/r\/[^\s)]*/i);
+      if (wiseMatch) BIBLE_BANK.wiseUrl = wiseMatch[0];
+
+      const lines = md.split(/\r?\n/);
+      let currentHeading = "";
+      for (const raw of lines) {
+        const trimmed = raw.trim();
+        if (!trimmed || /^```/.test(trimmed)) continue;
+
+        const hMatch = trimmed.match(/^#{1,4}\s+(.+)/);
+        if (hMatch) {
+          currentHeading = hMatch[1].trim().toLowerCase();
+          continue;
+        }
+
+        const candidate = trimmed.replace(/^[-*•]\s+/, "").replace(/\*\*/g, "").trim();
+        if (!candidate || candidate.length < 10 || /^https?:\/\//i.test(candidate)) continue;
+
+        const pipeParts = candidate.split("|").map((p) => p.trim());
+        if (/host|call sign|dj anna|veg anna/i.test(currentHeading) && pipeParts.length >= 2) {
+          const host = /^(DJ ANNA|Veg Anna)$/i.test(pipeParts[0]) ? pipeParts[0] : "DJ ANNA";
+          BIBLE_BANK.callSigns.push({ host, phrase: pipeParts.slice(1).join(" - ") });
+        } else if (/strayd|bio|artist|mythology|manifesto|mission/i.test(currentHeading)) {
+          BIBLE_BANK.loreLines.push(candidate);
+        } else if (/link|rights|ownership|share|bundle|support/i.test(currentHeading)) {
+          BIBLE_BANK.rightsLines.push(candidate);
+        } else if (/law|hook|attention|story|curiosity|voice|broadcast|podcast/i.test(currentHeading)) {
+          BIBLE_BANK.hooks.push(candidate);
+        } else {
+          BIBLE_BANK.lawLines.push(candidate);
+        }
+      }
+    }
+
+    async function loadBibleBank() {
+      BIBLE_BANK.callSigns = [];
+      BIBLE_BANK.hooks = [];
+      BIBLE_BANK.loreLines = [];
+      BIBLE_BANK.rightsLines = [];
+      BIBLE_BANK.lawLines = [];
+      BIBLE_BANK.loadedDocs = 0;
+
+      const foundBiblePaths = await listRepoDir("bible");
+      const mdPaths = foundBiblePaths.filter((p) => /\.md$/i.test(p));
+      BIBLE_BANK.discoveredFiles = mdPaths;
+
+      const pathsToLoad = mdPaths.length ? mdPaths : [
+        "bible/00-bible-index.md",
+        "bible/01-system-architecture.md",
+        "bible/02-links.md",
+        "bible/03-master-pages.md",
+        "bible/04-voice-and-broadcast-law.md",
+        "bible/05-mission-manifesto.md",
+        "bible/06-dj-anna-persona.md",
+        "bible/07-platform-cadence-and-hashtags.md"
+      ];
+
+      for (const path of pathsToLoad) {
+        const txt = await readRepoText(path);
+        if (txt) ingestMarkdownIntoBank(txt);
+      }
+
+      if (!$("hubUrl").value.trim()) $("hubUrl").value = BIBLE_BANK.hubUrl;
     }
 
     function extractTitleProfile(title) {
       const parenMatch = String(title || "").match(/\(([^)]+)\)/);
       const subPhrase = parenMatch ? parenMatch[1].trim() : "";
       const mainPhrase = String(title || "").replace(/\([^)]*\)/g, "").trim();
+      const questionMark = /\?/.test(title);
+      const exclamation = /!/.test(title);
+
       const stop = new Set(["the", "and", "for", "with", "from", "into", "that", "this", "your", "you", "can", "are", "was", "but", "not", "all", "one", "out", "off"]);
       const words = String(title || "")
         .replace(/[^A-Za-z0-9\s'-]/g, " ")
         .split(/\s+/)
         .map((w) => w.trim())
-        .filter((w) => w.length >= 3 && !stop.has(w.toLowerCase()));
+        .filter((w) => w.length >= 2 && !stop.has(w.toLowerCase()));
+
       const unique = [];
       const seen = new Set();
       for (const w of words) {
@@ -284,76 +437,189 @@
       }
       const tags = unique.map((w) => `#${w.replace(/[^A-Za-z0-9]/g, "")}`).filter((t) => t.length > 2);
       return {
+        rawTitle: title,
         mainPhrase: mainPhrase || title,
         subPhrase,
+        questionMark,
+        exclamation,
         keywords: unique,
         tags
       };
     }
 
-    function craftDjTitleStory(title, profile, host, rng) {
-      const { mainPhrase, subPhrase, keywords } = profile;
+    function pickHost(title, artist, rng) {
+      if (BIBLE_BANK.callSigns.length) {
+        const picked = pickOne(rng, BIBLE_BANK.callSigns);
+        const host = /^(DJ ANNA|Veg Anna)$/i.test(picked.host) ? picked.host : "DJ ANNA";
+        const phrase = sanitizeText(
+          picked.phrase
+            .replace(/\{TITLE\}/g, title)
+            .replace(/\{ARTIST\}/g, artist)
+            .replace(/\{HOST\}/g, host)
+        );
+        return { host, callSign: phrase };
+      }
+      const host = rng() > 0.5 ? "DJ ANNA" : "Veg Anna";
+      return { host, callSign: `${host} live on the daily singles broadcast with "${title}" by ${artist}` };
+    }
+
+    function readTitleLikeLiveDj(title, artist, host, profile, rng) {
+      const { mainPhrase, subPhrase, questionMark, keywords } = profile;
       const k1 = keywords[0] || mainPhrase;
       const k2 = keywords.find((w) => w.toLowerCase() !== k1.toLowerCase()) || "";
 
-      if (subPhrase) {
-        const pairedLines = [
-          `Good evening from the broadcast desk with ${host}. Somewhere on Earth someone is hearing "${title}" for the very first time, caught right where "${mainPhrase}" collides with "${subPhrase}".`,
-          `Listen closely to "${title}" as ${host} breaks it down: "${mainPhrase}" sets the pulse, while "${subPhrase}" pulls the story into sharp tension.`,
-          `There is real nerve behind "${title}". ${host} reads the room on "${mainPhrase}" and "${subPhrase}" - a song that refuses to sit quietly in the background.`
+      const titleObservations = subPhrase
+        ? [
+            `Look at how "${title}" pairs "${mainPhrase}" with "${subPhrase}" right inside the title - ${host} hears a sharp push and pull before the track even settles.`,
+            `When ${host} reads "${title}" out loud, "${mainPhrase}" and "${subPhrase}" sit side by side like two halves of a story that refuse to stay separate.`,
+            `"${title}" sets up a real contrast between "${mainPhrase}" and "${subPhrase}", and ${host} is locking straight onto that tension on air.`
+          ]
+        : (questionMark
+            ? [
+                `"${title}" asks a question right on the tin, and ${host} wants you listening closely to how ${artist} answers it in sound.`,
+                `A title like "${title}" puts a question mark straight in front of the listener - ${host} is spinning it live to see how it lands on you.`
+              ]
+            : [
+                `Read "${title}" once and you already feel the mood reaching out - ${host} is highlighting ${k2 ? `"${k1}" and "${k2}"` : `"${k1}"`} on today's broadcast.`,
+                `${host} looked at "${title}" and knew it belonged in rotation today: ${k2 ? `"${k1}" and "${k2}"` : `"${k1}"`} give the title a distinct personality you cannot miss.`,
+                `There is an unmistakable character to "${title}" as ${host} brings it onto the daily singles airwaves with ${artist}.`
+              ]);
+
+      const bibleRuleNote = pickOne(rng, BIBLE_BANK.hooks) || pickOne(rng, BIBLE_BANK.lawLines) || "";
+      const observation = pickOne(rng, titleObservations);
+      return sanitizeText(`${observation}${bibleRuleNote ? ` ${bibleRuleNote}` : ""}`);
+    }
+
+    function buildTagCluster(profile, count, extraTags = []) {
+      const pool = [...profile.tags, ...extraTags, "#MartinStrayd", "#DailySingle", "#IndieMusic", "#Songwriting", "#NewMusic"];
+      const seen = new Set();
+      const out = [];
+      for (const raw of pool) {
+        const t = String(raw || "").replace(/[^A-Za-z0-9#]/g, "");
+        const k = t.toLowerCase();
+        if (t.length > 2 && !seen.has(k)) {
+          seen.add(k);
+          out.push(t);
+          if (out.length >= count) break;
+        }
+      }
+      return out.join(" ");
+    }
+
+    function assembleChannelCopy(chId, ctx) {
+      const { title, artist, host, callSign, profile, djRead, note, news, countries, dateStr, linksBlock, shortLink, rng } = ctx;
+      const lorePool = shuffleSlice(rng, BIBLE_BANK.loreLines, 3);
+      const rightsPool = shuffleSlice(rng, BIBLE_BANK.rightsLines, 2);
+      const noteLine = note ? `\nStory / Hook Angle: ${note}` : "";
+      const newsLine = news ? `\nDispatch Update: ${news}` : "";
+
+      if (chId === "press") {
+        const dossierText = lorePool.length
+          ? lorePool.join(" ")
+          : `${artist} releases original songs day by day through a direct-to-listener singles catalog.`;
+        const rightsText = rightsPool.length
+          ? rightsPool.join(" ")
+          : `Official "${title}" MP3 and cover art bundle available for personal ownership and free non-commercial sharing with friends.`;
+
+        return sanitizeText([
+          `DJ ANNA SINGLES RELEASE MANAGEMENT TEAM`,
+          `OFFICIAL SINGLE RELEASE DISPATCH`,
+          `Date: ${dateStr}`,
+          `Lead Single: "${title}" - ${artist}`,
+          `On-Air Host: ${host}`,
+          `========================================================================`,
+          ``,
+          `ON-AIR BRIEFING`,
+          `${djRead} ${callSign}.${noteLine}${newsLine}`,
+          ``,
+          `RADIO & STREAMING DISTRIBUTION`,
+          `Radio rotation across ${countries}, alongside global digital streaming availability.`,
+          ``,
+          `ARTIST & CATALOG CONTEXT`,
+          `${dossierText}`,
+          ``,
+          `OWNERSHIP, SHARING & DESTINATIONS`,
+          `${rightsText}${linksBlock}`
+        ].filter(Boolean).join("\n"));
+      }
+
+      if (chId === "x") {
+        const xTags = buildTagCluster(profile, 2, ["#MartinStrayd"]);
+        const k1 = profile.keywords[0] || profile.mainPhrase;
+        const xOpeners = [
+          `${host} reading "${title}" on air: what happens when ${k1} hits the room?`,
+          `Why does "${title}" by ${artist} catch ${host}'s ear the second the title drops?`,
+          `${host} on the mic with "${title}" (${artist}) - hear how the title frames the ride.`
         ];
-        return pickOne(rng, pairedLines);
+        return fitUnderLimit(sanitizeText(`${pickOne(rng, xOpeners)}${note ? ` ${note}` : ""}${shortLink} ${xTags}`), 280);
       }
 
-      const detail = k2 ? `"${k1}" and "${k2}"` : `"${k1}"`;
-      const soloLines = [
-        `Somewhere tonight a listener is hitting play on "${title}" for the first time with ${host}, feeling ${detail} come alive in real time.`,
-        `${host} here on the daily singles frequency. "${title}" carries ${detail} with the kind of lived-in honesty you cannot fake in a boardroom.`,
-        `Every daily release has a heartbeat, and on "${title}" with ${host}, ${detail} gives the track an edge listeners immediately recognize.`
-      ];
-      return pickOne(rng, soloLines);
-    }
-
-    function parseCallSignsOnly(md) {
-      const parsed = [];
-      let activeSection = false;
-      md.split(/\r?\n/).forEach((raw) => {
-        if (/^##\s+HOST NAMES & CALL SIGNS/i.test(raw)) { activeSection = true; return; }
-        if (/^##\s+/.test(raw)) { activeSection = false; return; }
-        if (!activeSection || !/^-\s+/.test(raw)) return;
-        const clean = raw.replace(/^-\s+/, "").replace(/\*\*.*?\*\*/g, "").trim();
-        if (!clean || clean.length > 180) return;
-        const parts = clean.split("|").map((p) => p.trim());
-        const host = /^(DJ ANNA|Veg Anna)$/i.test(parts[0]) ? parts[0] : "DJ ANNA";
-        const phrase = sanitizeText(parts.length > 1 ? parts[1] : parts[0]);
-        if (phrase) parsed.push({ host, phrase });
-      });
-      if (parsed.length) BIBLE.callSignPhrases = parsed;
-    }
-
-    async function loadBible() {
-      const docs = [
-        "../bible/02-links.md",
-        "../bible/04-voice-and-broadcast-law.md",
-        "../bible/06-dj-anna-persona.md"
-      ];
-      for (const path of docs) {
-        try {
-          const r = await fetch(path, { cache: "no-store" });
-          if (!r.ok) continue;
-          const txt = await r.text();
-          if (path.endsWith("06-dj-anna-persona.md")) parseCallSignsOnly(txt);
-          const hubMatch = txt.match(/https:\/\/(?:tinyurl\.com\/martinstrayd|martinstrayd\.github\.io\/artist\/[^\s)]*)/i);
-          if (hubMatch) BIBLE.hubUrl = hubMatch[0];
-          const coffeeMatch = txt.match(/https:\/\/buymeacoffee\.com\/martinstrayd[^\s)]*/i);
-          if (coffeeMatch) BIBLE.coffeeUrl = coffeeMatch[0];
-          const ppMatch = txt.match(/https:\/\/www\.paypal\.com\/paypalme\/martinstrayd[^\s)]*/i);
-          if (ppMatch) BIBLE.paypalUrl = ppMatch[0];
-          const wiseMatch = txt.match(/https:\/\/wise\.com\/pay\/r\/[^\s)]*/i);
-          if (wiseMatch) BIBLE.wiseUrl = wiseMatch[0];
-        } catch {}
+      if (chId === "tiktok") {
+        const ttTags = buildTagCluster(profile, 5);
+        const rightsSnippet = rightsPool[0] || `Own "${title}" MP3 and cover art bundle and share freely for non-commercial enjoyment.`;
+        return sanitizeText([
+          `${djRead}${noteLine}${newsLine}`,
+          `${rightsSnippet}${linksBlock}`,
+          `${ttTags}`
+        ].filter(Boolean).join("\n\n")).slice(0, 2200);
       }
-      if (!$("hubUrl").value.trim()) $("hubUrl").value = BIBLE.hubUrl;
+
+      if (chId === "instagram") {
+        const igTags = buildTagCluster(profile, 5);
+        const loreSnippet = lorePool[0] || "";
+        const rightsSnippet = rightsPool[0] || `Own "${title}" MP3 and cover art bundle and share freely for non-commercial enjoyment.`;
+        return sanitizeText([
+          `${djRead}`,
+          `${loreSnippet}${noteLine}`,
+          `${rightsSnippet}${linksBlock}`,
+          `${igTags}`
+        ].filter(Boolean).join("\n\n")).slice(0, 2200);
+      }
+
+      if (chId === "facebook") {
+        const fbTags = buildTagCluster(profile, 5);
+        const loreSnippet = lorePool.slice(0, 2).join(" ");
+        const rightsSnippet = rightsPool.join(" ");
+        return sanitizeText([
+          `${djRead}${noteLine}${newsLine}`,
+          `${loreSnippet ? `${loreSnippet} ` : ""}Radio across ${countries}.`,
+          `${rightsSnippet}${linksBlock}`,
+          `${fbTags}`
+        ].filter(Boolean).join("\n\n")).slice(0, 63206);
+      }
+
+      if (chId === "ytTitle") {
+        const kwLead = profile.keywords[0] || profile.mainPhrase;
+        return fitUnderLimit(sanitizeText(`"${title}" - ${artist} | ${host} (${kwLead})`), 100);
+      }
+
+      const ytTags = buildTagCluster(profile, 5);
+      return sanitizeText([
+        `${djRead}`,
+        `Radio airplay across ${countries}.`,
+        lorePool.length ? `ARTIST & CATALOG NOTES:\n${lorePool.join(" ")}` : "",
+        rightsPool.length ? `OWNERSHIP & SHARING:\n${rightsPool.join(" ")}` : "",
+        `${noteLine}${newsLine}${linksBlock}`,
+        `${ytTags}`
+      ].filter(Boolean).join("\n\n")).slice(0, 5000);
+    }
+
+    function generateUniquePost(chId, baseCtx) {
+      for (let attempt = 0; attempt < 30; attempt++) {
+        const rng = makeRng((baseCtx.seed + attempt * 7919) >>> 0);
+        const rawText = assembleChannelCopy(chId, { ...baseCtx, rng });
+        const capped = capHashtagsByChannel(chId, sanitizeText(rawText));
+        const key = `${chId}:${hashString(capped)}`;
+        if (!SEEN_HASHES.has(key)) {
+          SEEN_HASHES.add(key);
+          try {
+            localStorage.setItem("anna_seen_posts_v8", JSON.stringify(Array.from(SEEN_HASHES).slice(-3000)));
+          } catch {}
+          return capped;
+        }
+      }
+      const fallbackRng = makeRng((baseCtx.seed + Date.now()) >>> 0);
+      return capHashtagsByChannel(chId, sanitizeText(assembleChannelCopy(chId, { ...baseCtx, rng: fallbackRng })));
     }
 
     function scoreFemaleVoice(voice) {
@@ -418,7 +684,7 @@
 
     function makeFallbackArt(title) {
       const safe = (title || "Martin Strayd Single").replace(/[<>&"]/g, "");
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+      const svg = `<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="600" height="600" viewBox="0 0 600 600">
         <rect width="600" height="600" fill="#132238"/>
         <text x="300" y="280" text-anchor="middle" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="28" font-weight="700">${safe.slice(0, 26)}</text>
         <text x="300" y="325" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="18">DJ ANNA SINGLES RELEASE</text>
@@ -434,19 +700,19 @@
         const val = String(raw || "").trim();
         if (!val) continue;
         if (/^(https?:\/\/|data:image\/)/i.test(val)) return val;
-        if (/^store-art\//i.test(val)) return `https://martinstrayd.github.io/artist/${encodeURI(val)}`;
+        if (/^store-art\//i.test(val)) return `[https://martinstrayd.github.io/artist/$](https://martinstrayd.github.io/artist/$){encodeURI(val)}`;
         return `../${encodeURI(val.replace(/^(\.\/|\.\.\/)+/, ""))}`;
       }
       return makeFallbackArt(title);
     }
 
     function getSelectedLinks() {
-      const hub = $("hubUrl").value.trim() || BIBLE.hubUrl;
+      const hub = $("hubUrl").value.trim() || BIBLE_BANK.hubUrl;
       const chosen = [];
       if ($("chkHub")?.checked && hub) chosen.push(`Artist Hub: ${hub}`);
-      if ($("chkCoffee")?.checked) chosen.push(`Buy Me a Coffee: ${BIBLE.coffeeUrl}`);
-      if ($("chkPaypal")?.checked) chosen.push(`PayPal: ${BIBLE.paypalUrl}`);
-      if ($("chkWise")?.checked) chosen.push(`Wise (200 THB): ${BIBLE.wiseUrl}`);
+      if ($("chkCoffee")?.checked) chosen.push(`Buy Me a Coffee: ${BIBLE_BANK.coffeeUrl}`);
+      if ($("chkPaypal")?.checked) chosen.push(`PayPal: ${BIBLE_BANK.paypalUrl}`);
+      if ($("chkWise")?.checked) chosen.push(`Wise (200 THB): ${BIBLE_BANK.wiseUrl}`);
       return { hub, chosen };
     }
 
@@ -510,7 +776,7 @@
         } else if (act === "post") {
           const { hub } = getSelectedLinks();
           if (chId === "x") {
-            window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(ta.value.slice(0, 280))}`, "_blank", "noopener");
+            window.open(`[https://x.com/intent/tweet?text=$](https://x.com/intent/tweet?text=$){encodeURIComponent(ta.value.slice(0, 280))}`, "_blank", "noopener");
           } else {
             navigator.clipboard?.writeText(ta.value).catch(() => {});
             window.open(hub, "_blank", "noopener");
@@ -588,137 +854,6 @@
       $("statusText").textContent = `On Air (${chosenVoice ? chosenVoice.name : "Female Voice"})...`;
     }
 
-    function buildTagCluster(profile, count, extraTags = []) {
-      const pool = [...profile.tags, ...extraTags, "#MartinStrayd", "#DailySingle", "#IndieMusic", "#Songwriting", "#NewMusic"];
-      const seen = new Set();
-      const out = [];
-      for (const raw of pool) {
-        const t = String(raw || "").replace(/[^A-Za-z0-9#]/g, "");
-        const k = t.toLowerCase();
-        if (t.length > 2 && !seen.has(k)) {
-          seen.add(k);
-          out.push(t);
-          if (out.length >= count) break;
-        }
-      }
-      return out.join(" ");
-    }
-
-    function assembleChannelCopy(chId, ctx) {
-      const { title, artist, host, callSign, profile, story, note, news, countries, dateStr, linksBlock, shortLink, rng } = ctx;
-      const noteLine = note ? `\n\nDJ & Story Angle: ${note}` : "";
-      const newsLine = news ? `\n\nOn-Air Dispatch Update: ${news}` : "";
-
-      if (chId === "press") {
-        const leads = [
-          `Today's single spotlight goes to "${title}" by ${artist}, presented on air by ${host} from the Daily Singles Media Empire.`,
-          `${host} introduces today's featured single release: "${title}" by ${artist}, rolling out as part of a continuous single-a-day catalog.`,
-          `From the broadcast desk of ${host}, today's single release is "${title}" by ${artist}, a direct-to-listener release from a catalog spanning more than 10 albums of original music.`
-        ];
-        return [
-          `DJ ANNA SINGLES RELEASE MANAGEMENT TEAM`,
-          `OFFICIAL SINGLE RELEASE DISPATCH`,
-          `Date: ${dateStr}`,
-          `Lead Single: "${title}" - ${artist}`,
-          `Host on Broadcast: ${host}`,
-          `========================================================================`,
-          ``,
-          `ON-AIR BRIEFING`,
-          `${pickOne(rng, leads)} ${story}`,
-          note ? `\nCreative & Story Angle:\n${note}` : ``,
-          news ? `\nBroadcast & Territory Notes:\n${news}` : ``,
-          ``,
-          `STREAMING & INTERNATIONAL AIRPLAY`,
-          `Available on global streaming services and heard on radio across ${countries}.`,
-          ``,
-          `ARTIST PROFILE - MARTIN STRAYD`,
-          `Australian lyricist, songwriter, composer, and independent recording artist Martin Strayd brings 55 years inside music and four decades of songwriting to the daily singles network, backed by 1990s Hollywood guitar technician work with Steve Jones (Sex Pistols) and Doug Fieger (The Knack) and ABC Triple J Unearthed roots.`,
-          ``,
-          `LISTENER OWNERSHIP & SHARING`,
-          `Listeners can get the "${title}" MP3 and cover art bundle for permanent personal ownership and share copies freely with friends for non-commercial enjoyment.${linksBlock}`
-        ].filter(Boolean).join("\n");
-      }
-
-      if (chId === "x") {
-        const xTags = buildTagCluster(profile, 2, ["#MartinStrayd"]);
-        const xHooks = [
-          `Why does "${title}" pull you in before the first chorus even lands? ${host} calls it live on air.${note ? ` ${note}` : ""}${shortLink} ${xTags}`,
-          `${host} just put "${title}" (${artist}) in the hot seat. One song every day, zero label filter.${shortLink} ${xTags}`,
-          `The song that stops the scroll today: "${title}" by ${artist}, spun on air by ${host}.${shortLink} ${xTags}`,
-          `Hear what ${host} caught on "${title}" by ${artist} before the hook turns around.${shortLink} ${xTags}`
-        ];
-        return fitUnderLimit(pickOne(rng, xHooks), 280);
-      }
-
-      if (chId === "tiktok") {
-        const ttTags = buildTagCluster(profile, 5);
-        const ttHooks = [
-          `${story} This is "${title}" by ${artist} in today's single-a-day launch, built from over 10 albums of original songwriting without waiting years for an album cycle.${noteLine}${newsLine}\n\nOwn the official "${title}" MP3 and cover art bundle for permanent personal ownership and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n${ttTags}`,
-          `Nobody expected a daily single engine to hit like "${title}" from ${artist}. ${callSign} - ${story}${noteLine}${newsLine}\n\nGrab the "${title}" MP3 and cover art bundle to own outright and share with friends for non-commercial enjoyment.${linksBlock}\n\n${ttTags}`
-        ];
-        return sanitizeText(pickOne(rng, ttHooks)).slice(0, 2200);
-      }
-
-      if (chId === "instagram") {
-        const igTags = buildTagCluster(profile, 5);
-        const igHooks = [
-          `${story} Four decades of songwriting and 55 years inside music live in "${title}" by ${artist}.${noteLine}\n\nOwn the "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n${igTags}`,
-          `Late-night frequency with ${host}: "${title}" from ${artist}. ${story}${noteLine}${newsLine}\n\nCollect the MP3 and cover art bundle for permanent personal ownership and free non-commercial sharing with friends.${linksBlock}\n\n${igTags}`
-        ];
-        return sanitizeText(pickOne(rng, igHooks)).slice(0, 2200);
-      }
-
-      if (chId === "facebook") {
-        const fbTags = buildTagCluster(profile, 5);
-        const fbHooks = [
-          `${story} ${artist} brings 55 years in music and four decades of songwriting - including 1990s Hollywood guitar tech work with Steve Jones (Sex Pistols) and Doug Fieger (The Knack) - into a single-a-day broadcast heard across ${countries}.${noteLine}${newsLine}\n\nWhat hits you first on "${title}"? Own the MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n${fbTags}`,
-          `${callSign}. ${story} Tell us what stands out to you on "${title}" and how it lands on first listen.${noteLine}${newsLine}\n\nAcquire the official "${title}" MP3 and cover art bundle for permanent personal ownership and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n${fbTags}`
-        ];
-        return sanitizeText(pickOne(rng, fbHooks)).slice(0, 63206);
-      }
-
-      if (chId === "ytTitle") {
-        const ytTitles = [
-          `"${title}" - ${artist} | ${host} Daily Single Spotlight`,
-          `${artist} - "${title}" | ${host} Live Radio Premiere`,
-          `"${title}" by ${artist} | Story & Single with ${host}`
-        ];
-        return fitUnderLimit(pickOne(rng, ytTitles), 100);
-      }
-
-      const ytTags = buildTagCluster(profile, 5);
-      return sanitizeText([
-        `${story}`,
-        `Today's featured single is "${title}" by ${artist}, released in a continuous daily singles rollout from over 10 albums of original music and heard on international radio across ${countries}.`,
-        ``,
-        `ABOUT MARTIN STRAYD:`,
-        `Australian lyricist, songwriter, composer, and independent recording artist Martin Strayd brings 55 years inside music and four decades of songwriting to the daily singles movement, backed by 1990s Hollywood guitar technician work with Steve Jones (Sex Pistols) and Doug Fieger (The Knack) and ABC Triple J Unearthed history.`,
-        ``,
-        `OWNERSHIP & SHARING:`,
-        `Acquire the official "${title}" MP3 and cover art bundle for permanent personal ownership and share copies freely with friends for non-commercial enjoyment.${noteLine}${newsLine}${linksBlock}`,
-        ``,
-        `${ytTags}`
-      ].join("\n")).slice(0, 5000);
-    }
-
-    function generateUniquePost(chId, baseCtx) {
-      for (let attempt = 0; attempt < 25; attempt++) {
-        const rng = makeRng((baseCtx.seed + attempt * 7919) >>> 0);
-        const rawText = assembleChannelCopy(chId, { ...baseCtx, rng });
-        const capped = capHashtagsByChannel(chId, sanitizeText(rawText));
-        const key = `${chId}:${hashString(capped)}`;
-        if (!SEEN_HASHES.has(key)) {
-          SEEN_HASHES.add(key);
-          try {
-            localStorage.setItem("anna_seen_posts_v5", JSON.stringify(Array.from(SEEN_HASHES).slice(-2500)));
-          } catch {}
-          return capped;
-        }
-      }
-      const fallbackRng = makeRng((baseCtx.seed + Date.now()) >>> 0);
-      return capHashtagsByChannel(chId, sanitizeText(assembleChannelCopy(chId, { ...baseCtx, rng: fallbackRng })));
-    }
-
     function buildPostsFromInput(advanceRefresh = false) {
       if (advanceRefresh) GEN_NONCE += 1;
 
@@ -728,41 +863,26 @@
       const artist = cleanTitle(songObj.artist) || "Martin Strayd";
       const note = sanitizeText($("noteInput").value);
       const news = sanitizeText($("newsInput").value);
-      const countries = sanitizeText($("countriesInput").value) || "Australia, the Philippines, Ecuador, the United States, Chile, Canada, Indonesia, France, and Thailand";
+      const countries = sanitizeText($("countriesInput").value) || "Australia, Philippines, Ecuador, United States, Chile, Canada, Indonesia, France, and Thailand";
       const dateStr = pressDateString();
       const { chosen } = getSelectedLinks();
 
       const seedNum = (parseInt(hashString(`${title.toLowerCase()}|${idx}|${GEN_NONCE}`), 36) || 104729) >>> 0;
       const baseRng = makeRng(seedNum);
 
-      const fallbackSigns = [
-        { host: "DJ ANNA", phrase: `DJ ANNA on the daily singles frequency with "${title}" by {ARTIST}` },
-        { host: "Veg Anna", phrase: `Veg Anna live on air spinning "${title}" from {ARTIST}` },
-        { host: "DJ ANNA", phrase: `DJ ANNA in the broadcast booth with "${title}" by {ARTIST}` },
-        { host: "Veg Anna", phrase: `Veg Anna tuning you into "${title}" from {ARTIST}` }
-      ];
-      const pool = BIBLE.callSignPhrases.length ? BIBLE.callSignPhrases : fallbackSigns;
-      const picked = pickOne(baseRng, pool);
-      const host = /^(DJ ANNA|Veg Anna)$/i.test(picked.host) ? picked.host : "DJ ANNA";
-      const callSign = sanitizeText(
-        picked.phrase
-          .replace(/\{TITLE\}/g, title)
-          .replace(/\{ARTIST\}/g, artist)
-          .replace(/\{HOST\}/g, host)
-      );
-
+      const { host, callSign } = pickHost(title, artist, baseRng);
       const profile = extractTitleProfile(title);
-      const story = craftDjTitleStory(title, profile, host, baseRng);
+      const djRead = readTitleLikeLiveDj(title, artist, host, profile, baseRng);
       const linksBlock = chosen.length ? `\n\n${chosen.join("\n")}` : "";
       const shortLink = chosen.length ? ` ${chosen[0].replace(/^[^:]+:\s*/, "")}` : "";
 
       CURRENT_ART = resolveArtUrl(songObj, title);
       $("songHeading").textContent = title;
-      $("djMeta").textContent = `${host} - DJ ANNA Singles Release Management Team (${CATALOG_SONGS.length || 1} active tracks)`;
+      $("djMeta").textContent = `${host} - DJ ANNA Singles Release Management (${BIBLE_BANK.loadedDocs} Bible docs · ${CATALOG_SONGS.length || 1} tracks)`;
       syncArtwork(title);
 
       const ctx = {
-        title, artist, host, callSign, profile, story,
+        title, artist, host, callSign, profile, djRead,
         note, news, countries, dateStr, linksBlock, shortLink, seed: seedNum
       };
 
@@ -774,21 +894,21 @@
         }
       });
 
-      $("statusText").textContent = `${host} - "${title}" (set #${GEN_NONCE % 10000})`;
+      $("statusText").textContent = `${host} - "${title}" (Bible docs: ${BIBLE_BANK.loadedDocs} · set #${GEN_NONCE % 10000})`;
     }
 
     async function loadCatalog() {
-      await loadBible();
+      await loadBibleBank();
       const select = $("songSelect");
       select.innerHTML = "";
 
-      const sources = ["songs-db.json", "core-catalog.json", "../strayd/songs-db.json", "../strayd/core-catalog.json"];
+      const sources = ["songs-db.json", "core-catalog.json", "../songs-db.json", "../core-catalog.json", "../strayd/songs-db.json", "../strayd/core-catalog.json"];
       const byTitle = new Map();
       for (const url of sources) {
+        const rawTxt = await readRepoText(url);
+        if (!rawTxt) continue;
         try {
-          const r = await fetch(url, { cache: "no-store" });
-          if (!r.ok) continue;
-          const data = await r.json();
+          const data = JSON.parse(rawTxt);
           const list = Array.isArray(data) ? data : (data.songs || data.tracks || data.items || []);
           list.forEach((item) => {
             const tClean = cleanTitle(item.title || item.name || item.track || "");
@@ -829,11 +949,22 @@
       window.speechSynthesis.onvoiceschanged = populateVoices;
     }
 
+    const savedPat = localStorage.getItem("anna_gh_pat") || "";
+    if (savedPat && $("ghPatInput")) $("ghPatInput").value = savedPat;
+
     renderCards();
     $("voiceSelect").addEventListener("change", () => {
       const v = getSelectedVoice();
       if (v) localStorage.setItem("anna_female_voice_name", v.name);
       $("statusText").textContent = `Selected voice: ${v ? v.name : "Default"}`;
+    });
+    $("reloadBibleBtn").addEventListener("click", async () => {
+      await loadBibleBank();
+      buildPostsFromInput(true);
+    });
+    $("ghPatInput").addEventListener("change", async () => {
+      await loadBibleBank();
+      buildPostsFromInput(true);
     });
     $("testVoiceBtn").addEventListener("click", () => {
       const t = $("songHeading").textContent || "today's single";
