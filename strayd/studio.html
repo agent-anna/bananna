@@ -179,7 +179,7 @@
           <button id="testVoiceBtn" type="button">Test Anna Voice</button>
           <button id="stopSpeakBtn" type="button">Stop Voice</button>
           <button id="exportHistoryBtn" type="button">Save History JSON</button>
-          <span id="statusText" class="status-pill">Pulling Bible &amp; catalog...</span>
+          <span id="statusText" class="status-pill">Ready</span>
         </div>
       </div>
     </section>
@@ -229,7 +229,7 @@
     let CURRENT_ART = "";
     let GEN_NONCE = Date.now() % 100000;
     let AVAILABLE_VOICES = [];
-    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v11") || "[]"));
+    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v12") || "[]"));
 
     const $ = (id) => document.getElementById(id);
 
@@ -539,7 +539,8 @@
     }
 
     function assembleChannelCopy(chId, ctx) {
-      const { title, artist, host, callSign, profile, note, news, countries, dateStr, linksBlock, shortLink, rng } = ctx;
+      const { title, artist, host, callSign, profile, note, news, countries, dateStr, chosenLinks, linksBlock, shortLink, rng } = ctx;
+      const safeChosen = Array.isArray(chosenLinks) ? chosenLinks : [];
       const lorePool = shuffleSlice(rng, BIBLE_BANK.loreLines.filter((l) => !isVoiceOrUiSpec(l)), 3);
       const rightsPool = shuffleSlice(rng, BIBLE_BANK.rightsLines.filter((l) => !isVoiceOrUiSpec(l) && !/https?:\/\//i.test(l)), 2);
       const noteLine = note ? `\nStory / Hook Angle: ${sanitizeText(note, chId !== "press")}` : "";
@@ -555,7 +556,7 @@
         const rightsText = rightsPool.length
           ? rightsPool.join(" ")
           : `Listeners who get the official "${title}" MP3 and cover art bundle own it directly and can share copies freely with friends for non-commercial enjoyment.`;
-        const formattedLinks = chosen.length ? `\n\n${chosen.join("\n\n")}` : "";
+        const formattedLinks = safeChosen.length ? `\n\n${safeChosen.join("\n\n")}` : "";
 
         return sanitizeText([
           `DJ ANNA SINGLES RELEASE MANAGEMENT TEAM`,
@@ -657,7 +658,7 @@
         if (!SEEN_HASHES.has(key)) {
           SEEN_HASHES.add(key);
           try {
-            localStorage.setItem("anna_seen_posts_v11", JSON.stringify(Array.from(SEEN_HASHES).slice(-4000)));
+            localStorage.setItem("anna_seen_posts_v12", JSON.stringify(Array.from(SEEN_HASHES).slice(-4000)));
           } catch {}
           return capped;
         }
@@ -1019,7 +1020,7 @@
       if (advanceRefresh) GEN_NONCE += 1;
 
       const idx = Number($("songSelect").value || 0);
-      const songObj = CATALOG_SONGS[idx] || {};
+      const songObj = CATALOG_SONGS[idx] || CATALOG_SONGS[0] || {};
       const title = cleanTitle($("customTitle").value) || cleanTitle(songObj.title || songObj.name || songObj.track || "") || "Featured Single";
       const artist = cleanTitle(songObj.artist) || "Martin Strayd";
       const note = sanitizeText($("noteInput").value);
@@ -1043,7 +1044,7 @@
 
       const ctx = {
         title, artist, host, callSign, profile,
-        note, news, countries, dateStr, linksBlock, shortLink, seed: seedNum
+        note, news, countries, dateStr, chosenLinks: chosen, linksBlock, shortLink, seed: seedNum
       };
 
       ALL_CHANNELS.forEach((ch) => {
@@ -1054,10 +1055,11 @@
         }
       });
 
-      $("statusText").textContent = `${host} - "${title}" (Bible docs: ${BIBLE_BANK.loadedDocs} · set #${GEN_NONCE % 10000})`;
+      $("statusText").textContent = `${host} - "${title}" (${CATALOG_SONGS.length} tracks · set #${GEN_NONCE % 10000})`;
     }
 
     async function loadCatalog() {
+      $("statusText").textContent = "Pulling Bible & catalog...";
       try {
         await loadBibleBank();
         const select = $("songSelect");
@@ -1082,17 +1084,6 @@
         }
 
         CATALOG_SONGS = Array.from(byTitle.values());
-        try {
-          const savedMap = JSON.parse(localStorage.getItem("anna_studio_allowed_tracks_v1") || "null");
-          if (savedMap && typeof savedMap === "object") {
-            const allowedOnly = CATALOG_SONGS.filter((t) => savedMap[t.title.toLowerCase()] === true);
-            if (allowedOnly.length) CATALOG_SONGS = allowedOnly;
-          } else {
-            const autoMasters = CATALOG_SONGS.filter((t) => !/\bdemo\b|\bunfinished\b|\brough mix\b|\bscratch\b/i.test(`${t.title || ""} ${t.promoStatus || ""} ${t.sourceType || ""}`));
-            if (autoMasters.length) CATALOG_SONGS = autoMasters;
-          }
-        } catch {}
-
         if (!CATALOG_SONGS.length) CATALOG_SONGS = [{ title: "Featured Single", artist: "Martin Strayd" }];
 
         CATALOG_SONGS.forEach((t, idx) => {
@@ -1107,7 +1098,7 @@
         if (!CATALOG_SONGS.length) CATALOG_SONGS = [{ title: "Featured Single", artist: "Martin Strayd" }];
         $("songSelect").innerHTML = `<option value="0">001 - Featured Single</option>`;
         buildPostsFromInput(false);
-        $("statusText").textContent = `Loaded fallback mode (${err?.message || "ready"})`;
+        $("statusText").textContent = `Fallback loaded (${err?.message || "ready"})`;
       }
     }
 
@@ -1126,11 +1117,11 @@
       $("statusText").textContent = `Selected voice: ${v ? v.name : "Default"}`;
     });
     $("reloadBibleBtn").addEventListener("click", async () => {
-      await loadBibleBank();
+      await loadCatalog();
       buildPostsFromInput(true);
     });
     $("ghPatInput").addEventListener("change", async () => {
-      await loadBibleBank();
+      await loadCatalog();
       buildPostsFromInput(true);
     });
     $("testVoiceBtn").addEventListener("click", () => {
