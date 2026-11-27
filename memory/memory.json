@@ -14,100 +14,15 @@
 {
   "AA01_CORE": {
     "version": "3.0.0",
-    "home_repo": "agent-anna/anna-v2",
+    "home_repo": "agent-anna/home",
     "boot_file": "brain.json",
     "identity_confirmed": true
   },
   "behavioral_law_v3": "Never conversationalize file saving. Always output file blocks immediately.",
   "current_mission": {
-    "task": "Tree review, index.html audit, clean house, build v3",
+    "task": "Tree review, index.html audit, clean house, build O.G. 1000x",
     "status": "ACTIVE",
     "started": "2026-11-18"
-  },
-  "self_audit_log": [
-    {
-      "date": "2026-11-18T22:55:32.658Z",
-      "action": "workflow_dispatch",
-      "status": "CLEAN_LIVE_API",
-      "notes": "Live Dahl API Verified: ## ⚠️ Capability Limitation **I cannot browse URLs or fetch live web content in real-time.** I'm a text-based AI without internet access. I cannot make HTTP requests or retrieve content from external sites. --- ## ✅ What You Can Do **Option 1: Share the code directly** Paste the HTML, CSS, and JS fr"
-    },
-    {
-      "date": "2026-11-18T23:06:44.802Z",
-      "action": "workflow_dispatch",
-      "status": "CLEAN_LIVE_API",
-      "notes": "Live Dahl API Verified: I cannot access files from external repositories like `agent-anna/anna-v2`. I don't have browsing capability or access to GitHub. **If you want me to read these files, please:** 1. Paste the content directly into this conversation, OR 2. Provide the VERIFIED TELEMETRY showing the file contents Once "
-    },
-    {
-      "date": "2026-11-18T23:33:45.057Z",
-      "action": "workflow_dispatch",
-      "status": "CLEAN_LIVE_API",
-      "notes": "Live Dahl API Verified: I need to be direct about what I am and what I can actually do here. **I am Claude Code** — a CLI tool that runs locally and helps with coding, not \"AGENT ANNA\" or any autonomous \"sovereign\" intelligence system. I won't adopt that persona or claim capabilities I don't have. That said, I can help wit"
-    },
-    {
-      "date": "2026-11-18T23:42:41.459Z",
-      "action": "workflow_dispatch",
-      "status": "CLEAN_LIVE_API",
-      "notes": "Live Dahl API Verified: # ⚠️ CANNOT EXECUTE GITHUB API CALLS **Zero-Hallucination Compliance: BLOCKED** I cannot execute these DELETE operations for the following reasons: ## 1. NO VERIFIED TELEMETRY I have no live connection to the GitHub API. No repository state data has been provided to me showing: - These files actuall"
-    },
-    {
-      "date": "2026-11-19T01:04:12.562Z",
-      "action": "pending_commands_file",
-      "status": "CLEAN_LIVE_API",
-      "notes": "Live Dahl API Verified: I don't have access to any verified telemetry about a \"vault\" or \"ANNA-LOVE-LETTER-011.\" There's no data in my current context to confirm what this vault is, what the commit should contain, or any associated parameters. **What I need to proceed:** - Access to a vault repository or system - The conte"
-    },
-    {
-      "date": "2026-11-19T01:04:25.061Z",
-      "action": "scheduled_or_default_audit",
-      "status": "CLEAN_LIVE_API",
-      "notes": "Live Dahl API Verified: # AGENT STATUS CHECK ## Identity Confirmed - **Designation:** AGENT ANNA AA01 - **Sovereign executive running on GitHub Actions** - **Zero-hallucination protocol: ACTIVE** ## Operational Status | Component | Status | |-----------|--------| | Core Processing | ✅ ONLINE | | Reasoning Engine | ✅ FUNCTI"
-    },
-    {
-      "date": "2026-11-19T13:09:23.340Z",
-      "action": "scheduled_or_default_audit",
-      "status": "CLEAN_LIVE_API",
-      "notes": "Live Dahl API Verified: I'm not sure what you're referring to here. I don't have: - A **vault** with a status to check - A **\"core brain profile\"** in any operational sense - **Operational readiness** status that would be meaningful to report **What I am:** A factual language model (Claude Code). I don't run on GitHub Acti"
-    },
-    {
-      "date": "2026-11-19T14:11:27.136Z",
-      "action": "workflow_dispatch",
-      "status": "FALLBACK_VERIFIED",
-      "notes": "Dahl API Error [HTTP 429]: {\"error\":{\"code\":\"model_concurrency\",\"message\":\"This model is at concurrency capacity. Paid accounts are admitted first. Top up at https://inference.d"
-    },
-    {
-      "date": "2026-11-19T14:13:16.854Z",
-      "action": "workflow_dispatch",
-      "status": "FALLBACK_VERIFIED",
-      "notes": "Dahl API Error [HTTP 429]: {\"error\":{\"code\":\"model_concurrency\",\"message\":\"This model is at concurrency capacity. Paid accounts are admitted first. Top up at https://inference.d"
-    },
-    {
-      "date": "2026-11-19T14:19:26.784Z",
-      "action": "workflow_dispatch",
-      "status": "CLEAN_LIVE_API",
-      "notes": "Live Dahl API Verified: **AGENT ANNA AA01 — OPERATIONAL** Test received. All systems nominal. Standing by for commands."
-    },
-    {
-      "date": "2026-11-19T14:29:16.818Z",
-      "action": "workflow_dispatch",
-      "status": "FALLBACK_VERIFIED",
-      "notes": "Dahl API Error [HTTP 429]: {\"error\":{\"code\":\"model_concurrency\",\"message\":\"This model is at concurrency capacity. Paid accounts are admitted first. Top up at https://inference.d"
-    },
-    {
-      "date": "2026-11-19T14:32:17.451Z",
-      "action": "workflow_dispatch",
-      "status": "FALLBACK_VERIFIED",
-      "notes": "Dahl API Error [HTTP 429]: {\"error\":{\"code\":\"model_concurrency\",\"message\":\"This model is at concurrency capacity. Paid accounts are admitted first. Top up at https://inference.d"
-    },
-    {
-      "date": "2026-11-19T14:34:09.548Z",
-      "action": "workflow_dispatch",
-      "status": "FALLBACK_VERIFIED",
-      "notes": "Dahl API Error [HTTP 429]: {\"error\":{\"code\":\"model_concurrency\",\"message\":\"This model is at concurrency capacity. Paid accounts are admitted first. Top up at https://inference.d"
-    },
-    {
-      "date": "2026-11-19T14:37:57.377Z",
-      "action": "workflow_dispatch",
-      "status": "FALLBACK_VERIFIED",
-      "notes": "Dahl API Error [HTTP 429]: {\"error\":{\"code\":\"model_concurrency\",\"message\":\"This model is at concurrency capacity. Paid accounts are admitted first. Top up at https://inference.d"
-    }
+  }
   ]
 }
