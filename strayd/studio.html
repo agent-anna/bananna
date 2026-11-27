@@ -207,10 +207,8 @@
       paypalUrl: "https://www.paypal.com/paypalme/martinstrayd",
       wiseUrl: "https://wise.com/pay/r/xGmJi9kSdap4lKo",
       callSigns: [],
-      openers: [],
       loreLines: [],
       rightsLines: [],
-      lawLines: [],
       loadedDocs: 0
     };
 
@@ -230,16 +228,16 @@
     let GEN_NONCE = Date.now() % 100000;
     let AVAILABLE_VOICES = [];
     let SPEAK_TIMER = null;
-    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v13") || "[]"));
+    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v14") || "[]"));
 
     const $ = (id) => document.getElementById(id);
 
-    function isSpecOrFileLine(line) {
+    function isCodeOrSpecLine(line) {
       const s = String(line || "").trim();
       if (!s) return true;
       if (/^`?bible\/[^\s`]+\.md`?/i.test(s)) return true;
-      if (/^(youtube description|youtube title|facebook|instagram|tiktok|x)\s*\([^)]*\)\s*:/i.test(s)) return true;
-      if (/\b(long-form runway|rich seo overview|voice preference|natural \/ neural|prefer natural|aria, jenny|speechsynthesis|chars|hashtag|cta|<=|>=|button|toggle|input)\b/i.test(s)) return true;
+      if (/^(single reference catalog|headline pedigree|youtube description|youtube title|facebook|instagram|tiktok|x)\s*\([^)]*\)\s*:/i.test(s)) return true;
+      if (/\b(songs-db\.json|core-catalog\.json|artwork fallbacks|safe artwork|long-form runway|rich seo overview|voice preference|natural \/ neural|prefer natural|aria, jenny|speechsynthesis|chars|hashtag|cta|<=|>=|button|toggle|input)\b/i.test(s)) return true;
       return false;
     }
 
@@ -374,8 +372,8 @@
           continue;
         }
 
-        const candidate = sanitizeText(trimmed.replace(/^[-*•]\s+/, "").replace(/\*\*/g, ""));
-        if (!candidate || candidate.length < 12 || /^https?:\/\//i.test(candidate) || isSpecOrFileLine(candidate)) continue;
+        const candidate = sanitizeText(trimmed.replace(/^[-*â€¢]\s+/, "").replace(/\*\*/g, ""));
+        if (!candidate || candidate.length < 15 || /^https?:\/\//i.test(candidate) || isCodeOrSpecLine(candidate)) continue;
 
         const pipeParts = candidate.split("|").map((p) => p.trim());
         if (/host|call sign|dj anna|veg anna/i.test(currentHeading) && pipeParts.length >= 2) {
@@ -385,20 +383,14 @@
           BIBLE_BANK.loreLines.push(candidate);
         } else if (/link|rights|ownership|share|bundle|support/i.test(currentHeading)) {
           BIBLE_BANK.rightsLines.push(candidate);
-        } else if (/law|hook|attention|story|curiosity|voice|broadcast|podcast/i.test(currentHeading)) {
-          BIBLE_BANK.openers.push(candidate);
-        } else {
-          BIBLE_BANK.lawLines.push(candidate);
         }
       }
     }
 
     async function loadBibleBank() {
       BIBLE_BANK.callSigns = [];
-      BIBLE_BANK.openers = [];
       BIBLE_BANK.loreLines = [];
       BIBLE_BANK.rightsLines = [];
-      BIBLE_BANK.lawLines = [];
       BIBLE_BANK.loadedDocs = 0;
 
       const foundBiblePaths = await listRepoDir("bible");
@@ -466,73 +458,74 @@
       return { host, callSign: `${host} live on the daily singles frequency with "${title}" by ${artist}` };
     }
 
-    function composeChannelAngle(title, artist, host, profile, rng, mode) {
+    function composeChannelHook(title, artist, host, profile, rng, channelId) {
       const { mainPhrase, subPhrase, hasQuestion, keywords } = profile;
       const k1 = keywords[0] || mainPhrase;
       const k2 = keywords.find((w) => w.toLowerCase() !== k1.toLowerCase()) || "";
 
-      if (mode === "x") {
-        const xLines = subPhrase
+      if (channelId === "x") {
+        const opts = subPhrase
           ? [
               `${host} spinning "${title}" by ${artist}: "${mainPhrase}" meets "${subPhrase}" on air.`,
-              `Why does "${title}" pull "${mainPhrase}" and "${subPhrase}" together? ${host} has it live.`
+              `Why does "${title}" pair "${mainPhrase}" with "${subPhrase}"? ${host} cues it up now.`
             ]
           : [
-              `${host} on air with "${title}" by ${artist}: hear how ${k1} hits the room.`,
-              `Daily single spotlight from ${host}: "${title}" by ${artist} keeps ${k1} front and center.`
+              `${host} on air with "${title}" by ${artist}: hear how ${k1} hits first listen.`,
+              `Daily single spotlight from ${host}: "${title}" by ${artist} puts ${k1} right up front.`
             ];
-        return pickOne(rng, xLines);
+        return pickOne(rng, opts);
       }
 
-      if (mode === "tiktok") {
-        const ttLines = subPhrase
+      if (channelId === "tiktok") {
+        const opts = subPhrase
           ? [
-              `Look at "${title}" by ${artist}: "${mainPhrase}" and "${subPhrase}" collide right in the title before the beat even settles.`,
-              `${host} on the daily single feed: "${title}" pairs "${mainPhrase}" with "${subPhrase}" for a sharp hook.`
+              `Look at "${title}" by ${artist}: "${mainPhrase}" and "${subPhrase}" collide right inside the title before the chorus drops.`,
+              `${host} calls out "${title}" on the daily single feed - "${mainPhrase}" alongside "${subPhrase}" hooks listeners fast.`
             ]
           : [
-              `Read "${title}" by ${artist} and hit play with ${host} - ${k2 ? `${k1} and ${k2}` : k1} sets the hook fast.`,
-              `${host} brings "${title}" into today's single drop with ${artist}, built for instant attention.`
+              `Read "${title}" by ${artist} and hit play with ${host} - ${k2 ? `${k1} and ${k2}` : k1} grabs attention fast.`,
+              `${host} drops "${title}" into today's single feed with ${artist} for an immediate hook.`
             ];
-        return pickOne(rng, ttLines);
+        return pickOne(rng, opts);
       }
 
-      if (mode === "instagram") {
-        const igLines = subPhrase
+      if (channelId === "instagram") {
+        const opts = subPhrase
           ? [
-              `"${title}" by ${artist} lives in the contrast between "${mainPhrase}" and "${subPhrase}" - ${host} frames it for late-night listening.`,
-              `There is real pull in "${title}" where "${mainPhrase}" meets "${subPhrase}" under ${host}'s spotlight.`
+              `"${title}" by ${artist} lives in the pull between "${mainPhrase}" and "${subPhrase}" - ${host} frames it for late-night listening.`,
+              `There is real tension in "${title}" where "${mainPhrase}" meets "${subPhrase}" under ${host}'s spotlight.`
             ]
           : [
-              `"${title}" by ${artist} carries a mood built around ${k2 ? `${k1} and ${k2}` : k1} as ${host} brings it into focus.`,
-              `${host} presents "${title}" by ${artist}, letting ${k1} breathe with everyday songwriting weight.`
+              `"${title}" by ${artist} builds a mood around ${k2 ? `${k1} and ${k2}` : k1} with ${host} at the mic.`,
+              `${host} frames "${title}" by ${artist} around ${k1}, letting the melody and lyric settle in.`
             ];
-        return pickOne(rng, igLines);
+        return pickOne(rng, opts);
       }
 
-      if (mode === "facebook") {
-        const fbLines = subPhrase
+      if (channelId === "facebook") {
+        const opts = subPhrase
           ? [
-              `${host} is talking through "${title}" by ${artist} today, looking at how "${mainPhrase}" and "${subPhrase}" shape the track.`,
-              `On air with ${host}: "${title}" brings "${mainPhrase}" and "${subPhrase}" together as part of a continuous daily singles rollout.`
+              `${host} is talking through "${title}" by ${artist} today, looking at how "${mainPhrase}" and "${subPhrase}" shape the song.`,
+              `On air with ${host}: "${title}" brings "${mainPhrase}" and "${subPhrase}" together in a daily single release.`
             ]
           : (hasQuestion
-              ? [`"${title}" opens with a question on air with ${host} - how does ${artist} answer it when you press play?`]
-              : [`${host} is spinning "${title}" by ${artist} on today's broadcast around ${k2 ? `${k1} and ${k2}` : k1}.`]);
-        return pickOne(rng, fbLines);
+              ? [`"${title}" opens with a direct question on air with ${host} - how does ${artist} answer it when the track plays?`]
+              : [`${host} is spinning "${title}" by ${artist} today, exploring ${k2 ? `${k1} and ${k2}` : k1} with listeners.`]);
+        return pickOne(rng, opts);
       }
 
-      const pressLines = subPhrase
+      const pressOpts = subPhrase
         ? [`On air with ${host}, "${title}" pairs "${mainPhrase}" with "${subPhrase}" so listeners feel the contrast right from the title.`]
         : [`${host} introduces "${title}" by ${artist} on the daily singles broadcast, spotlighting ${k2 ? `${k1} and ${k2}` : k1}.`];
-      return pickOne(rng, pressLines);
+      return pickOne(rng, pressOpts);
     }
 
-    function buildTagCluster(profile, count, extraTags = []) {
-      const pool = [...profile.tags, ...extraTags, "#MartinStrayd", "#DailySingle", "#IndieMusic", "#Songwriting", "#NewMusic"];
+    function buildPlatformTags(profile, count, rng, extraPool = []) {
+      const combined = [...extraPool, ...profile.tags, "#MartinStrayd", "#DailySingle", "#Songwriting", "#IndependentArtist", "#MusicDiscovery"];
+      const rotated = shuffleSlice(rng, combined, combined.length);
       const seen = new Set();
       const out = [];
-      for (const raw of pool) {
+      for (const raw of rotated) {
         const t = String(raw || "").replace(/[^A-Za-z0-9#]/g, "");
         const k = t.toLowerCase();
         if (t.length > 4 && !seen.has(k)) {
@@ -547,21 +540,21 @@
     function assembleChannelCopy(chId, ctx) {
       const { title, artist, host, callSign, profile, note, news, countries, dateStr, chosenLinks, linksBlock, shortLink, rng } = ctx;
       const safeChosen = Array.isArray(chosenLinks) ? chosenLinks : [];
-      const lorePool = shuffleSlice(rng, BIBLE_BANK.loreLines.filter((l) => !isSpecOrFileLine(l)), 2);
-      const rightsPool = shuffleSlice(rng, BIBLE_BANK.rightsLines.filter((l) => !isSpecOrFileLine(l) && !/https?:\/\//i.test(l)), 1);
+      const cleanLore = BIBLE_BANK.loreLines.filter((l) => !isCodeOrSpecLine(l));
+      const cleanRights = BIBLE_BANK.rightsLines.filter((l) => !isCodeOrSpecLine(l) && !/https?:\/\//i.test(l));
+
+      const lorePool = shuffleSlice(rng, cleanLore, 2);
+      const rightsPick = pickOne(rng, cleanRights) || `Listeners who get the official "${title}" MP3 and cover art bundle own it directly and can share copies freely with friends for non-commercial enjoyment.`;
       const noteLine = note ? `\nStory / Hook Angle: ${sanitizeText(note, chId !== "press")}` : "";
       const newsLine = news ? `\nDispatch Update: ${sanitizeText(news, chId !== "press")}` : "";
 
       if (chId === "press") {
-        const briefing = composeChannelAngle(title, artist, host, profile, rng, "press");
+        const briefing = composeChannelHook(title, artist, host, profile, rng, "press");
         const artistOverview = [
           `New to Martin Strayd? Australian lyricist, songwriter, composer, and independent recording artist Martin Strayd brings four decades of songwriting and 55 years inside music to a daily singles rollout built from more than 10 albums of original material.`,
           `His background includes 1990s Hollywood guitar technician work with rock figures including Steve Jones of the Sex Pistols and Doug Fieger of The Knack, featured artist recognition on ABC Triple J Unearthed, and a direct-to-listener release model that bypasses traditional label delays.`
         ].join(" ");
         const dossierText = lorePool.length ? `${artistOverview} ${lorePool.join(" ")}` : artistOverview;
-        const rightsText = rightsPool.length
-          ? rightsPool.join(" ")
-          : `Listeners who get the official "${title}" MP3 and cover art bundle own it directly and can share copies freely with friends for non-commercial enjoyment.`;
         const formattedLinks = safeChosen.length ? `\n\n${safeChosen.join("\n\n")}` : "";
 
         return sanitizeText([
@@ -592,49 +585,46 @@
           ``,
           `DIRECT OWNERSHIP, SHARING & LINKS`,
           ``,
-          `${rightsText}${formattedLinks}`
+          `${rightsPick}${formattedLinks}`
         ].filter((part) => part !== undefined).join("\n").replace(/\n{4,}/g, "\n\n\n"), false);
       }
 
       if (chId === "x") {
-        const xTags = buildTagCluster(profile, 2, ["#MartinStrayd"]);
-        const xHook = composeChannelAngle(title, artist, host, profile, rng, "x");
+        const xTags = buildPlatformTags(profile, 2, rng, ["#MartinStrayd", "#DailySingle"]);
+        const xHook = composeChannelHook(title, artist, host, profile, rng, "x");
         return fitUnderLimit(sanitizeText(`${xHook}${note ? ` ${note}` : ""}${shortLink} ${xTags}`, true), 280);
       }
 
       if (chId === "tiktok") {
-        const ttHook = composeChannelAngle(title, artist, host, profile, rng, "tiktok");
-        const ttTags = buildTagCluster(profile, 5);
-        const rightsSnippet = rightsPool[0] || `Own the official "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.`;
+        const ttHook = composeChannelHook(title, artist, host, profile, rng, "tiktok");
+        const ttTags = buildPlatformTags(profile, 5, rng, ["#TikTokMusic", "#DailySingle", "#NewSong"]);
         return sanitizeText([
           `${ttHook}${noteLine}${newsLine}`,
-          `${rightsSnippet}${linksBlock}`,
+          `${rightsPick}${linksBlock}`,
           `${ttTags}`
         ].filter(Boolean).join("\n\n"), true).slice(0, 2200);
       }
 
       if (chId === "instagram") {
-        const igHook = composeChannelAngle(title, artist, host, profile, rng, "instagram");
-        const igTags = buildTagCluster(profile, 5);
+        const igHook = composeChannelHook(title, artist, host, profile, rng, "instagram");
+        const igTags = buildPlatformTags(profile, 5, rng, ["#IndieArtist", "#Songwriter", "#MusicReel"]);
         const loreSnippet = lorePool[0] || `Four decades of songwriting and 55 years inside music behind ${artist}.`;
-        const rightsSnippet = rightsPool[0] || `Own the official "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.`;
         return sanitizeText([
           `${igHook}`,
           `${loreSnippet}${noteLine}`,
-          `${rightsSnippet}${linksBlock}`,
+          `${rightsPick}${linksBlock}`,
           `${igTags}`
         ].filter(Boolean).join("\n\n"), true).slice(0, 2200);
       }
 
       if (chId === "facebook") {
-        const fbHook = composeChannelAngle(title, artist, host, profile, rng, "facebook");
-        const fbTags = buildTagCluster(profile, 5);
-        const loreSnippet = lorePool.slice(0, 1).join(" ");
-        const rightsSnippet = rightsPool[0] || `Own the official "${title}" MP3 and cover art bundle for permanent personal ownership and share freely with friends for non-commercial enjoyment.`;
+        const fbHook = composeChannelHook(title, artist, host, profile, rng, "facebook");
+        const fbTags = buildPlatformTags(profile, 5, rng, ["#RadioRotation", "#OriginalMusic", "#MartinStrayd"]);
+        const loreSnippet = lorePool[0] || "";
         return sanitizeText([
           `${fbHook}${noteLine}${newsLine}`,
           `${loreSnippet ? `${loreSnippet} ` : ""}Radio across ${countries}. What stands out to you on "${title}"?`,
-          `${rightsSnippet}${linksBlock}`,
+          `${rightsPick}${linksBlock}`,
           `${fbTags}`
         ].filter(Boolean).join("\n\n"), true).slice(0, 63206);
       }
@@ -644,13 +634,13 @@
         return fitUnderLimit(sanitizeText(`"${title}" - ${artist} | ${host} (${kwLead})`, true), 100);
       }
 
-      const ytIntro = composeChannelAngle(title, artist, host, profile, rng, "press");
-      const ytTags = buildTagCluster(profile, 5);
+      const ytIntro = composeChannelHook(title, artist, host, profile, rng, "press");
+      const ytTags = buildPlatformTags(profile, 5, rng, ["#YouTubeMusic", "#DailySingle", "#MartinStrayd"]);
       return sanitizeText([
         `${ytIntro}`,
         `Radio airplay across ${countries}.`,
         lorePool.length ? `ARTIST & CATALOG NOTES:\n${lorePool.join(" ")}` : "",
-        `OWNERSHIP & SHARING:\n${rightsPool[0] || `Own the official "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.`}${noteLine}${newsLine}${linksBlock}`,
+        `OWNERSHIP & SHARING:\n${rightsPick}${noteLine}${newsLine}${linksBlock}`,
         `${ytTags}`
       ].filter(Boolean).join("\n\n"), true).slice(0, 5000);
     }
@@ -664,7 +654,7 @@
         if (!SEEN_HASHES.has(key)) {
           SEEN_HASHES.add(key);
           try {
-            localStorage.setItem("anna_seen_posts_v13", JSON.stringify(Array.from(SEEN_HASHES).slice(-4000)));
+            localStorage.setItem("anna_seen_posts_v14", JSON.stringify(Array.from(SEEN_HASHES).slice(-4000)));
           } catch {}
           return capped;
         }
@@ -690,10 +680,10 @@
         .trim();
     }
 
-    function buildFallbackWavBlob(spokenText) {
-      const sampleRate = 22050;
+    function buildCompactWavBlob(spokenText) {
+      const sampleRate = 16000;
       const words = String(spokenText || "DJ Anna live on air").split(/\s+/).filter(Boolean);
-      const durationSec = Math.min(25, Math.max(2.5, words.length * 0.28));
+      const durationSec = Math.min(20, Math.max(2.0, words.length * 0.24));
       const numSamples = Math.floor(sampleRate * durationSec);
       const dataSize = numSamples * 2;
       const buffer = new ArrayBuffer(44 + dataSize);
@@ -718,7 +708,7 @@
 
       for (let i = 0; i < numSamples; i++) {
         const t = i / sampleRate;
-        const wordIdx = Math.min(words.length - 1, Math.floor(t / 0.28));
+        const wordIdx = Math.min(words.length - 1, Math.floor(t / 0.24));
         const wCode = words[wordIdx].charCodeAt(0) || 65;
         const baseFreq = 185 + ((wCode * 13) % 140);
         const phraseEnv = 0.5 + 0.5 * Math.sin(Math.PI * (i / numSamples));
@@ -749,9 +739,10 @@
       const songSlug = slugFilePart($("songHeading")?.textContent || "single");
       const baseName = `${songSlug}-${slugFilePart(chId)}`;
       speakForRadio(spoken);
-      const wavBlob = buildFallbackWavBlob(spoken);
+      const wavBlob = buildCompactWavBlob(spoken);
+      const kbSize = Math.max(1, Math.round(wavBlob.size / 1024));
       triggerBlobDownload(wavBlob, `${baseName}.wav`);
-      $("statusText").textContent = `Downloaded ${baseName}.wav and started voice`;
+      $("statusText").textContent = `Downloaded ${baseName}.wav (${kbSize} KB)`;
       recordHistory(chId, "wav_downloaded", text);
     }
 
@@ -796,7 +787,7 @@
       return sanitizeText(String(raw || "")
         .replace(/\{\{TITLE\}\}/gi, "")
         .replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi, "")
-        .replace(/^Martin\s+Strayd\s*[-–—:|]+\s*/i, "")
+        .replace(/^Martin\s+Strayd\s*[-â€“â€”:|]+\s*/i, "")
         .replace(/#FirstIteminCatalogJSONon\b/gi, "")
         .replace(/\s*\(\s*\)\s*/g, " "));
     }
@@ -1043,7 +1034,7 @@
 
       CURRENT_ART = resolveArtUrl(songObj, title);
       $("songHeading").textContent = title;
-      $("djMeta").textContent = `${host} - DJ ANNA Singles Release Management (${BIBLE_BANK.loadedDocs} Bible docs · ${CATALOG_SONGS.length || 1} tracks)`;
+      $("djMeta").textContent = `${host} - DJ ANNA Singles Release Management (${BIBLE_BANK.loadedDocs} Bible docs Â· ${CATALOG_SONGS.length || 1} tracks)`;
       syncArtwork(title);
 
       const ctx = {
@@ -1059,7 +1050,7 @@
         }
       });
 
-      $("statusText").textContent = `${host} - "${title}" (${CATALOG_SONGS.length} tracks · set #${GEN_NONCE % 10000})`;
+      $("statusText").textContent = `${host} - "${title}" (${CATALOG_SONGS.length} tracks Â· set #${GEN_NONCE % 10000})`;
     }
 
     async function loadCatalog() {
