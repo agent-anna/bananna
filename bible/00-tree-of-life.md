@@ -1,4 +1,4 @@
-# ANNA Living Tree of Life System Map
+# BANANNA Living Tree of Life System Map
 _Auto-generated on push to `bible/` at `2026-11-27T01:41:32.363021+00:00`_
 
 ## The Roots (Core Config & Memory)
@@ -34,11 +34,11 @@ _Auto-generated on push to `bible/` at `2026-11-27T01:41:32.363021+00:00`_
 - `strayd/viewer.html`
 
 ## The Branches (Active GitHub Actions Workflows)
-- **Anna Bible, Catalog & Feed Action** (`.github/workflows/aa01-bible-and-feed.yml`)
+- **Bananna Bible, Catalog & Feed Action** (`.github/workflows/aa01-bible-and-feed.yml`)
 - **AA01 Live Intel Feed** (`.github/workflows/aa01-intel-feed.yml`)
-- **Agent Anna V3 Autonomous Audit** (`.github/workflows/anna-autonomous-audit.yml`)
-- **ANNA Book-Triggered Tree of Life Sync** (`.github/workflows/book-tree-sync.yml`)
-- **Anna - Marketing - New Song Promo Gate** (`.github/workflows/daily-song-promo.yml`)
+- **Agent Bananna Autonomous Audit** (`.github/workflows/anna-autonomous-audit.yml`)
+- **Bananna Book-Triggered Tree of Life Sync** (`.github/workflows/book-tree-sync.yml`)
+- **Bananna - Marketing - New Song Promo Gate** (`.github/workflows/daily-song-promo.yml`)
 
 ## The Leaves (Verified Knowledge & Logs)
 - `knowledge/business.md`

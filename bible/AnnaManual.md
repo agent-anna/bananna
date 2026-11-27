@@ -1,7 +1,7 @@
-# AGENT ANNA — FULL DAILY SINGLE COMMAND MANUAL (AREAS 1–5)
+# AGENT Bananna — FULL DAILY SINGLE COMMAND MANUAL (AREAS 1–5)
 
 ## 1. Core Concept: Radio, Social & Autonomous Pipeline
-Agent Anna runs as the **modern DJ, podcaster, and announcer** behind a **new song release every single day** (not once a month) for **Martin Strayd**. Every drop combines 2027+ search/hashtag alignment and fast visual sleeve copying with direct listener access to **MP3 + cover art bundles** (to own and share freely with friends for non-commercial enjoyment) via:
+Agent Bananna runs as the **modern DJ, podcaster, and announcer** behind a **new song release every single day** (not once a month) for **Martin Strayd**. Every drop combines 2027+ search/hashtag alignment and fast visual sleeve copying with direct listener access to **MP3 + cover art bundles** (to own and share freely with friends for non-commercial enjoyment) via:
 - Official Store: https://martinstrayd.github.io/artist/
 - PayPal: https://www.paypal.com/paypalme/martinstrayd
 - Wise: 200 THB via Wise (`https://wise.com/pay/r/xGmJi9kSdap4lKo`)
@@ -10,12 +10,12 @@ Agent Anna runs as the **modern DJ, podcaster, and announcer** behind a **new so
 Visual direction stays strictly **realistic live-action cinematography** (real spaces, practical lighting, real human presence—zero cartoon).
 
 ### How It Works as Radio
-- Anna introduces a fresh single every day with on-air DJ, podcast, and announcer framing.
+- Bananna introduces a fresh single every day with on-air DJ, podcast, and announcer framing.
 - Use **Read** for a clean teleprompter view and **Speak** for browser voice-over auditioning before recording or going live.
-- Example DJ cue: *"Modern DJ Agent Anna on air with today's new single drop: 'Midnight Over Chiang Rai' (STRAYD-014) by Martin Strayd—a new song every day, not once a month."*
+- Example DJ cue: *"Modern DJ Agent Bananna on air with today's new single drop: 'Midnight Over Chiang Rai' (STRAYD-014) by Martin Strayd—a new song every day, not once a month."*
 
 ### How It Works as Social & Sales
-- Prioritizes clear 2027+ search keywords and focused hashtags (`#MartinStrayd`, `#DailySongDrop`, `#AgentAnna`, plus track/keyword tags) rather than tag stuffing.
+- Prioritizes clear 2027+ search keywords and focused hashtags (`#MartinStrayd`, `#DailySongDrop`, `#AgentBananna`, plus track/keyword tags) rather than tag stuffing.
 - Click the cover sleeve or use **Copy Image** / **Copy Art Link** to paste the sleeve image (or direct art/store URL fallback) fast alongside drafts for TikTok, Instagram, YouTube Title & Description, Facebook, X, Morning/Midday/Evening slots, and Fan Replies.
 
 ### How It Works as an Autonomous Engine
@@ -31,7 +31,7 @@ Visual direction stays strictly **realistic live-action cinematography** (real s
 - Set 2027+ search keywords/hashtag seeds and presenter rotation; keep Store, PayPal, Wise (`200 THB`), and Buy Me a Coffee (`https://buymeacoffee.com/martinstrayd`) updated.
 - Click **Generate Fresh Presenter Copy**, **Next Non-Repeating Single & Reload**, or **OK To Post (Stage JSON & Audit)**.
 
-### Area 2 — Chat With Agent Anna (Anna Host)
+### Area 2 — Chat With Agent Bananna (Bananna Host)
 - Type natural direction to steer presenter copy.
 - Commands: `next` / `random` / `another track` / `skip` cycles to the next non-repeating track; `stage` / `ok to post` / `json` stages the Area 5 payload; `speak` / `read` explains voice/teleprompter controls; any other note updates the active presenter directive.
 
@@ -40,7 +40,7 @@ Visual direction stays strictly **realistic live-action cinematography** (real s
 
 ### Area 4 — Daily Hit Press Release, Pitch Deck, Slots, Replies & Channel Drafts
 - Clickable sleeve + **Copy Image** / **Copy Art Link** for fast visual pasting.
-- Blocks: **Press Release**, **Per-Song Pitch Deck**, **TikTok**, **Instagram**, **YouTube Title**, **YouTube Description**, **Facebook**, **X**, **Day-by-Day Time Slots** (Morning • Midday • Evening), and **Agent Anna Fan Reply Pack**, with live word/character counts and **Read**, **Speak**, **Edit**, **Save**, **Copy**, and **Post**.
+- Blocks: **Press Release**, **Per-Song Pitch Deck**, **TikTok**, **Instagram**, **YouTube Title**, **YouTube Description**, **Facebook**, **X**, **Day-by-Day Time Slots** (Morning • Midday • Evening), and **Agent Bananna Fan Reply Pack**, with live word/character counts and **Read**, **Speak**, **Edit**, **Save**, **Copy**, and **Post**.
 
 ### Area 5 — Staged JSON Payload, Pod Audit & Full Campaign Pack
 - Displays staged JSON (`track`, `links`, `keywords`, `cadence`, `drafts`, `session_notes`) with **Copy JSON** and **Copy Full Pack**.
