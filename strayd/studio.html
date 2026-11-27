@@ -12,7 +12,7 @@
       --text: #eef3fb;
       --muted: #9fb0c8;
       --accent: #38bdf8;
-      --border: rgba(255, 255, 255, 0.1);
+      --border: rgba(255, 255, 255, 0.12);
     }
     * { box-sizing: border-box; }
     body {
@@ -42,12 +42,9 @@
       overflow: hidden;
       background: var(--card-2);
       border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
     .art-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .song-title { margin: 0 0 6px; font-size: 1.65rem; line-height: 1.2; }
+    .song-title { margin: 0 0 6px; font-size: 1.6rem; line-height: 1.2; }
     .meta-line { color: var(--muted); font-size: 0.9rem; margin-bottom: 12px; }
     .controls-grid {
       display: grid;
@@ -66,7 +63,7 @@
       font-size: 0.92rem;
       font-family: inherit;
     }
-    textarea { min-height: 220px; resize: vertical; line-height: 1.6; padding: 12px; }
+    textarea { min-height: 210px; resize: vertical; line-height: 1.6; padding: 12px; }
     .link-toggles {
       display: flex;
       flex-wrap: wrap;
@@ -101,7 +98,7 @@
     button.primary { background: var(--accent); color: #061018; font-weight: 600; border: none; }
     .status-pill { font-size: 0.8rem; color: var(--accent); padding-left: 6px; }
     .press-top { margin-bottom: 16px; }
-    .press-top textarea { min-height: 540px; line-height: 1.75; padding: 16px; }
+    .press-top textarea { min-height: 500px; line-height: 1.75; padding: 16px; }
     .posts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
     .post-card {
       background: var(--card);
@@ -128,14 +125,14 @@
       </div>
       <div>
         <h1 id="songHeading" class="song-title">Loading catalog...</h1>
-        <div id="djMeta" class="meta-line">DJ ANNA Singles Release Management Team - Daily Broadcast &amp; Reel Studio</div>
+        <div id="djMeta" class="meta-line">DJ ANNA Singles Release Management Team - Daily Broadcast Studio</div>
         <div class="controls-grid">
           <div>
             <label for="songSelect">1. Pick Song from Catalog</label>
             <select id="songSelect"></select>
           </div>
           <div>
-            <label for="voiceSelect">DJ ANNA / Veg Anna Female Voice</label>
+            <label for="voiceSelect">DJ ANNA / Veg Anna Voice</label>
             <select id="voiceSelect"></select>
           </div>
           <div>
@@ -175,7 +172,7 @@
           <button id="makePostsBtn" class="primary" type="button">Generate Fresh Set</button>
           <a href="catalog-filter.html" style="color:var(--accent);font-size:0.84rem;font-weight:600;text-decoration:none;padding:0 4px;">Catalog Filter</a>
           <a href="radio-stream.html" style="color:var(--accent);font-size:0.84rem;font-weight:600;text-decoration:none;padding:0 4px;">Live Radio Stream</a>
-          <button id="reloadBibleBtn" type="button">Reload Catalog &amp; Brain</button>
+          <button id="reloadCatalogBtn" type="button">Reload Catalog</button>
           <button id="testVoiceBtn" type="button">Test Anna Voice</button>
           <button id="stopSpeakBtn" type="button">Stop Voice</button>
           <button id="exportHistoryBtn" type="button">Save History JSON</button>
@@ -206,7 +203,7 @@
       coffeeUrl: "https://buymeacoffee.com/martinstrayd",
       paypalUrl: "https://www.paypal.com/paypalme/martinstrayd",
       wiseNote: "Wise THB / Wise Pay direct transfer",
-      loadedSources: 0
+      loadedFiles: 0
     };
 
     const FEMALE_VOICE_HINTS = [
@@ -225,7 +222,7 @@
     let GEN_NONCE = Date.now() % 100000;
     let AVAILABLE_VOICES = [];
     let SPEAK_TIMER = null;
-    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v20") || "[]"));
+    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v21") || "[]"));
 
     const $ = (id) => document.getElementById(id);
 
@@ -299,10 +296,10 @@
       };
     }
 
-    async function readLocalOrRepoText(relPath) {
-      const cleanPath = String(relPath || "").replace(/^\.\//, "").replace(/^\/+/, "");
+    async function readRepoFile(fileName) {
+      const cleanName = String(fileName || "").replace(/^\.\//, "").replace(/^strayd\//, "").replace(/^\/+/, "");
+      const repoPath = `strayd/${cleanName}`;
       const patHeaders = getPatHeaders();
-      const repoPath = cleanPath.startsWith("strayd/") ? cleanPath : `strayd/${cleanPath}`;
 
       if (patHeaders) {
         try {
@@ -320,13 +317,13 @@
         } catch {}
       }
 
-      const fetchCandidates = [
-        `./${cleanPath.replace(/^strayd\//, "")}`,
+      const urls = [
+        `./${cleanName}`,
         `https://agent-anna.github.io/home/${repoPath}`,
         `https://raw.githubusercontent.com/agent-anna/home/main/${repoPath}`
       ];
 
-      for (const u of fetchCandidates) {
+      for (const u of urls) {
         try {
           const r = await fetch(`${u}${u.includes("?") ? "&" : "?"}t=${Date.now()}`, { cache: "no-store" });
           if (r.ok) return await r.text();
@@ -503,7 +500,7 @@
         if (!SEEN_HASHES.has(key)) {
           SEEN_HASHES.add(key);
           try {
-            localStorage.setItem("anna_seen_posts_v20", JSON.stringify(Array.from(SEEN_HASHES).slice(-5000)));
+            localStorage.setItem("anna_seen_posts_v21", JSON.stringify(Array.from(SEEN_HASHES).slice(-5000)));
           } catch {}
           return capped;
         }
@@ -655,41 +652,21 @@
     }
 
     function makeFallbackArt(title) {
-      const canvas = document.createElement("canvas");
-      canvas.width = 400;
-      canvas.height = 400;
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.fillStyle = "#132238";
-        ctx.fillRect(0, 0, 400, 400);
-        ctx.strokeStyle = "#38bdf8";
-        ctx.lineWidth = 4;
-        ctx.strokeRect(16, 16, 368, 368);
-        ctx.fillStyle = "#38bdf8";
-        ctx.font = "bold 18px system-ui, sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText("MARTIN STRAYD", 200, 155);
-        ctx.fillStyle = "#eef3fb";
-        ctx.font = "bold 22px system-ui, sans-serif";
-        const label = String(title || "STRAYD SINGLE").slice(0, 24);
-        ctx.fillText(label, 200, 205);
-        ctx.fillStyle = "#9fb0c8";
-        ctx.font = "15px system-ui, sans-serif";
-        ctx.fillText("DJ ANNA DAILY RELEASE", 200, 250);
-      }
-      return canvas.toDataURL("image/png");
+      const safe = String(title || "Martin Strayd").replace(/[<>&"']/g, "").slice(0, 26);
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="400" height="400" fill="#132238"/><rect x="14" y="14" width="372" height="372" fill="none" stroke="#38bdf8" stroke-width="3"/><text x="200" y="165" text-anchor="middle" fill="#38bdf8" font-family="Arial,sans-serif" font-size="16" font-weight="bold">MARTIN STRAYD</text><text x="200" y="205" text-anchor="middle" fill="#eef3fb" font-family="Arial,sans-serif" font-size="20" font-weight="bold">${safe}</text><text x="200" y="245" text-anchor="middle" fill="#9fb0c8" font-family="Arial,sans-serif" font-size="14">DJ ANNA DAILY RELEASE</text></svg>`;
+      return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
     }
 
-    function resolveArtUrl(songOrRaw, title) {
-      const candidates = typeof songOrRaw === "object" && songOrRaw !== null
-        ? [songOrRaw.artUrl, songOrRaw.art, songOrRaw.artwork, songOrRaw.image, songOrRaw.coverArt]
-        : [songOrRaw];
+    function resolveArtUrl(songObj, title) {
+      const candidates = songObj && typeof songObj === "object"
+        ? [songObj.artUrl, songObj.art, songObj.artwork, songObj.image, songObj.coverArt]
+        : [];
       for (const raw of candidates) {
         const val = String(raw || "").trim();
         if (!val) continue;
         if (/^(https?:\/\/|data:image\/)/i.test(val)) return val;
         if (/^store-art\//i.test(val)) return `https://martinstrayd.github.io/artist/${encodeURI(val)}`;
-        return `https://agent-anna.github.io/home/strayd/${encodeURI(val.replace(/^(\.\/|strayd\/)+/, ""))}`;
+        return `https://martinstrayd.github.io/artist/store-art/${encodeURIComponent(val.replace(/^(\.\/|strayd\/|store-art\/)+/, ""))}`;
       }
       return makeFallbackArt(title);
     }
@@ -884,7 +861,7 @@
 
       const idx = Number($("songSelect").value || 0);
       const songObj = CATALOG_SONGS[idx] || CATALOG_SONGS[0] || {};
-      const title = cleanTitle($("customTitle").value) || cleanTitle(songObj.title || songObj.name || songObj.track || "") || "STRAYD Catalog Single";
+      const title = cleanTitle($("customTitle").value) || cleanTitle(songObj.title || songObj.name || songObj.track || "") || "Adhd I Can Do That (Travillen Disorder)";
       const artist = cleanTitle(songObj.artist) || "Martin Strayd";
       const note = sanitizeText($("noteInput").value);
       const news = sanitizeText($("newsInput").value);
@@ -901,7 +878,7 @@
 
       CURRENT_ART = resolveArtUrl(songObj, title);
       $("songHeading").textContent = title;
-      $("djMeta").textContent = `${host} - ${artist} (${BRAIN_STATE.loadedSources} repo files Â· ${CATALOG_SONGS.length} tracks)`;
+      $("djMeta").textContent = `${host} - ${artist} (${BRAIN_STATE.loadedFiles} repo files, ${CATALOG_SONGS.length} tracks)`;
       syncArtwork(title);
 
       const ctx = {
@@ -918,18 +895,18 @@
         }
       });
 
-      $("statusText").textContent = `${host} - "${title}" (${CATALOG_SONGS.length} tracks Â· set #${GEN_NONCE % 10000})`;
+      $("statusText").textContent = `${host} - "${title}" (${CATALOG_SONGS.length} tracks, set #${GEN_NONCE % 10000})`;
     }
 
     async function loadCatalog() {
       $("statusText").textContent = "Loading songs-db.json & core-catalog.json...";
-      BRAIN_STATE.loadedSources = 0;
+      BRAIN_STATE.loadedFiles = 0;
 
-      const brainRaw = await readLocalOrRepoText("record-brain.json");
-      if (brainRaw) {
-        try {
+      try {
+        const brainRaw = await readRepoFile("record-brain.json");
+        if (brainRaw) {
           const brain = JSON.parse(brainRaw);
-          BRAIN_STATE.loadedSources += 1;
+          BRAIN_STATE.loadedFiles += 1;
           if (brain.salesPortal) BRAIN_STATE.hubUrl = brain.salesPortal;
           if (brain.paymentRails?.buyMeACoffee) BRAIN_STATE.coffeeUrl = brain.paymentRails.buyMeACoffee;
           if (brain.paymentRails?.directMp3AndArt) BRAIN_STATE.paypalUrl = brain.paymentRails.directMp3AndArt;
@@ -937,19 +914,19 @@
           if ($("hubUrl") && !localStorage.getItem("anna_custom_hub")) {
             $("hubUrl").value = BRAIN_STATE.hubUrl;
           }
-        } catch {}
-      }
+        }
+      } catch {}
 
       const select = $("songSelect");
       select.innerHTML = "";
       const byTitle = new Map();
 
       for (const fileName of ["songs-db.json", "core-catalog.json", "strayd-artist-live.json"]) {
-        const rawTxt = await readLocalOrRepoText(fileName);
-        if (!rawTxt) continue;
         try {
+          const rawTxt = await readRepoFile(fileName);
+          if (!rawTxt) continue;
           const data = JSON.parse(rawTxt);
-          BRAIN_STATE.loadedSources += 1;
+          BRAIN_STATE.loadedFiles += 1;
           const list = Array.isArray(data) ? data : (data.songs || data.tracks || data.items || []);
           list.forEach((item) => {
             const tClean = cleanTitle(item.title || item.name || item.track || "");
@@ -970,7 +947,11 @@
 
       CATALOG_SONGS = Array.from(byTitle.values());
       if (!CATALOG_SONGS.length) {
-        CATALOG_SONGS = [{ title: "Adhd I Can Do That (Travillen Disorder)", artist: "Martin Strayd", art: "store-art/Martin Strayd - Adhd I Can Do That (Travillen Disorder).png" }];
+        CATALOG_SONGS = [{
+          title: "Adhd I Can Do That (Travillen Disorder)",
+          artist: "Martin Strayd",
+          art: "store-art/Martin Strayd - Adhd I Can Do That (Travillen Disorder).png"
+        }];
       }
 
       CATALOG_SONGS.forEach((t, idx) => {
@@ -997,7 +978,7 @@
       if (v) localStorage.setItem("anna_female_voice_name", v.name);
       $("statusText").textContent = `Selected voice: ${v ? v.name : "Default"}`;
     });
-    $("reloadBibleBtn").addEventListener("click", async () => {
+    $("reloadCatalogBtn").addEventListener("click", async () => {
       await loadCatalog();
       buildPostsFromInput(true);
     });
