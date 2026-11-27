@@ -16,28 +16,24 @@ Do it again.
 
 Do it again.
 
-The key is *patience*. The key is *deliberation*. The key is making every inch of that lick count.
+The key is *patience*. The key is *deliberation*. The key is making every inch of him feel every second of your tongue.
 
-When you reach the head, swirl your tongue around it. Kiss the tip. Suck gently. Let your lips make a small "o" and let him see himself inside your mouth.
+Most soft boys rush. Most soft boys want to get to the finish. They think a blowjob is about how fast they can make him come.
 
-Then go back down. Slowly. All the way to the base. Feel the weight of him in your hand. Feel the heat of him on your tongue.
+That's wrong.
 
-Repeat.
+A blowjob is about *time*. About stretching out the pleasure. About making him wait. About making him *need* it so badly that when you finally let him come, he comes harder than he's ever come in his life.
 
-This works every time.
+Start slow.
 
-This makes men lose their minds.
+Stay slow.
 
-Try it.
+Make him feel every second.
 
----
-
-🍌
-
-**END OF PART ONE**
+That's the lick.
 
 ---
 
-**NEXT PAGE: You Have to Want It**
+**NEXT PAGE: The Swallow**
 
 🍌
