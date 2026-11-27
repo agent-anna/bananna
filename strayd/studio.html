@@ -229,12 +229,18 @@
     let CURRENT_ART = "";
     let GEN_NONCE = Date.now() % 100000;
     let AVAILABLE_VOICES = [];
-    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v12") || "[]"));
+    let SPEAK_TIMER = null;
+    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v13") || "[]"));
 
     const $ = (id) => document.getElementById(id);
 
-    function isVoiceOrUiSpec(line) {
-      return /\b(voice preference|natural \/ neural|prefer natural|aria, jenny|speechsynthesis|chars|hashtag|cta|<=|>=|button|toggle|input)\b/i.test(String(line || ""));
+    function isSpecOrFileLine(line) {
+      const s = String(line || "").trim();
+      if (!s) return true;
+      if (/^`?bible\/[^\s`]+\.md`?/i.test(s)) return true;
+      if (/^(youtube description|youtube title|facebook|instagram|tiktok|x)\s*\([^)]*\)\s*:/i.test(s)) return true;
+      if (/\b(long-form runway|rich seo overview|voice preference|natural \/ neural|prefer natural|aria, jenny|speechsynthesis|chars|hashtag|cta|<=|>=|button|toggle|input)\b/i.test(s)) return true;
+      return false;
     }
 
     function capHashtagsByChannel(chId, text) {
@@ -249,6 +255,7 @@
 
     function sanitizeText(str, stripDates = false) {
       let out = String(str || "")
+        .replace(/`/g, "")
         .replace(/[\u2013\u2014\u2015]/g, "-")
         .replace(/\s+-\s+/g, " - ");
       if (stripDates) {
@@ -368,7 +375,7 @@
         }
 
         const candidate = sanitizeText(trimmed.replace(/^[-*•]\s+/, "").replace(/\*\*/g, ""));
-        if (!candidate || candidate.length < 12 || /^https?:\/\//i.test(candidate) || isVoiceOrUiSpec(candidate)) continue;
+        if (!candidate || candidate.length < 12 || /^https?:\/\//i.test(candidate) || isSpecOrFileLine(candidate)) continue;
 
         const pipeParts = candidate.split("|").map((p) => p.trim());
         if (/host|call sign|dj anna|veg anna/i.test(currentHeading) && pipeParts.length >= 2) {
@@ -463,7 +470,6 @@
       const { mainPhrase, subPhrase, hasQuestion, keywords } = profile;
       const k1 = keywords[0] || mainPhrase;
       const k2 = keywords.find((w) => w.toLowerCase() !== k1.toLowerCase()) || "";
-      const lawPick = pickOne(rng, BIBLE_BANK.lawLines.filter((l) => !isVoiceOrUiSpec(l))) || "";
 
       if (mode === "x") {
         const xLines = subPhrase
@@ -488,7 +494,7 @@
               `Read "${title}" by ${artist} and hit play with ${host} - ${k2 ? `${k1} and ${k2}` : k1} sets the hook fast.`,
               `${host} brings "${title}" into today's single drop with ${artist}, built for instant attention.`
             ];
-        return `${pickOne(rng, ttLines)}${lawPick ? ` ${lawPick}` : ""}`;
+        return pickOne(rng, ttLines);
       }
 
       if (mode === "instagram") {
@@ -519,7 +525,7 @@
       const pressLines = subPhrase
         ? [`On air with ${host}, "${title}" pairs "${mainPhrase}" with "${subPhrase}" so listeners feel the contrast right from the title.`]
         : [`${host} introduces "${title}" by ${artist} on the daily singles broadcast, spotlighting ${k2 ? `${k1} and ${k2}` : k1}.`];
-      return `${pickOne(rng, pressLines)}${lawPick ? ` ${lawPick}` : ""}`;
+      return pickOne(rng, pressLines);
     }
 
     function buildTagCluster(profile, count, extraTags = []) {
@@ -541,8 +547,8 @@
     function assembleChannelCopy(chId, ctx) {
       const { title, artist, host, callSign, profile, note, news, countries, dateStr, chosenLinks, linksBlock, shortLink, rng } = ctx;
       const safeChosen = Array.isArray(chosenLinks) ? chosenLinks : [];
-      const lorePool = shuffleSlice(rng, BIBLE_BANK.loreLines.filter((l) => !isVoiceOrUiSpec(l)), 3);
-      const rightsPool = shuffleSlice(rng, BIBLE_BANK.rightsLines.filter((l) => !isVoiceOrUiSpec(l) && !/https?:\/\//i.test(l)), 2);
+      const lorePool = shuffleSlice(rng, BIBLE_BANK.loreLines.filter((l) => !isSpecOrFileLine(l)), 2);
+      const rightsPool = shuffleSlice(rng, BIBLE_BANK.rightsLines.filter((l) => !isSpecOrFileLine(l) && !/https?:\/\//i.test(l)), 1);
       const noteLine = note ? `\nStory / Hook Angle: ${sanitizeText(note, chId !== "press")}` : "";
       const newsLine = news ? `\nDispatch Update: ${sanitizeText(news, chId !== "press")}` : "";
 
@@ -623,8 +629,8 @@
       if (chId === "facebook") {
         const fbHook = composeChannelAngle(title, artist, host, profile, rng, "facebook");
         const fbTags = buildTagCluster(profile, 5);
-        const loreSnippet = lorePool.slice(0, 2).join(" ");
-        const rightsSnippet = rightsPool.join(" ") || `Own the official "${title}" MP3 and cover art bundle for permanent personal ownership and share freely with friends for non-commercial enjoyment.`;
+        const loreSnippet = lorePool.slice(0, 1).join(" ");
+        const rightsSnippet = rightsPool[0] || `Own the official "${title}" MP3 and cover art bundle for permanent personal ownership and share freely with friends for non-commercial enjoyment.`;
         return sanitizeText([
           `${fbHook}${noteLine}${newsLine}`,
           `${loreSnippet ? `${loreSnippet} ` : ""}Radio across ${countries}. What stands out to you on "${title}"?`,
@@ -644,7 +650,7 @@
         `${ytIntro}`,
         `Radio airplay across ${countries}.`,
         lorePool.length ? `ARTIST & CATALOG NOTES:\n${lorePool.join(" ")}` : "",
-        `OWNERSHIP & SHARING:\n${rightsPool.join(" ") || `Own the official "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.`}${noteLine}${newsLine}${linksBlock}`,
+        `OWNERSHIP & SHARING:\n${rightsPool[0] || `Own the official "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.`}${noteLine}${newsLine}${linksBlock}`,
         `${ytTags}`
       ].filter(Boolean).join("\n\n"), true).slice(0, 5000);
     }
@@ -658,7 +664,7 @@
         if (!SEEN_HASHES.has(key)) {
           SEEN_HASHES.add(key);
           try {
-            localStorage.setItem("anna_seen_posts_v12", JSON.stringify(Array.from(SEEN_HASHES).slice(-4000)));
+            localStorage.setItem("anna_seen_posts_v13", JSON.stringify(Array.from(SEEN_HASHES).slice(-4000)));
           } catch {}
           return capped;
         }
@@ -742,45 +748,10 @@
       }
       const songSlug = slugFilePart($("songHeading")?.textContent || "single");
       const baseName = `${songSlug}-${slugFilePart(chId)}`;
-
-      if ("MediaRecorder" in window && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-        try {
-          $("statusText").textContent = "Select tab/window with audio to record Anna voice...";
-          const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-          const audioTracks = stream.getAudioTracks();
-          if (audioTracks.length) {
-            const captureStream = new MediaStream(audioTracks);
-            const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-              ? "audio/webm;codecs=opus"
-              : (MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "");
-            const recorder = mimeType ? new MediaRecorder(captureStream, { mimeType }) : new MediaRecorder(captureStream);
-            const chunks = [];
-            recorder.ondataavailable = (ev) => { if (ev.data && ev.data.size > 0) chunks.push(ev.data); };
-            const stopped = new Promise((resolve) => { recorder.onstop = resolve; });
-            recorder.start();
-            speakForRadio(spoken);
-            await new Promise((r) => setTimeout(r, Math.min(28000, Math.max(3000, spoken.split(/\s+/).length * 360))));
-            try { recorder.stop(); } catch {}
-            await stopped;
-            stream.getTracks().forEach((tr) => tr.stop());
-            if (chunks.length) {
-              const ext = (recorder.mimeType || "").includes("ogg") ? "ogg" : "webm";
-              const blob = new Blob(chunks, { type: recorder.mimeType || `audio/${ext}` });
-              triggerBlobDownload(blob, `${baseName}.${ext}`);
-              $("statusText").textContent = `Downloaded ${baseName}.${ext}`;
-              recordHistory(chId, "audio_downloaded", text);
-              return;
-            }
-          } else {
-            stream.getTracks().forEach((tr) => tr.stop());
-          }
-        } catch {}
-      }
-
       speakForRadio(spoken);
       const wavBlob = buildFallbackWavBlob(spoken);
       triggerBlobDownload(wavBlob, `${baseName}.wav`);
-      $("statusText").textContent = `Downloaded ${baseName}.wav (voice played live)`;
+      $("statusText").textContent = `Downloaded ${baseName}.wav and started voice`;
       recordHistory(chId, "wav_downloaded", text);
     }
 
@@ -1002,18 +973,51 @@
     }
 
     function speakForRadio(text) {
-      if (!("speechSynthesis" in window)) return;
-      populateVoices();
-      window.speechSynthesis.cancel();
+      if (SPEAK_TIMER) {
+        clearTimeout(SPEAK_TIMER);
+        SPEAK_TIMER = null;
+      }
       const spoken = buildCleanSpokenScript(text);
-      if (!spoken) return;
-      const utter = new SpeechSynthesisUtterance(spoken);
+      if (!spoken) {
+        $("statusText").textContent = "Nothing to speak";
+        return;
+      }
+      if (!("speechSynthesis" in window)) {
+        $("statusText").textContent = "Browser speech synthesis unavailable on this device";
+        return;
+      }
+      populateVoices();
+      try { window.speechSynthesis.cancel(); } catch {}
+
+      const sentences = spoken.match(/[^.!?]+[.!?]?/g) || [spoken];
+      const chunks = sentences.map((s) => s.trim()).filter(Boolean).slice(0, 8);
       const chosenVoice = getSelectedVoice();
-      if (chosenVoice) utter.voice = chosenVoice;
-      utter.rate = 0.98;
-      utter.pitch = 1.04;
-      window.speechSynthesis.speak(utter);
-      $("statusText").textContent = `On Air (${chosenVoice ? chosenVoice.name : "Female Voice"})...`;
+
+      let spokeAny = false;
+      chunks.forEach((part, index) => {
+        try {
+          const utter = new SpeechSynthesisUtterance(part);
+          if (chosenVoice) utter.voice = chosenVoice;
+          utter.rate = 0.98;
+          utter.pitch = 1.04;
+          if (index === chunks.length - 1) {
+            utter.onend = () => { $("statusText").textContent = "Finished speaking"; };
+          }
+          window.speechSynthesis.speak(utter);
+          spokeAny = true;
+        } catch {}
+      });
+
+      if (spokeAny) {
+        $("statusText").textContent = `Speaking (${chosenVoice ? chosenVoice.name : "Default Voice"})...`;
+        SPEAK_TIMER = setTimeout(() => {
+          if (window.speechSynthesis && !window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+            $("statusText").textContent = "Tip: Check system sound output or pick another voice in dropdown";
+          }
+        }, 900);
+      } else {
+        $("statusText").textContent = "Voice playback blocked by browser";
+      }
     }
 
     function buildPostsFromInput(advanceRefresh = false) {
@@ -1139,7 +1143,10 @@
     });
     $("exportHistoryBtn").addEventListener("click", exportHistoryJson);
     $("stopSpeakBtn").addEventListener("click", () => {
-      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      if (SPEAK_TIMER) clearTimeout(SPEAK_TIMER);
+      if ("speechSynthesis" in window) {
+        try { window.speechSynthesis.cancel(); } catch {}
+      }
       $("statusText").textContent = "Voice stopped";
     });
     loadCatalog();
