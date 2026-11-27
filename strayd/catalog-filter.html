@@ -116,7 +116,7 @@
     <section class="top">
       <div class="bar" style="margin-bottom:4px;">
         <h1>Pre-Broadcast Song Filter (Masters vs. Demos)</h1>
-        <a class="nav-link" href="radio-stream.html" style="margin-right:12px;">Live Radio Stream &rarr;</a>`n        <a class="nav-link" href="studio.html">Open Studio (Filtered) →</a>
+        <a class="nav-link" href="radio-stream.html" style="margin-right:12px;">Live Radio Stream &rarr;</a>        <a class="nav-link" href="studio.html">Open Studio (Filtered) →</a>
       </div>
       <div class="sub">
         Choose which tracks enter DJ ANNA / Veg Anna radio and social post generation. DEMO tracks stay in your catalog for licensing/buyers without ever entering promo broadcasts.
@@ -297,6 +297,37 @@
     $("saveBtn").addEventListener("click", saveSelection);
     $("exportBtn").addEventListener("click", exportAllowlist);
     init();
+      const STICKY_KEY = "anna_sticky_selection_v1";
+    function trackKey(t) {
+      const idPart = String(t.id || t.songId || t.trackId || "").trim().toLowerCase();
+      const titlePart = String(t.title || "").trim().toLowerCase().replace(/\s+/g, " ");
+      return idPart ? `${idPart}::${titlePart}` : titlePart;
+    }
+    function readStickyMap() {
+      try { return JSON.parse(localStorage.getItem(STICKY_KEY) || "{}"); } catch { return {}; }
+    }
+    function writeStickyMap(map) {
+      try { localStorage.setItem(STICKY_KEY, JSON.stringify(map)); } catch {}
+    }
+    window.addEventListener("DOMContentLoaded", () => {
+      const saveBtn = document.getElementById("saveBtn");
+      if (saveBtn) {
+        saveBtn.addEventListener("click", () => {
+          const sticky = readStickyMap();
+          if (Array.isArray(window.ALL_TRACKS)) {
+            window.ALL_TRACKS.forEach((t) => {
+              const allowed = typeof window.ALLOWED_MAP === "object" && window.ALLOWED_MAP
+                ? Boolean(window.ALLOWED_MAP[String(t.title || "").toLowerCase()])
+                : true;
+              sticky[trackKey(t)] = allowed;
+            });
+            writeStickyMap(sticky);
+          }
+          const st = document.getElementById("stats") || document.getElementById("statusText");
+          if (st) st.textContent = "Saved sticky selection for Studio & Live Radio Stream.";
+        });
+      }
+    });
   </script>
 </body>
 </html>
