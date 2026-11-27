@@ -1,48 +1,44 @@
-# PAGE 2: SINCE I WAS SIXTEEN
+# PAGE 2: EIGHTEEN
 
 ---
 
-Thirty-six years.
+The year I turned eighteen, I got a girlfriend.
 
-That's how long the wanting has been living in my body. Thirty-six years since that party in the backyard, since Danny's hands, since the first crack in the wall. Thirty-six years of wanting and not having and wanting again and still not having and then finally — finally — having, over and over, until the having became its own kind of hunger, until the hunger became a practice, and the practice became a philosophy, and the philosophy became a life.
+Her name was Sarah. She was kind and patient and she had a laugh that made me feel like maybe I was doing something right. She was the kind of girl that people approved of. The kind of girl that made sense. The kind of girl whose parents invited you to dinner and asked about your grades and your future and your five-year plan.
 
-Thirty-six years of looking at men on the street and wondering what their hands felt like. Not in an abstract way. In a specific, physical, desperate way. I would see a man — on the tram, in a cafe, at the gym, walking his dog through the park — and I would think about the weight of his palm. The temperature of his skin. The calluses if he worked with his hands. The softness if he didn't. The way his fingers would feel wrapped around the back of my neck, pulling me closer. The way his breath would sound if I dropped to my knees right there on the footpath and took him into my mouth in front of everyone.
+I did not have a five-year plan. I had a secret.
 
-I never did that. But I thought about it constantly.
+We dated for eight months. I held her hand in public because that's what you do. I kissed her goodnight because that's what you do. I told her she was beautiful because in the light of certain truths, she was — she was beautiful in every way except the one way I couldn't be honest about. I tried. God, I tried. I tried to make it work. I tried to want the right thing. I tried to pray the wanting away, night after night, in the dark, asking whatever was listening to please just fix me, please just make me normal, please just let me live like everyone else.
 
-Thirty-six years of dreaming about cocks I saw in change rooms and never approached. The gym was a particular kind of torture. Men walking around naked, or nearly naked, completely comfortable in their bodies, completely unaware that I was trying not to stare, trying not to let my eyes linger too long on the thickness of a thigh, the curve of an ass, the soft weight of a penis hanging between legs that seemed designed by something divine. I would shower quickly and leave. I would go home and jerk off and hate myself for not saying anything, for not being brave enough, for still being the soft boy in the corner who couldn't take the step.
+It didn't work.
 
-Thirty-six years of telling myself that the wanting would fade. That it was a phase. That I would grow out of it the way I grew out of my teenage acne and my awkward voice and my certainty that nobody would ever want me. I dated women. I tried. I went on dates and kissed women and even fell in love once or twice, in that way where you think the feeling must be real if it hurts this much, and it was real, but it wasn't the right kind of real. It was the kind of real that comes from settling, from choosing safety over truth, from deciding that the life you were supposed to want was close enough to the life you actually wanted that you could pretend the difference didn't exist.
+The year I turned eighteen, I started drinking.
 
-I couldn't pretend.
+Not because I was an alcoholic. Not because I had a problem. Because alcohol was the only thing that loosened the walls enough for me to breathe. One or two drinks and the voice that told me the wanting was wrong would get quieter. Two or three and the voice would disappear entirely and I would feel — for a few hours — like a version of myself that I actually wanted to be. Outgoing. Relaxed. Open. The kind of man who could talk to people at parties without feeling like a fraud. The kind of man who could look at another man without immediately looking away.
 
-The wanting got stronger.
+I didn't know yet that what I was doing was called self-medication. I didn't know yet that the relief would come with a cost. I just knew that it was the only time I felt okay.
 
-The older I got, the more specific it became. When I was sixteen, I wanted a man's hands. When I was twenty, I wanted a man's body. When I was twenty-five, I wanted a man's cock specifically — the weight of it, the taste of it, the way it would fill my mouth and throat and make me feel like I was finally, finally doing the thing I was born to do. When I was thirty, I wanted the whole experience. The hunt. The conversation. The build-up. The moment of first touch. The moment of taking it in my mouth. The moment of swallowing. The moment of lying together afterward, skin to skin, heartbeats syncing, two men who had given each other something that no words could describe.
+The year I turned eighteen, I started noticing things I had trained myself not to notice before.
 
-I am fifty-two years old now. I have been with more men than I can count.
+The way certain men moved. The particular sound certain men made when they laughed. The way I felt when a man I was attracted to looked at me — really looked, for half a second longer than necessary — before looking away. I started keeping lists in my head. Mental files. Catalogues of every moment I had felt this way, going back years, back to before I knew what the feeling was.
 
-I have been with men in bathroom stalls — those anonymous, terrifying, exhilarating spaces where two strangers can agree, without saying a word, that this is going to happen right now, in this fluorescent-light purgatory, with the sound of someone peeing three feet away and the smell of industrial cleaner doing nothing to cover the musk of two bodies wanting each other. I have been with men in hotel rooms — that particular kind of loneliness that hotels create, that makes men braver than they would be anywhere else, that turns a business trip into a secret adventure. I have been with men in back rooms of bars and on beaches after dark and in the backseats of cars and in bedrooms of houses with white picket fences where the wife was asleep down the hall and the kids were in their rooms and the whole architecture of normal life was suspended for an hour or two while a man who looked like a banker or a teacher or a dad showed me exactly who he really was.
+I was building evidence. Not for anyone else. For myself. A secret archive of proof that this was real, that I wasn't confused, that the wanting had always been there and would always be there and was not going away no matter how much I wanted it to.
 
-I have been with men who were married and men who were single and men who were confused and men who knew exactly what they wanted and men who had no idea and men who thought they were straight until I showed them what straight actually felt like. Straight is not what you think it is. Straight is a story men tell themselves so they don't have to admit that they want what they want. Straight is a costume. And I have seen what is underneath it.
+I never opened that archive. I kept it locked. I kept it secret. I kept adding to it in the dark.
 
-I have been with men who tasted like cigarettes and men who tasted like beer and men who tasted like nothing at all — which is the most impossible and perfect thing a man can taste like, that clean warm skin-and-salt-and-something-undefinable that is the taste of another human being at his most vulnerable, his most exposed, his most honest. I have been with men who came in seconds and men who took an hour and men who never came at all because they were too inside their own heads to let go, too worried about what they looked like, too trapped in the performance to allow themselves the luxury of actually feeling something.
+But it was there.
 
-I have been with men who cried when they finished. Not from sadness. From release. From the overwhelming experience of finally, after years of denial, letting themselves have exactly what they wanted and discovering that the world didn't end, that no one was judging them, that they were still themselves, only more. I have been with men who laughed — the nervous, embarrassed, joyful kind of laughter that happens when two people realize they are both equally ridiculous and equally serious and that the whole thing is absurd and sacred at the same time. I have been with men who slept immediately, their breathing going soft and slow while I was still lying next to them, still on the high, still unable to believe that this had actually happened. I have been with men who wanted to talk about their childhoods, who saw in me a kind of therapist they could pay in intimacy instead of money. I have been with men who wanted to do it again, immediately, before the refractory period had even begun to fade.
+The year I turned eighteen, I started thinking about what it would feel like to stop pretending.
 
-And every single one of them started with a moment like Danny. Every single one of them started with a first time that they couldn't stop thinking about. A first crack in the wall. A first moment of honesty with themselves about what they actually wanted. For some of them, that moment came late — in their forties, their fifties, their sixties — and the hunger that had been building for all those years came out all at once, like a flood through a broken dam. For others, it came young, and they spent their whole lives riding the current they discovered in that first moment of honesty.
+Not to come out — I wasn't ready for that, wouldn't be ready for that for years — but to stop. To relax. To stop holding the wall up with both hands. To walk into a room and just be. To look at whoever I wanted to look at. To want whoever I wanted to want.
 
-You have that moment. You've had it for years, maybe. Maybe since you were sixteen, like me. Maybe earlier — maybe you were twelve or thirteen and you saw something, or felt something, or wanted something that you didn't have a name for yet. Maybe you've been carrying that wanting so long that it feels like a second heartbeat — always there, always humming, always reminding you that there is something inside you that the world told you wasn't supposed to be there. That you shouldn't want what you want. That there's something wrong with you. That if anyone found out, they would see you differently. That you would lose something — respect, family, friends, the life you built on top of the wanting — if you ever admitted what was underneath.
+I imagined it sometimes. Late at night. Drifting off to sleep. I imagined a version of myself who had gotten through the other side. Who had done the work. Who had somehow — through some means I couldn't imagine yet — broken through the wall and come out the other side.
 
-This book is for the wanting.
+I imagined what that man would feel like.
 
-This book is for you.
+I imagined he would feel free.
 
-This book is the crack in the wall I never had. This is the door I am opening for you right now. Everything I know, everything I learned, every technique and every truth and every secret that HERB taught me and that I taught myself in thirty-six years of practice — I am putting it in your hands. Page by page. Truth by truth. Cock by cock.
-
-Read it. Want it. Do it.
-
-That's all there is to it.
+I wasn't ready to be that man yet. But I was starting to wonder what it would take to get there.
 
 🍌
 
