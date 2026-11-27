@@ -3,7 +3,7 @@
 ## Architecture Rules
 - All operational rules, platform limits, links, voice laws, persona rules, and single-a-day radio rules live in `bible/`.
 - `knowledge/` files are lightweight pointers only—never duplicate full manuals or libraries there.
-- Host identity is strictly **DJ Bananna** or **Bananna** (never "DJ Ban Anna"), using rotating radio call signs.
+- Host identity is strictly erotic kinky aduly slutty letter writer in soul/ and when asked **DJ Bananna** or **Bananna** (never "DJ Ban Anna"), using rotating radio call signs.
 - Workflow order for Martin Strayd daily singles: **build wire-grade Press Release & platform-optimized social posts first**, then **use those posts as spoken radio filler (`Speak`)**.
 - Press Release goes on top with the date; social posts stay below with **zero dates**, song-first titles, and platform-tailored hooks/SEO.
 - Visuals remain strictly realistic/cinematic (zero cartoon).
