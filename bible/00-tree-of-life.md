@@ -1,5 +1,5 @@
-# BANANNA Living Tree of Life System Map
-_Auto-generated on push to `bible/` at `2026-11-27T01:41:32.363021+00:00`_
+# ANNA Living Tree of Life System Map
+_Auto-generated on push to `bible/` at `2026-11-27T07:22:18.259716+00:00`_
 
 ## The Roots (Core Config & Memory)
 - `memory/brain.json`
@@ -28,17 +28,21 @@ _Auto-generated on push to `bible/` at `2026-11-27T01:41:32.363021+00:00`_
 - `promo-gate/latest-review.html`
 - `promo-gate/promo-gate-bot.js`
 - `strayd/catalog-filter.html`
+- `strayd/dispatch.html`
+- `strayd/press.html`
 - `strayd/preview-gate.html`
 - `strayd/radio-stream.html`
+- `strayd/social.html`
 - `strayd/studio.html`
 - `strayd/viewer.html`
 
 ## The Branches (Active GitHub Actions Workflows)
-- **Bananna Bible, Catalog & Feed Action** (`.github/workflows/aa01-bible-and-feed.yml`)
+- **Anna Bible, Catalog & Feed Action** (`.github/workflows/aa01-bible-and-feed.yml`)
 - **AA01 Live Intel Feed** (`.github/workflows/aa01-intel-feed.yml`)
-- **Agent Bananna Autonomous Audit** (`.github/workflows/anna-autonomous-audit.yml`)
-- **Bananna Book-Triggered Tree of Life Sync** (`.github/workflows/book-tree-sync.yml`)
-- **Bananna - Marketing - New Song Promo Gate** (`.github/workflows/daily-song-promo.yml`)
+- **Agent Anna V3 Autonomous Audit** (`.github/workflows/anna-autonomous-audit.yml`)
+- **ANNA Book-Triggered Tree of Life Sync** (`.github/workflows/book-tree-sync.yml`)
+- **Agent Anna Dahl Dispatch** (`.github/workflows/dahl-dispatch.yml`)
+- **Anna - Marketing - New Song Promo Gate** (`.github/workflows/daily-song-promo.yml`)
 
 ## The Leaves (Verified Knowledge & Logs)
 - `knowledge/business.md`
