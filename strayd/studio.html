@@ -66,7 +66,7 @@
       font-size: 0.92rem;
       font-family: inherit;
     }
-    textarea { min-height: 195px; resize: vertical; line-height: 1.54; }
+    textarea { min-height: 210px; resize: vertical; line-height: 1.56; }
     .link-toggles {
       display: flex;
       flex-wrap: wrap;
@@ -101,7 +101,7 @@
     button.primary { background: var(--accent); color: #061018; font-weight: 600; border: none; }
     .status-pill { font-size: 0.8rem; color: var(--accent); padding-left: 6px; }
     .press-top { margin-bottom: 16px; }
-    .press-top textarea { min-height: 460px; line-height: 1.6; }
+    .press-top textarea { min-height: 540px; line-height: 1.65; }
     .posts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
     .post-card {
       background: var(--card);
@@ -128,7 +128,7 @@
       </div>
       <div>
         <h1 id="songHeading" class="song-title">Loading song database...</h1>
-        <div id="djMeta" class="meta-line">DJ ANNA / Veg Anna - Record Release Command Studio</div>
+        <div id="djMeta" class="meta-line">DJ ANNA Singles Release Management Team - Live Broadcast &amp; Media Studio</div>
         <div class="controls-grid">
           <div>
             <label for="songSelect">1. Pick Song from Catalog</label>
@@ -174,7 +174,7 @@
           <button id="testVoiceBtn" type="button">Test Anna Voice</button>
           <button id="stopSpeakBtn" type="button">Stop Voice</button>
           <button id="exportHistoryBtn" type="button">Save History JSON</button>
-          <span id="statusText" class="status-pill">Loading bible & song database...</span>
+          <span id="statusText" class="status-pill">Loading bible &amp; song database...</span>
         </div>
       </div>
     </section>
@@ -184,7 +184,7 @@
   </div>
 
   <script>
-    const PRESS_CHANNEL = { id: "press", label: "Record Release Dispatch (Dated - Lead Single Focus)", max: 12000 };
+    const PRESS_CHANNEL = { id: "press", label: "Press Release - DJ ANNA Singles Release Management Team", max: 12000 };
     const SOCIAL_CHANNELS = [
       { id: "x", label: "X", max: 280 },
       { id: "tiktok", label: "TikTok", max: 2200 },
@@ -194,6 +194,7 @@
       { id: "ytDesc", label: "YouTube Description", max: 5000 }
     ];
     const ALL_CHANNELS = [PRESS_CHANNEL, ...SOCIAL_CHANNELS];
+    const CHANNEL_TAG_CAPS = { x: 2, tiktok: 5, instagram: 5, facebook: 5, ytTitle: 0, ytDesc: 5, press: 0 };
 
     const BIBLE = {
       hubUrl: "https://tinyurl.com/martinstrayd",
@@ -218,11 +219,10 @@
     let CURRENT_ART = "";
     let GEN_NONCE = Date.now() % 100000;
     let AVAILABLE_VOICES = [];
-    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v2") || "[]"));
+    const SEEN_HASHES = new Set(JSON.parse(localStorage.getItem("anna_seen_posts_v5") || "[]"));
 
     const $ = (id) => document.getElementById(id);
 
-        const CHANNEL_TAG_CAPS = { x: 2, tiktok: 5, instagram: 5, facebook: 5, ytTitle: 0, ytDesc: 5, press: 0 };
     function capHashtagsByChannel(chId, text) {
       const cap = CHANNEL_TAG_CAPS[chId];
       if (typeof cap !== "number") return text;
@@ -232,12 +232,13 @@
         return count <= cap ? `${prefix}${match.trim()}` : "";
       }).replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
     }
+
     function sanitizeText(str) {
       return String(str || "")
         .replace(/\*\*.*?\*\*/g, "")
         .replace(/[\u2013\u2014\u2015]/g, "-")
         .replace(/\s+-\s+/g, " - ")
-        .replace(/\s{2,}/g, " ")
+        .replace(/\n{3,}/g, "\n\n")
         .trim();
     }
 
@@ -262,8 +263,11 @@
       return arr[Math.floor(rng() * arr.length)];
     }
 
-    function extractDistinctKeywords(title) {
-      const stop = new Set(["the", "and", "for", "with", "from", "into", "that", "this", "your", "you", "can", "are", "was", "but", "not", "all", "one", "out", "off", "disorder", "track", "song"]);
+    function extractTitleProfile(title) {
+      const parenMatch = String(title || "").match(/\(([^)]+)\)/);
+      const subPhrase = parenMatch ? parenMatch[1].trim() : "";
+      const mainPhrase = String(title || "").replace(/\([^)]*\)/g, "").trim();
+      const stop = new Set(["the", "and", "for", "with", "from", "into", "that", "this", "your", "you", "can", "are", "was", "but", "not", "all", "one", "out", "off"]);
       const words = String(title || "")
         .replace(/[^A-Za-z0-9\s'-]/g, " ")
         .split(/\s+/)
@@ -278,7 +282,36 @@
           unique.push(w);
         }
       }
-      return unique;
+      const tags = unique.map((w) => `#${w.replace(/[^A-Za-z0-9]/g, "")}`).filter((t) => t.length > 2);
+      return {
+        mainPhrase: mainPhrase || title,
+        subPhrase,
+        keywords: unique,
+        tags
+      };
+    }
+
+    function craftDjTitleStory(title, profile, host, rng) {
+      const { mainPhrase, subPhrase, keywords } = profile;
+      const k1 = keywords[0] || mainPhrase;
+      const k2 = keywords.find((w) => w.toLowerCase() !== k1.toLowerCase()) || "";
+
+      if (subPhrase) {
+        const pairedLines = [
+          `Good evening from the broadcast desk with ${host}. Somewhere on Earth someone is hearing "${title}" for the very first time, caught right where "${mainPhrase}" collides with "${subPhrase}".`,
+          `Listen closely to "${title}" as ${host} breaks it down: "${mainPhrase}" sets the pulse, while "${subPhrase}" pulls the story into sharp tension.`,
+          `There is real nerve behind "${title}". ${host} reads the room on "${mainPhrase}" and "${subPhrase}" - a song that refuses to sit quietly in the background.`
+        ];
+        return pickOne(rng, pairedLines);
+      }
+
+      const detail = k2 ? `"${k1}" and "${k2}"` : `"${k1}"`;
+      const soloLines = [
+        `Somewhere tonight a listener is hitting play on "${title}" for the first time with ${host}, feeling ${detail} come alive in real time.`,
+        `${host} here on the daily singles frequency. "${title}" carries ${detail} with the kind of lived-in honesty you cannot fake in a boardroom.`,
+        `Every daily release has a heartbeat, and on "${title}" with ${host}, ${detail} gives the track an edge listeners immediately recognize.`
+      ];
+      return pickOne(rng, soloLines);
     }
 
     function parseCallSignsOnly(md) {
@@ -310,7 +343,7 @@
           if (!r.ok) continue;
           const txt = await r.text();
           if (path.endsWith("06-dj-anna-persona.md")) parseCallSignsOnly(txt);
-          const hubMatch = txt.match(/https:\/\/martinstrayd\.github\.io\/artist\/[^\s)]*/i);
+          const hubMatch = txt.match(/https:\/\/(?:tinyurl\.com\/martinstrayd|martinstrayd\.github\.io\/artist\/[^\s)]*)/i);
           if (hubMatch) BIBLE.hubUrl = hubMatch[0];
           const coffeeMatch = txt.match(/https:\/\/buymeacoffee\.com\/martinstrayd[^\s)]*/i);
           if (coffeeMatch) BIBLE.coffeeUrl = coffeeMatch[0];
@@ -388,7 +421,7 @@
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
         <rect width="600" height="600" fill="#132238"/>
         <text x="300" y="280" text-anchor="middle" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="28" font-weight="700">${safe.slice(0, 26)}</text>
-        <text x="300" y="325" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="18">DAILY SINGLE COMMAND</text>
+        <text x="300" y="325" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="18">DJ ANNA SINGLES RELEASE</text>
       </svg>`;
       return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
     }
@@ -401,7 +434,7 @@
         const val = String(raw || "").trim();
         if (!val) continue;
         if (/^(https?:\/\/|data:image\/)/i.test(val)) return val;
-        if (/^store-art\//i.test(val)) return `https://tinyurl.com/martinstrayd${encodeURI(val)}`;
+        if (/^store-art\//i.test(val)) return `https://martinstrayd.github.io/artist/${encodeURI(val)}`;
         return `../${encodeURI(val.replace(/^(\.\/|\.\.\/)+/, ""))}`;
       }
       return makeFallbackArt(title);
@@ -555,107 +588,135 @@
       $("statusText").textContent = `On Air (${chosenVoice ? chosenVoice.name : "Female Voice"})...`;
     }
 
+    function buildTagCluster(profile, count, extraTags = []) {
+      const pool = [...profile.tags, ...extraTags, "#MartinStrayd", "#DailySingle", "#IndieMusic", "#Songwriting", "#NewMusic"];
+      const seen = new Set();
+      const out = [];
+      for (const raw of pool) {
+        const t = String(raw || "").replace(/[^A-Za-z0-9#]/g, "");
+        const k = t.toLowerCase();
+        if (t.length > 2 && !seen.has(k)) {
+          seen.add(k);
+          out.push(t);
+          if (out.length >= count) break;
+        }
+      }
+      return out.join(" ");
+    }
+
     function assembleChannelCopy(chId, ctx) {
-      const { title, artist, host, callSign, kw1, kw2, note, news, countries, dateStr, linksBlock, shortLink, rng } = ctx;
-      const hasSecondDistinctKw = Boolean(kw2 && kw2.toLowerCase() !== kw1.toLowerCase());
-      const themePhrase = hasSecondDistinctKw ? `${kw1} and ${kw2}` : kw1;
-      const tagSlug = (kw1 || "DailySingle").replace(/[^A-Za-z0-9]/g, "") || "DailySingle";
-      const noteLine = note ? ` ${note}` : "";
-      const newsLine = news ? ` ${news}` : "";
+      const { title, artist, host, callSign, profile, story, note, news, countries, dateStr, linksBlock, shortLink, rng } = ctx;
+      const noteLine = note ? `\n\nDJ & Story Angle: ${note}` : "";
+      const newsLine = news ? `\n\nOn-Air Dispatch Update: ${news}` : "";
 
       if (chId === "press") {
+        const leads = [
+          `Today's single spotlight goes to "${title}" by ${artist}, presented on air by ${host} from the Daily Singles Media Empire.`,
+          `${host} introduces today's featured single release: "${title}" by ${artist}, rolling out as part of a continuous single-a-day catalog.`,
+          `From the broadcast desk of ${host}, today's single release is "${title}" by ${artist}, a direct-to-listener release from a catalog spanning more than 10 albums of original music.`
+        ];
         return [
-          `RECORD RELEASE DISPATCH - ${dateStr}`,
-          `COMMAND DIRECTIVE: DAILY SINGLE LAUNCH - "${title.toUpperCase()}" BY ${artist.toUpperCase()}`,
-          `ON-AIR COMMAND: ${host} - GLOBAL DAILY SINGLES OPERATION`,
+          `DJ ANNA SINGLES RELEASE MANAGEMENT TEAM`,
+          `OFFICIAL SINGLE RELEASE DISPATCH`,
+          `Date: ${dateStr}`,
+          `Lead Single: "${title}" - ${artist}`,
+          `Host on Broadcast: ${host}`,
+          `========================================================================`,
           ``,
-          `1. LEAD SINGLE BRIEFING`,
-          `${callSign}. Today's official single release is "${title}" by ${artist}, centered on the title and theme angle of ${themePhrase}. Built for daily release momentum, "${title}" goes straight from songwriter to listeners without label delay.`,
+          `ON-AIR BRIEFING`,
+          `${pickOne(rng, leads)} ${story}`,
+          note ? `\nCreative & Story Angle:\n${note}` : ``,
+          news ? `\nBroadcast & Territory Notes:\n${news}` : ``,
           ``,
-          `2. INTERNATIONAL RADIO & GLOBAL STREAMING DISTRIBUTION`,
-          `"${title}" is distributed worldwide across Spotify, Apple Music, iTunes, YouTube Music, and Shazam, with international radio airplay spanning ${countries}.${note ? `\nRelease Angle: ${note}` : ""}${news ? `\nField Dispatch: ${news}` : ""}`,
+          `STREAMING & INTERNATIONAL AIRPLAY`,
+          `Available on global streaming services and heard on radio across ${countries}.`,
           ``,
-          `3. ARTIST DOSSIER - MARTIN STRAYD`,
-          `Australian lyricist, songwriter, composer, and independent recording artist Martin Strayd brings 55 years inside music and four decades of songwriting to the daily singles campaign. Prior to launching his solo releases, Strayd served in Hollywood during the 1990s as a celebrity guitar technician for rock figures including Steve Jones of the Sex Pistols and Doug Fieger of The Knack, and is a featured artist on ABC Triple J Unearthed.`,
+          `ARTIST PROFILE - MARTIN STRAYD`,
+          `Australian lyricist, songwriter, composer, and independent recording artist Martin Strayd brings 55 years inside music and four decades of songwriting to the daily singles network, backed by 1990s Hollywood guitar technician work with Steve Jones (Sex Pistols) and Doug Fieger (The Knack) and ABC Triple J Unearthed roots.`,
           ``,
-          `4. DIRECT ACQUISITION & SHARING RIGHTS`,
-          `Listeners can acquire the official "${title}" MP3 and cover art bundle directly for permanent personal ownership and share copies freely with friends for non-commercial enjoyment.${linksBlock}`
-        ].join("\n");
+          `LISTENER OWNERSHIP & SHARING`,
+          `Listeners can get the "${title}" MP3 and cover art bundle for permanent personal ownership and share copies freely with friends for non-commercial enjoyment.${linksBlock}`
+        ].filter(Boolean).join("\n");
       }
 
       if (chId === "x") {
-        const xFrames = [
-          `"${title}" (${artist}) - ${host} locks in on ${kw1}.${noteLine}${shortLink} #MartinStrayd #${tagSlug}`,
-          `Daily release active: "${title}" by ${artist}, spotlighting ${kw1} with ${host}.${noteLine}${shortLink} #DailySingle #MartinStrayd`,
-          `${host} flags "${title}" from ${artist} - theme focus: ${kw1}.${noteLine}${shortLink} #MartinStrayd #IndieMusic`
+        const xTags = buildTagCluster(profile, 2, ["#MartinStrayd"]);
+        const xHooks = [
+          `Why does "${title}" pull you in before the first chorus even lands? ${host} calls it live on air.${note ? ` ${note}` : ""}${shortLink} ${xTags}`,
+          `${host} just put "${title}" (${artist}) in the hot seat. One song every day, zero label filter.${shortLink} ${xTags}`,
+          `The song that stops the scroll today: "${title}" by ${artist}, spun on air by ${host}.${shortLink} ${xTags}`,
+          `Hear what ${host} caught on "${title}" by ${artist} before the hook turns around.${shortLink} ${xTags}`
         ];
-        return fitUnderLimit(pickOne(rng, xFrames), 280);
+        return fitUnderLimit(pickOne(rng, xHooks), 280);
       }
 
       if (chId === "tiktok") {
-        const ttFrames = [
-          `${callSign}. "${title}" by ${artist} puts ${themePhrase} front and center on today's single drop.${noteLine}${newsLine} Own the "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n#MartinStrayd #DailySingle #${tagSlug}`,
-          `Today's single drop: "${title}" from ${artist} with ${host} on air, built around ${themePhrase}.${noteLine}${newsLine} Grab the MP3 and cover art bundle to own outright and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n#MartinStrayd #${tagSlug} #Songwriting`
+        const ttTags = buildTagCluster(profile, 5);
+        const ttHooks = [
+          `${story} This is "${title}" by ${artist} in today's single-a-day launch, built from over 10 albums of original songwriting without waiting years for an album cycle.${noteLine}${newsLine}\n\nOwn the official "${title}" MP3 and cover art bundle for permanent personal ownership and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n${ttTags}`,
+          `Nobody expected a daily single engine to hit like "${title}" from ${artist}. ${callSign} - ${story}${noteLine}${newsLine}\n\nGrab the "${title}" MP3 and cover art bundle to own outright and share with friends for non-commercial enjoyment.${linksBlock}\n\n${ttTags}`
         ];
-        return sanitizeText(pickOne(rng, ttFrames)).slice(0, 2200);
+        return sanitizeText(pickOne(rng, ttHooks)).slice(0, 2200);
       }
 
       if (chId === "instagram") {
-        const igFrames = [
-          `${callSign} - "${title}" by ${artist} brings ${themePhrase} into sharp focus. Four decades of songwriting and 55 years in music behind every daily release.${noteLine} Own the "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n#MartinStrayd #${tagSlug} #IndieMusic`,
-          `On air with ${host}: "${title}" from ${artist}, shaped around ${themePhrase}.${noteLine}${newsLine} Collect the "${title}" MP3 and cover art bundle for permanent personal ownership and free non-commercial sharing with friends.${linksBlock}\n\n#MartinStrayd #DailySingle #${tagSlug}`
+        const igTags = buildTagCluster(profile, 5);
+        const igHooks = [
+          `${story} Four decades of songwriting and 55 years inside music live in "${title}" by ${artist}.${noteLine}\n\nOwn the "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n${igTags}`,
+          `Late-night frequency with ${host}: "${title}" from ${artist}. ${story}${noteLine}${newsLine}\n\nCollect the MP3 and cover art bundle for permanent personal ownership and free non-commercial sharing with friends.${linksBlock}\n\n${igTags}`
         ];
-        return sanitizeText(pickOne(rng, igFrames)).slice(0, 2200);
+        return sanitizeText(pickOne(rng, igHooks)).slice(0, 2200);
       }
 
       if (chId === "facebook") {
-        const fbFrames = [
-          `${callSign} with "${title}" by ${artist}, exploring ${themePhrase}. Backed by 55 years in music, four decades of songwriting, 1990s Hollywood guitar tech credits with Steve Jones (Sex Pistols) and Doug Fieger (The Knack), and radio across ${countries}.${noteLine}${newsLine} Own the "${title}" MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n#MartinStrayd #DailySingle #${tagSlug}`,
-          `Daily single broadcast with ${host}: "${title}" by ${artist} (${themePhrase}). What hits you first on "${title}"?${noteLine}${newsLine} Own the MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n#MartinStrayd #Radio #${tagSlug}`
+        const fbTags = buildTagCluster(profile, 5);
+        const fbHooks = [
+          `${story} ${artist} brings 55 years in music and four decades of songwriting - including 1990s Hollywood guitar tech work with Steve Jones (Sex Pistols) and Doug Fieger (The Knack) - into a single-a-day broadcast heard across ${countries}.${noteLine}${newsLine}\n\nWhat hits you first on "${title}"? Own the MP3 and cover art bundle and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n${fbTags}`,
+          `${callSign}. ${story} Tell us what stands out to you on "${title}" and how it lands on first listen.${noteLine}${newsLine}\n\nAcquire the official "${title}" MP3 and cover art bundle for permanent personal ownership and share freely with friends for non-commercial enjoyment.${linksBlock}\n\n${fbTags}`
         ];
-        return sanitizeText(pickOne(rng, fbFrames)).slice(0, 63206);
+        return sanitizeText(pickOne(rng, fbHooks)).slice(0, 63206);
       }
 
       if (chId === "ytTitle") {
         const ytTitles = [
-          `"${title}" - ${artist} | ${host} (${kw1})`,
-          `${artist} - "${title}" | ${host} Daily Single`,
-          `"${title}" by ${artist} | ${host} Official Single`
+          `"${title}" - ${artist} | ${host} Daily Single Spotlight`,
+          `${artist} - "${title}" | ${host} Live Radio Premiere`,
+          `"${title}" by ${artist} | Story & Single with ${host}`
         ];
         return fitUnderLimit(pickOne(rng, ytTitles), 100);
       }
 
+      const ytTags = buildTagCluster(profile, 5);
       return sanitizeText([
-        `${callSign}.`,
+        `${story}`,
+        `Today's featured single is "${title}" by ${artist}, released in a continuous daily singles rollout from over 10 albums of original music and heard on international radio across ${countries}.`,
         ``,
-        `SINGLE OF THE DAY: "${title}" by ${artist} (Theme Focus: ${themePhrase}).`,
-        `Released as part of a continuous single-a-day rollout from a catalog of more than 10 albums of original music, streaming worldwide and heard on radio across ${countries}.`,
-        ``,
-        `ARTIST BACKGROUND:`,
-        `Australian lyricist, songwriter, composer, and recording artist Martin Strayd brings 55 years of experience in music and four decades of songwriting, including 1990s Hollywood guitar technician work with Steve Jones (Sex Pistols) and Doug Fieger (The Knack) and ABC Triple J Unearthed feature history.`,
+        `ABOUT MARTIN STRAYD:`,
+        `Australian lyricist, songwriter, composer, and independent recording artist Martin Strayd brings 55 years inside music and four decades of songwriting to the daily singles movement, backed by 1990s Hollywood guitar technician work with Steve Jones (Sex Pistols) and Doug Fieger (The Knack) and ABC Triple J Unearthed history.`,
         ``,
         `OWNERSHIP & SHARING:`,
-        `Acquire the official "${title}" MP3 and cover art bundle for permanent personal ownership and free non-commercial sharing with friends.${note ? `\nNotes: ${note}` : ""}${news ? `\nNews: ${news}` : ""}${linksBlock}`,
+        `Acquire the official "${title}" MP3 and cover art bundle for permanent personal ownership and share copies freely with friends for non-commercial enjoyment.${noteLine}${newsLine}${linksBlock}`,
         ``,
-        `#MartinStrayd #DailySingle #${tagSlug} #IndieMusic`
+        `${ytTags}`
       ].join("\n")).slice(0, 5000);
     }
 
     function generateUniquePost(chId, baseCtx) {
       for (let attempt = 0; attempt < 25; attempt++) {
         const rng = makeRng((baseCtx.seed + attempt * 7919) >>> 0);
-        const text = sanitizeText(assembleChannelCopy(chId, { ...baseCtx, rng }));
-        const key = `${chId}:${hashString(text)}`;
+        const rawText = assembleChannelCopy(chId, { ...baseCtx, rng });
+        const capped = capHashtagsByChannel(chId, sanitizeText(rawText));
+        const key = `${chId}:${hashString(capped)}`;
         if (!SEEN_HASHES.has(key)) {
           SEEN_HASHES.add(key);
           try {
-            localStorage.setItem("anna_seen_posts_v2", JSON.stringify(Array.from(SEEN_HASHES).slice(-2500)));
+            localStorage.setItem("anna_seen_posts_v5", JSON.stringify(Array.from(SEEN_HASHES).slice(-2500)));
           } catch {}
-          return text;
+          return capped;
         }
       }
       const fallbackRng = makeRng((baseCtx.seed + Date.now()) >>> 0);
-      return sanitizeText(assembleChannelCopy(chId, { ...baseCtx, rng: fallbackRng }));
+      return capHashtagsByChannel(chId, sanitizeText(assembleChannelCopy(chId, { ...baseCtx, rng: fallbackRng })));
     }
 
     function buildPostsFromInput(advanceRefresh = false) {
@@ -675,10 +736,10 @@
       const baseRng = makeRng(seedNum);
 
       const fallbackSigns = [
-        { host: "DJ ANNA", phrase: `tuning you into "${title}" by {ARTIST} on the daily singles frequency` },
-        { host: "Veg Anna", phrase: `Veg Anna live on air with "${title}" from {ARTIST}` },
-        { host: "DJ ANNA", phrase: `DJ ANNA in the booth with "${title}" by {ARTIST}` },
-        { host: "Veg Anna", phrase: `late-night broadcast with Veg Anna spinning "${title}" from {ARTIST}` }
+        { host: "DJ ANNA", phrase: `DJ ANNA on the daily singles frequency with "${title}" by {ARTIST}` },
+        { host: "Veg Anna", phrase: `Veg Anna live on air spinning "${title}" from {ARTIST}` },
+        { host: "DJ ANNA", phrase: `DJ ANNA in the broadcast booth with "${title}" by {ARTIST}` },
+        { host: "Veg Anna", phrase: `Veg Anna tuning you into "${title}" from {ARTIST}` }
       ];
       const pool = BIBLE.callSignPhrases.length ? BIBLE.callSignPhrases : fallbackSigns;
       const picked = pickOne(baseRng, pool);
@@ -690,26 +751,25 @@
           .replace(/\{HOST\}/g, host)
       );
 
-      const distinctKws = extractDistinctKeywords(title);
-      const kw1 = distinctKws[0] || title;
-      const kw2 = distinctKws[1] || "";
+      const profile = extractTitleProfile(title);
+      const story = craftDjTitleStory(title, profile, host, baseRng);
       const linksBlock = chosen.length ? `\n\n${chosen.join("\n")}` : "";
       const shortLink = chosen.length ? ` ${chosen[0].replace(/^[^:]+:\s*/, "")}` : "";
 
       CURRENT_ART = resolveArtUrl(songObj, title);
       $("songHeading").textContent = title;
-      $("djMeta").textContent = `${host} - ${artist} (${CATALOG_SONGS.length || 1} active tracks)`;
+      $("djMeta").textContent = `${host} - DJ ANNA Singles Release Management Team (${CATALOG_SONGS.length || 1} active tracks)`;
       syncArtwork(title);
 
       const ctx = {
-        title, artist, host, callSign, kw1, kw2,
+        title, artist, host, callSign, profile, story,
         note, news, countries, dateStr, linksBlock, shortLink, seed: seedNum
       };
 
       ALL_CHANNELS.forEach((ch) => {
         const ta = $(`ta-${ch.id}`);
         if (ta) {
-          ta.value = capHashtagsByChannel(ch.id, generateUniquePost(ch.id, ctx));
+          ta.value = generateUniquePost(ch.id, ctx);
           updateCounter(ch.id, ch.max);
         }
       });
@@ -777,7 +837,7 @@
     });
     $("testVoiceBtn").addEventListener("click", () => {
       const t = $("songHeading").textContent || "today's single";
-      speakForRadio(`Tuning you into ${t} by Martin Strayd on the daily singles frequency.`);
+      speakForRadio(`DJ ANNA on the daily singles frequency with ${t} by Martin Strayd.`);
     });
     $("makePostsBtn").addEventListener("click", () => buildPostsFromInput(true));
     $("songSelect").addEventListener("change", () => { GEN_NONCE += 1; buildPostsFromInput(false); });
