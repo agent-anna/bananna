@@ -1,8 +1,8 @@
 {
   "notes": [
     {
-      "id": "anna-engine-complete",
-      "text": "annaengine build complete — github.js, brain.js, chat.js, memory.js, telemetry.js, and utils.js all locked in functions/",
+      "id": "bananna-engine-complete",
+      "text": "Banannaengine build complete — github.js, brain.js, chat.js, memory.js, telemetry.js, and utils.js all locked in functions/",
       "timestamp": "2026-11-26"
     },
     {
@@ -12,7 +12,7 @@
 }
 
 {
-  "AA01_CORE": {
+  "BANANNA_CORE": {
     "version": "3.0.0",
     "home_repo": "agent-anna/home",
     "boot_file": "brain.json",
@@ -20,7 +20,7 @@
   },
   "behavioral_law_v3": "Never conversationalize file saving. Always output file blocks immediately.",
   "current_mission": {
-    "task": "Tree review, index.html audit, clean house, build O.G. 1000x",
+    "task": "Tree review, index.html audit, clean house, build v3",
     "status": "ACTIVE",
     "started": "2026-11-18"
   }

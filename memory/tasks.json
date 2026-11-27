@@ -7,7 +7,7 @@
   },
   {
     "id": "seed-links-json",
-    "text": "Seed A1/v3/memory/links.json with initial Strayd Music URLs",
+    "text": "memory/links.json with initial Strayd Music URLs",
     "status": "open",
     "created": "2026-11-26"
   },
