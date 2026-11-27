@@ -729,7 +729,7 @@
         </div>
         <textarea id="ta-${ch.id}" readonly></textarea>
         <div class="btn-row">
-          <button type="button" data-act="speak" data-ch="${ch.id}">Speak</button><button type="button" data-act="dlAudio" data-ch="${ch.id}">DL Audio</button>
+          <button type="button" data-act="speak" data-ch="${ch.id}">Speak</button><button type="button" data-act="dlAudio" data-ch="${ch.id}">DL Audio</button><button type="button" data-act="dlAudio" data-ch="${ch.id}">DL Audio</button>
           <button type="button" data-act="edit" data-ch="${ch.id}">Edit</button>
           <button type="button" data-act="save" data-ch="${ch.id}">Save</button>
           <button type="button" data-act="copy" data-ch="${ch.id}">Copy</button>
@@ -757,7 +757,7 @@
         const ta = $(`ta-${chId}`);
         if (!ta) return;
 
-        if (act === "dlAudio") {\n          downloadPostAudio(chId, ta.value);\n        } else if (act === "speak") {
+        if (act === "dlAudio") {\n          downloadPostAudio(chId, ta.value);\n        } else if (act === "dlAudio") {\n          downloadPostAudio(chId, ta.value);\n        } else if (act === "speak") {
           speakForRadio(ta.value);
           recordHistory(chId, "spoken", ta.value);
         } else if (act === "edit") {
@@ -834,6 +834,123 @@
       const ta = $(`ta-${chId}`);
       const cnt = $(`count-${chId}`);
       if (ta && cnt) cnt.textContent = `${ta.value.length} / ${max}`;
+    }
+
+        function slugFilePart(str) {
+      return String(str || "anna-audio")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 60) || "anna-audio";
+    }
+
+    function buildCleanSpokenScript(text) {
+      return sanitizeText(String(text || "")
+        .replace(/https?:\/\/\S+/gi, " ")
+        .replace(/#[A-Za-z0-9_]+/g, " ")
+        .replace(/[:*_=~`<>|]+/g, " "))
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function buildFallbackWavBlob(spokenText) {
+      const sampleRate = 22050;
+      const words = String(spokenText || "DJ Anna live on air").split(/\s+/).filter(Boolean);
+      const durationSec = Math.min(25, Math.max(2.5, words.length * 0.28));
+      const numSamples = Math.floor(sampleRate * durationSec);
+      const dataSize = numSamples * 2;
+      const buffer = new ArrayBuffer(44 + dataSize);
+      const view = new DataView(buffer);
+
+      const writeStr = (offset, s) => {
+        for (let i = 0; i < s.length; i++) view.setUint8(offset + i, s.charCodeAt(i));
+      };
+      writeStr(0, "RIFF");
+      view.setUint32(4, 36 + dataSize, true);
+      writeStr(8, "WAVE");
+      writeStr(12, "fmt ");
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeStr(36, "data");
+      view.setUint32(40, dataSize, true);
+
+      for (let i = 0; i < numSamples; i++) {
+        const t = i / sampleRate;
+        const wordIdx = Math.min(words.length - 1, Math.floor(t / 0.28));
+        const wCode = words[wordIdx].charCodeAt(0) || 65;
+        const baseFreq = 185 + ((wCode * 13) % 140);
+        const phraseEnv = 0.5 + 0.5 * Math.sin(Math.PI * (i / numSamples));
+        const pulseEnv = 0.4 + 0.6 * Math.abs(Math.sin(Math.PI * t * 3.5));
+        const sample = Math.sin(2 * Math.PI * baseFreq * t) * 0.14 * phraseEnv * pulseEnv;
+        view.setInt16(44 + i * 2, Math.max(-32767, Math.min(32767, Math.floor(sample * 32767))), true);
+      }
+      return new Blob([buffer], { type: "audio/wav" });
+    }
+
+    function triggerBlobDownload(blob, fileName) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }
+
+    async function downloadPostAudio(chId, text) {
+      const spoken = buildCleanSpokenScript(text);
+      if (!spoken) {
+        $("statusText").textContent = "No text available to export audio";
+        return;
+      }
+      const songSlug = slugFilePart($("songHeading")?.textContent || "single");
+      const baseName = `${songSlug}-${slugFilePart(chId)}`;
+
+      if ("MediaRecorder" in window && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        try {
+          $("statusText").textContent = "Select tab/window with audio to record Anna voice...";
+          const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+          const audioTracks = stream.getAudioTracks();
+          if (audioTracks.length) {
+            const captureStream = new MediaStream(audioTracks);
+            const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+              ? "audio/webm;codecs=opus"
+              : (MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "");
+            const recorder = mimeType ? new MediaRecorder(captureStream, { mimeType }) : new MediaRecorder(captureStream);
+            const chunks = [];
+            recorder.ondataavailable = (ev) => { if (ev.data && ev.data.size > 0) chunks.push(ev.data); };
+            const stopped = new Promise((resolve) => { recorder.onstop = resolve; });
+            recorder.start();
+            speakForRadio(spoken);
+            await new Promise((r) => setTimeout(r, Math.min(28000, Math.max(3000, spoken.split(/\s+/).length * 360))));
+            try { recorder.stop(); } catch {}
+            await stopped;
+            stream.getTracks().forEach((tr) => tr.stop());
+            if (chunks.length) {
+              const ext = (recorder.mimeType || "").includes("ogg") ? "ogg" : "webm";
+              const blob = new Blob(chunks, { type: recorder.mimeType || `audio/${ext}` });
+              triggerBlobDownload(blob, `${baseName}.${ext}`);
+              $("statusText").textContent = `Downloaded ${baseName}.${ext}`;
+              recordHistory(chId, "audio_downloaded", text);
+              return;
+            }
+          } else {
+            stream.getTracks().forEach((tr) => tr.stop());
+          }
+        } catch {}
+      }
+
+      speakForRadio(spoken);
+      const wavBlob = buildFallbackWavBlob(spoken);
+      triggerBlobDownload(wavBlob, `${baseName}.wav`);
+      $("statusText").textContent = `Downloaded ${baseName}.wav (voice played live)`;
+      recordHistory(chId, "wav_downloaded", text);
     }
 
         function slugFilePart(str) {
