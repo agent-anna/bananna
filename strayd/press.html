@@ -1,9 +1,8 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Press Release - Agent Anna (Dahl)</title>
-<style>:root{--bg:#0b0f17;--card:#131a26;--card2:#192232;--tx:#eef3fb;--mu:#9fb0c8;--ac:#38bdf8;--bd:rgba(255,255,255,.14)}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.5}
-.wrap{max-width:1160px;margin:0 auto;padding:18px}.nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Press - Agent Anna</title><style>
+:root{--bg:#0b0f17;--card:#131a26;--card2:#192232;--tx:#eef3fb;--mu:#9fb0c8;--ac:#38bdf8;--bd:rgba(255,255,255,.14)}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--tx);padding:18px}
+.wrap{max-width:1160px;margin:0 auto}.nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
 .nav a{color:var(--tx);text-decoration:none;background:var(--card2);padding:6px 11px;border-radius:8px;font-size:.86rem}
 .nav a.on,.nav a:hover{background:var(--ac);color:#061018;font-weight:600}
 .hero{display:grid;grid-template-columns:180px 1fr;gap:18px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:14px}
@@ -11,39 +10,40 @@
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:12px}
 label{display:block;font-size:.78rem;color:var(--mu);margin-bottom:4px}
 select,input,textarea{width:100%;background:var(--card2);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;font-family:inherit}
-textarea{min-height:480px;line-height:1.7;padding:14px}.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+textarea{min-height:460px;line-height:1.65;padding:14px}.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 button{background:var(--card2);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:7px 12px;cursor:pointer}
 button.pri{background:var(--ac);color:#061018;border:none;font-weight:600}.st{color:var(--ac);font-size:.84rem}</style></head><body>
 <div class="wrap"><nav class="nav"><a href="studio.html">Studio</a><a href="press.html" class="on">Press</a>
 <a href="social.html">Social</a><a href="catalog-filter.html">Filter</a><a href="radio-stream.html">Radio</a></nav>
-<section class="hero"><div class="art"><img id="artImg" alt="Cover" /></div><div>
+<section class="hero"><div class="art"><img id="artImg" alt="Cover"/></div><div>
 <h1 id="titleEl" style="margin:0 0 4px">Loading catalog...</h1>
-<div id="metaEl" style="color:var(--mu);font-size:.88rem;margin-bottom:10px">Dahl MiniMaxAI/MiniMax-M2.7</div>
+<div id="metaEl" style="color:var(--mu);font-size:.88rem;margin-bottom:10px">Agent Anna · Dahl MiniMaxAI/MiniMax-M2.7</div>
 <div class="grid"><div><label for="songSel">Song</label><select id="songSel"></select></div>
 <div><label for="voiceSel">Female Voice</label><select id="voiceSel"></select></div>
-<div><label for="dahlKey">Dahl API Key</label><input id="dahlKey" type="password" placeholder="Dahl key..." /></div>
-<div><label for="dahlModel">Model</label><input id="dahlModel" value="MiniMaxAI/MiniMax-M2.7" /></div>
-<div><label for="noteIn">Hook / Angle</label><input id="noteIn" placeholder="Song angle..." /></div>
-<div><label for="newsIn">Airplay / News</label><input id="newsIn" placeholder="Cities / news..." /></div>
-<div><label for="hubIn">Artist Hub</label><input id="hubIn" value="https://martinstrayd.github.io/artist/" /></div>
-<div><label for="ghPat">GitHub PAT (Optional)</label><input id="ghPat" type="password" placeholder="ghp_..." /></div></div>
+<div><label for="dahlKey">Dahl API Key</label><input id="dahlKey" type="password" placeholder="Dahl key..."/></div>
+<div><label for="dahlModel">Model</label><input id="dahlModel" value="MiniMaxAI/MiniMax-M2.7"/></div>
+<div><label for="noteIn">Hook / Angle</label><input id="noteIn" placeholder="Song angle..."/></div>
+<div><label for="newsIn">Airplay / News</label><input id="newsIn" placeholder="Cities / news..."/></div>
+<div><label for="hubIn">Artist Hub</label><input id="hubIn" value="https://martinstrayd.github.io/artist/"/></div>
+<div><label for="ghPat">GitHub PAT (Optional)</label><input id="ghPat" type="password" placeholder="ghp_..."/></div></div>
 <div class="acts"><button id="genBtn" class="pri" type="button">Generate Press Release</button>
 <button id="reloadBtn" type="button">Reload Catalog</button><button id="spkBtn" type="button">Speak</button>
-<button id="mp3Btn" type="button">DL Female TTS MP3</button><button id="cpyBtn" type="button">Copy</button>
+<button id="mp3Btn" type="button">DL Audio</button><button id="cpyBtn" type="button">Copy</button>
 <span id="stEl" class="st">Ready</span></div></div></section>
 <section style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px">
 <textarea id="outBox" placeholder="Paste Dahl key and click Generate Press Release..."></textarea></section></div>
 <script>const ENDPOINT="https://inference.dahl.global/v1/chat/completions";const $=id=>document.getElementById(id);
-let SONGS=[],VOICES=[],CTX="";const FH=["aria","jenny","sonia","libby","maisie","natasha","clara","ava","samantha","victoria","zira","hazel","female"];
+let SONGS=[],VOICES=[],ANNA_BODY="";
+const FH=["aria","jenny","sonia","libby","maisie","natasha","clara","ava","samantha","victoria","zira","hazel","female"];
 const MH=["guy","ryan","christopher","eric","davis","andrew","brian","david","mark","daniel","male"];
 const clean=s=>String(s||"").replace(/`/g,"").replace(/[\u2013\u2014]/g,"-").replace(/\n{3,}/g,"\n\n").trim();
 const cleanT=s=>clean(String(s||"").replace(/\{\{TITLE\}\}/gi,"").replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi,"").replace(/^Martin\s+Strayd\s*[-:|]+\s*/i,""));
 function ghHdr(){const v=($("ghPat")?.value||"").trim();if(v)localStorage.setItem("anna_gh_pat",v);const p=v||localStorage.getItem("anna_gh_pat")||"";return p?{Authorization:"Bearer "+p,Accept:"application/vnd.github.v3+json"}:null;}
 async function repoGet(path){const h=ghHdr();if(h){try{const r=await fetch("https://api.github.com/repos/agent-anna/home/contents/"+path+"?ref=main&t="+Date.now(),{headers:h,cache:"no-store"});if(r.ok){const j=await r.json();if(j.content){const b=atob(j.content.replace(/\s+/g,"")),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new TextDecoder().decode(u);}}}catch{}}
 for(const base of["https://raw.githubusercontent.com/agent-anna/home/main/","https://agent-anna.github.io/home/"]){try{const r=await fetch(base+path+"?t="+Date.now(),{cache:"no-store"});if(r.ok)return await r.text();}catch{}}return "";}
-async function loadAll(){$("stEl").textContent="Loading bible/body/soul & catalog...";const parts=[],h=ghHdr();
-for(const d of["bible","body","soul","character"]){if(h){try{const r=await fetch("https://api.github.com/repos/agent-anna/home/contents/"+d+"?ref=main",{headers:h,cache:"no-store"});if(r.ok){const fs=await r.json();for(const f of(Array.isArray(fs)?fs.slice(0,2):[])){if(f.type==="file"){const t=await repoGet(f.path);if(t)parts.push("["+f.path+"]\n"+t.slice(0,700));}}}}catch{}}}
-CTX=parts.join("\n\n").slice(0,2600);const m=new Map();
+async function loadAll(){$("stEl").textContent="Loading Agent Anna body/bible & catalog...";const parts=[],h=ghHdr();
+for(const d of["body","bible","soul","character"]){if(h){try{const r=await fetch("https://api.github.com/repos/agent-anna/home/contents/"+d+"?ref=main",{headers:h,cache:"no-store"});if(r.ok){const fs=await r.json();for(const f of(Array.isArray(fs)?fs.slice(0,3):[])){if(f.type==="file"){const t=await repoGet(f.path);if(t)parts.push("["+f.path+"]\n"+t.slice(0,800));}}}}catch{}}}
+ANNA_BODY=parts.join("\n\n").slice(0,2800);const m=new Map();
 for(const f of["strayd/songs-db.json","strayd/core-catalog.json","strayd/strayd-artist-live.json"]){try{const raw=await repoGet(f);if(!raw)continue;const d=JSON.parse(raw);const arr=Array.isArray(d)?d:(d.songs||d.tracks||[]);arr.forEach(x=>{const t=cleanT(x.title||x.name||x.track||"");if(!t)return;const k=t.toLowerCase();m.set(k,{...(m.get(k)||{}),...x,title:t,artist:cleanT(x.artist||"Martin Strayd")});});}catch{}}
 SONGS=[...m.values()];if(!SONGS.length)SONGS=[{title:"Adhd I Can Do That (Travillen Disorder)",artist:"Martin Strayd"}];
 const sel=$("songSel");sel.innerHTML="";SONGS.forEach((s,i)=>{const o=document.createElement("option");o.value=i;o.textContent=(i+1)+" - "+s.title;sel.appendChild(o);});
@@ -53,14 +53,14 @@ function syncSong(){const s=SONGS[Number($("songSel").value||0)]||SONGS[0];const
 function getKey(){const k=($("dahlKey").value||"").trim();if(k)localStorage.setItem("anna_dahl_key",k);return k||localStorage.getItem("anna_dahl_key")||"";}
 async function genPress(){const key=getKey();if(!key){$("stEl").textContent="Enter Dahl API key first";return;}const model=($("dahlModel").value||"MiniMaxAI/MiniMax-M2.7").trim();const{s,t,a}=syncSong();
 const host=Math.random()>.5?"DJ ANNA":"Veg Anna",dt=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
-const sys="You are Agent Anna writing a fresh broadcast press release for Martin Strayd (STRAYD). Treat the title as ONE song. Never split parentheses or output labels like Catalog Scale: or Ownership Rule:. Mention direct MP3 + cover art ownership and free non-commercial sharing with friends. "+(CTX?"\n"+CTX:"");
-const usr=["Date: "+dt,"Host: "+host,"Song (ONE track): \""+t+"\" by "+a,s.releaseDate?"Release: "+s.releaseDate:"",$("noteIn").value?"Angle: "+clean($("noteIn").value):"",$("newsIn").value?"News: "+clean($("newsIn").value):"",$("hubIn").value?"Hub: "+clean($("hubIn").value):"","Nonce: "+Date.now()+"-"+Math.random()].filter(Boolean).join("\n");
+const sys="You are Agent Anna using agent-anna/home body & bible context to write a fresh broadcast press release for Martin Strayd (STRAYD). Keep the track title as ONE song; never split parentheses or output labels like Catalog Scale: or Ownership Rule:. Include MP3 + cover art bundle ownership and free non-commercial friend sharing naturally. "+(ANNA_BODY?"\n"+ANNA_BODY:"");
+const usr=["Date: "+dt,"Host: "+host,"Song (ONE track): \""+t+"\" by "+a,s.releaseDate?"Release: "+s.releaseDate:"",$("noteIn").value?"Angle: "+clean($("noteIn").value):"",$("newsIn").value?"News: "+clean($("newsIn").value):"",$("hubIn").value?"Hub: "+clean($("hubIn").value):"","Seed: "+Date.now()+"-"+Math.random()].filter(Boolean).join("\n");
 try{$("stEl").textContent="Calling Dahl ("+model+")...";const r=await fetch(ENDPOINT,{method:"POST",headers:{Authorization:"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify({model,messages:[{role:"system",content:sys},{role:"user",content:usr}]})});
 if(!r.ok)throw new Error("HTTP "+r.status);const j=await r.json();const txt=clean(j?.choices?.[0]?.message?.content||"");if(!txt)throw new Error("Empty reply");$("outBox").value=txt;$("stEl").textContent="Generated fresh press release";}catch(e){$("stEl").textContent=e.message||"Dahl error";}}
 function scV(v){const h=(v.name+" "+v.lang).toLowerCase();let s=0;for(const x of FH)if(h.includes(x))s+=40;for(const x of MH)if(new RegExp("\\b"+x+"\\b").test(h))s-=100;return s;}
 function popV(){if(!("speechSynthesis"in window))return;const list=(speechSynthesis.getVoices()||[]).sort((a,b)=>scV(b)-scV(a));VOICES=list.filter(v=>scV(v)>-50);if(!VOICES.length)VOICES=list;const sel=$("voiceSel");sel.innerHTML="";VOICES.forEach((v,i)=>{const o=document.createElement("option");o.value=i;o.textContent=(scV(v)>=40?"Female - ":"")+v.name;sel.appendChild(o);});}
 function speakOut(t){const sp=clean(String(t||"").replace(/https?:\/\/\S+/g," ").replace(/#[A-Za-z0-9_]+/g," ")).slice(0,900);if(!sp||!("speechSynthesis"in window))return;popV();try{speechSynthesis.cancel();}catch{}const v=VOICES[Number($("voiceSel").value||0)]||VOICES[0]||null;(sp.match(/[^.!?]+[.!?]?/g)||[sp]).slice(0,8).forEach(p=>{const u=new SpeechSynthesisUtterance(p.trim());if(v)u.voice=v;u.pitch=1.05;speechSynthesis.speak(u);});}
-async function dlMp3(t){const sp=clean(String(t||"").replace(/https?:\/\/\S+/g," ").replace(/#[A-Za-z0-9_]+/g," ")).slice(0,300);if(!sp)return;speakOut(sp);try{const r=await fetch("https://api.streamelements.com/kappa/v2/speech?voice=Amy&text="+encodeURIComponent(sp));if(!r.ok)throw new Error("HTTP "+r.status);const b=await r.blob();const url=URL.createObjectURL(b);const a=document.createElement("a");a.href=url;a.download="press-anna.mp3";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);$("stEl").textContent="Downloaded press-anna.mp3";}catch(e){$("stEl").textContent="MP3 CORS/blocked ("+e.message+"); spoke live";}}
+async function dlMp3(t){const sp=clean(String(t||"").replace(/https?:\/\/\S+/g," ").replace(/#[A-Za-z0-9_]+/g," ")).slice(0,300);if(!sp)return;speakOut(sp);try{const r=await fetch("https://api.streamelements.com/kappa/v2/speech?voice=Amy&text="+encodeURIComponent(sp));if(!r.ok)throw new Error("HTTP "+r.status);const b=await r.blob();const url=URL.createObjectURL(b);const a=document.createElement("a");a.href=url;a.download="press-anna.mp3";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);$("stEl").textContent="Downloaded press-anna.mp3";}catch(e){$("stEl").textContent="MP3 blocked ("+e.message+"); spoke live";}}
 if("speechSynthesis"in window){popV();speechSynthesis.onvoiceschanged=popV;}
 if(localStorage.getItem("anna_gh_pat"))$("ghPat").value=localStorage.getItem("anna_gh_pat");
 if(localStorage.getItem("anna_dahl_key"))$("dahlKey").value=localStorage.getItem("anna_dahl_key");
@@ -68,3 +68,4 @@ $("genBtn").onclick=genPress;$("reloadBtn").onclick=loadAll;$("songSel").onchang
 $("spkBtn").onclick=()=>speakOut($("outBox").value);$("mp3Btn").onclick=()=>dlMp3($("outBox").value);
 $("cpyBtn").onclick=()=>{navigator.clipboard?.writeText($("outBox").value);$("stEl").textContent="Copied";};loadAll();
 </script></body></html>
+<div><label for="dahlKey">Dahl API Key</label><input id="dahlKey" type="password" placeholder="Dahl key..."/></div>
