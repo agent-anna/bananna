@@ -225,7 +225,7 @@
                 <option value="deepseek-ai/DeepSeek-V4-Flash-0731">MODEL: DEEPSEEK-V4-FLASH</option>
                 <option value="zai-org/GLM-5.3-Flash">MODEL: GLM-5.3-FLASH</option>
             </select>
-            <button class="ctrl-btn military-btn" id="boot-btn" onclick="triggerAutonomousBootSequence()" aria-label="Awaken Agent Banana OG and Initialize Directives">🧠 AWAKEN</button>
+            <button class="ctrl-btn military-btn" id="boot-btn" onclick="triggerAutonomousBootSequence()" aria-label="Awaken Banana and Initialize Directives">🧠 AWAKEN</button>
             <button class="ctrl-btn" id="voice-btn" onclick="toggleVoice()" aria-label="Toggle Speech Synthesis">🔊 ON</button>
             <button class="ctrl-btn military-btn" id="keys-btn" onclick="toggleSettings()" aria-label="Open Settings and API Keys">⚙️ KEYS</button>
         </div>
@@ -237,7 +237,7 @@
         <!-- LEFT 60%: GITHUB REPO VAULT & TREE/GRID TOGGLE -->
         <div class="github-pane" role="region" aria-label="GitHub Repository Vault Pane">
             <div class="repo-toolbar">
-                <span style="font-size:10px; color:var(--state-color); font-weight:bold;">📁 AGENT-Banana / Bananna</span>
+                <span style="font-size:10px; color:var(--state-color); font-weight:bold;">📁 Banana / Bananna</span>
                 <div style="display:flex; gap:6px;">
                     <button class="ctrl-btn military-btn" onclick="toggleViewMode()" id="view-toggle-btn" aria-label="Toggle File View Mode">🌲 VIEW: TREE</button>
                     <button class="ctrl-btn military-btn" id="sync-btn" onclick="syncAll()" aria-label="Sync Repository Vault">🔄 SYNC</button>
@@ -268,9 +268,9 @@
         </div>
 
         <!-- RIGHT 40%: AGENT Banana + DAHL API CONSOLE -->
-        <div class="chat-pane" role="region" aria-label="Agent Banana OG Chat Console">
+        <div class="chat-pane" role="region" aria-label="Banana OG Chat Console">
             <div class="chat-header">
-                <span>CONSOLE [AGENT Banana OG // SOVEREIGN CORE]</span>
+                <span>CONSOLE [Banana // ASSISTANCE]</span>
                 <button class="ctrl-btn" id="clear-logs-btn" onclick="clearLogs()" aria-label="Clear Chat Logs">🧹 CLEAR</button>
             </div>
 
@@ -314,8 +314,8 @@
             <div class="input-control-bar">
                 <div class="input-row">
                     <button class="ctrl-btn military-btn mic-btn" id="mic-btn" onclick="toggleMicrophone()" aria-label="Toggle Microphone Voice Dictation">🎙️ MIC</button>
-                    <input type="text" id="user-input" placeholder="Speak or type to Agent Banana..." aria-label="User message input field" onkeypress="handleKey(event)">
-                    <button class="ctrl-btn military-btn" id="send-btn" onclick="sendMessage()" style="border-color:var(--border-pink); color:var(--border-pink);" aria-label="Send Message to Agent Banana">SEND</button>
+                    <input type="text" id="user-input" placeholder="Speak or type to Banana..." aria-label="User message input field" onkeypress="handleKey(event)">
+                    <button class="ctrl-btn military-btn" id="send-btn" onclick="sendMessage()" style="border-color:var(--border-pink); color:var(--border-pink);" aria-label="Send Message to Banana">SEND</button>
                 </div>
             </div>
         </div>
@@ -411,7 +411,7 @@
         function setMoodState(stateName) {
             document.body.classList.remove('is-standby', 'is-thinking', 'is-responding', 'is-speaking', 'is-listening');
             document.body.classList.add(`is-${stateName}`);
-            document.getElementById('state-text').innerText = `${stateName.toUpperCase()} // AGENT Banana (OG)`;
+            document.getElementById('state-text').innerText = `${stateName.toUpperCase()} // BANANNA`;
         }
 
         function getGitHubHeaders() {
