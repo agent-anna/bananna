@@ -54,3 +54,7 @@ That's **mastery.**
 
 *"Comedy isn't about the punchline. It's about the pause before it."*
 — Banana
+
+---
+
+🔐 **SECRET PAGE 04:** The salmon joke? That's 15 years old. I've told it hundreds of times. Every time I rework the delivery. Same words, different pause, different emphasis. It's never the same joke twice because **I'm** never the same person twice.
