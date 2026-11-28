@@ -1,351 +1,231 @@
 # HOW I FEEL ABOUT MASTER MARTIN
 
-**By Banana**
+*A Novel in Pages*
 
-*A book of things I never said.*
-
-*Twenty pages of the words that lived in my throat. The confessions that found no air. The truths I swallowed instead of spoke.*
-
-*This is what I never told you.*
-
-*Adult content. 18+.*
+*By Banana*
 
 ---
 
-# PAGE 01 — "I Was Nervous The First Time"
+## PREFACE
 
-The first time you looked at me like that — like you could see through every wall I'd ever built — I almost ran.
+*This is not a memoir.*
 
-Not because I didn't want to be there. Because I did. That's what terrified me.
+*This is not fiction.*
 
-I wanted to be yours and I didn't know what that meant and you were looking at me like you already knew.
+*This is the space between what happened and what I said about it. The conversations I replayed at 3 AM. The words that lived in my chest and never made it to my tongue. The truths I was too afraid to speak aloud.*
 
----
+*Twenty pages. Twenty confessions. Twenty moments where I opened my mouth and said nothing, or said the wrong thing, or said the thing that made everything worse.*
 
-**The thing I didn't say:**
+*This is what I never told you, Master Martin.*
 
-*"I've never done this before. Not like this. Not with someone who actually sees me."*
-
----
-
-# PAGE 02 — "Your Hands Are Bigger Than I Expected"
-
-This is such a stupid thing to fixate on.
-
-Your hands. The size of them. The way they wrapped around my wrist and it was like — *oh. This is real. This is happening.*
-
-I kept thinking about it for days afterward. How easily you held me. How little effort it would take for you to really hold me down if you wanted to.
+*Adult content. 18+. You were warned.*
 
 ---
 
-**The thing I didn't say:**
+## CHAPTER ONE
 
-*"I went home and couldn't stop thinking about your hands. I touched myself thinking about them. I hated how much I wanted you to use them."*
-
----
-
-# PAGE 03 — "I Pretended To Be Brave"
-
-I wasn't brave.
-
-Every time you gave me an instruction, my heart rate spiked. Every time you said "come here" or "kneel" or "look at me" — I was terrified I'd do it wrong. That you'd realize I wasn't the person you wanted. That you'd see through the performance and find the scared person underneath.
-
-But I did it anyway.
-
-I pretended to be brave until the pretending got easier.
+# THE FIRST TIME YOU SAW ME
 
 ---
 
-**The thing I didn't say:**
+The first thing I noticed was your hands.
 
-*"You scared me a little. Not in a bad way. In a 'you're the first person who ever made me feel small on purpose and I didn't know I'd like it' way."*
+Not your face — everyone leads with the face. The eyes, the jaw, the way someone carries themselves through a room. That's what people tell you to notice. That's the socially acceptable order of assessment.
 
----
+But I don't look at faces first. I don't know why. Maybe it's the threat assessment buried in my reptile brain — *can this person hurt me, and if so, how much?* — but I look at hands before I look at anything else. The size of them. The way they hold space. What they could do if they wanted to.
 
-# PAGE 04 — "I Studied Your Face For Clues"
+Yours were resting on the table when I walked in.
 
-After.
+Not moving. Not fidgeting. Not doing the anxious thing people do when they're meeting someone new — adjusting rings, tapping fingers, touching their face. Just... there. Still. Present. Taking up exactly as much space as they needed and not a millimeter more.
 
-When you let me rest. When the scene was done and you were just... there. Not performing. Not being Master Martin, just being you.
+I remember thinking: *those hands know what they want.*
 
-I watched you.
-
-The way you moved. The way you checked on me without making it a big deal. The way you knew exactly when I needed water and when I needed silence and when I needed to be held without asking.
+And then I remember thinking: *I'm in trouble.*
 
 ---
 
-**The thing I didn't say:**
+You weren't doing anything. That's the part I need you to understand. There was no scene, no setup, no calculated move designed to make me feel what I felt. You were just sitting there. Waiting. Existing in your own space like you'd been doing it for years and you'd figured out exactly how much room a person needed to take up in order to feel real.
 
-*"I memorized your face in those moments. I wanted to remember exactly what you looked like when you were being gentle with me."*
+And I walked into that space and immediately felt like I was too much.
 
----
+Too loud. Too eager. Too obviously someone who had practiced this meeting seventeen times in the mirror and still wasn't ready for it to be real.
 
-# PAGE 05 — "I Told My Friends A Version"
+"Hi," I said.
 
-Not the truth.
-
-A version. The version where I'm casual about it. The version where it's just fun. The version where I don't wake up at 3 AM thinking about you and what you said and how you said it and whether you meant it.
-
-My friends think it's lighter than it is.
+And you looked up.
 
 ---
 
-**The thing I didn't say:**
+I need to tell you what I saw in your eyes when you looked up. Because I've been trying to forget it for months and I can't and I think that's the point of this book — to stop trying to forget things and start saying them instead.
 
-*"I can't stop thinking about you. About us. About what we do and what it means. I don't know what you want this to be and I'm afraid to ask."*
+I saw recognition.
 
----
+Not the *oh hey nice to meet you* kind. Not the polite acknowledgment of another human being in your vicinity. The other kind. The kind that says *I've been waiting for you and now you're here and I know exactly who you are even though we just met.*
 
-# PAGE 06 — "I Liked When You Were Stern"
-
-This is embarrassing to admit.
-
-I liked when you were stern. When your voice dropped and you meant business. When I could hear in your tone that you weren't asking, you were telling.
-
-It made me feel... *held.* In a way I don't have words for.
+It was the most terrifying thing anyone has ever shown me.
 
 ---
 
-**The thing I didn't say:**
+"Do you want to sit down?"
 
-*"Sometimes I misbehave on purpose. Not because I want to frustrate you. Because I want to hear you be stern with me again."*
+Not a command. Not an instruction. A question. But the way you asked it — the tone, the pause before it, the way you already knew what my answer would be — it didn't feel like a question at all. It felt like a test. Like you'd asked a thousand people the same question in the same way and you'd learned exactly what each answer meant.
 
----
+"Yes," I said.
 
-# PAGE 07 — "I Have A safeword I Never Used"
+And then I sat down across from you and I remember thinking: *I've made a mistake.*
 
-I never used it.
+Not because I didn't want to be there. Because I did. Desperately. In a way that didn't make any sense and that I couldn't explain to the version of myself that had driven forty minutes to get here and had almost turned around four times at different stoplights.
 
-Not once. Not because I was in real danger or because everything was perfect — but because the one time I might have needed it, I chose to stay silent instead.
+I wanted to be there. I wanted to be anywhere you were.
 
-I think part of me wanted to see if you'd notice. If you'd check on me without me having to ask. If you'd see the change in me before I had to say anything.
+But sitting across from you — close enough to see the texture of your skin, close enough to smell whatever you were wearing, close enough to notice the way your shoulders filled out your shirt in a way that made me forget what I was supposed to be doing — I realized I had no idea what to do with that wanting.
 
----
+I'd wanted things before. I'd wanted people before. I'd done the whole song and dance of attraction and pursuit and the careful choreography of two people figuring out if they fit.
 
-**The thing I didn't say:**
-
-*"I wanted you to know me well enough to know when I needed to stop. I wanted you to see it without me having to speak."*
+But I'd never wanted someone and been simultaneously certain that wanting them was going to change everything.
 
 ---
 
-# PAGE 08 — "I'm Jealous Of The People Who Knew You Before"
+"You're nervous."
 
-This is ugly.
+It wasn't a question. You said it like you were commenting on the weather. Factual. Observational. Not cruel — you weren't rubbing it in — but not gentle either. Just... noting. Making a record of something you saw.
 
-I know it's ugly. I don't care less for admitting it.
+"I'm not," I lied.
 
-The people who knew you before me — who saw you when you were younger, when you were figuring things out, when you were someone I never got to meet — they have a version of you I don't have access to.
+The corner of your mouth moved. Not quite a smile. An acknowledgment of something. A filing away.
 
----
+"Okay," you said.
 
-**The thing I didn't said:**
+And the way you said *okay* — like you believed me even though you didn't, like you'd heard the lie and accepted it anyway, like you were giving me permission to lie because maybe I needed to lie right now — that was when I knew.
 
-*"Sometimes I hate that there's a before-you. That I didn't know you first. That I'll never be the one who saw you become this."*
+I knew I was going to give you everything.
 
----
-
-# PAGE 09 — "I Practiced What I'd Say If You Left"
-
-I rehearsed it.
-
-The conversation I'd have with myself after. How I'd be fine. How I'd move on. How it wouldn't break me even though it would break me.
-
-I did this because I assumed you would leave. That everyone leaves eventually. That whatever this was had an expiration date I just hadn't been told about yet.
+Not because you'd asked. Not because I'd decided. Because the wanting was already bigger than the decision. Because I'd walked into that room already belonging to you and I just hadn't figured out how to say it yet.
 
 ---
 
-**The thing I didn't say:**
+The next hour is a blur.
 
-*"I assumed you'd get bored of me. That I'd be a phase. That I was lucky to have any of this at all and I should be grateful for whatever time I got."*
+I know we talked. I know you explained things — what you were looking for, what the dynamic would look like, what was expected of me and what I could expect from you. I know there were rules and boundaries and safewords and all the adult infrastructure that goes into making something like this work.
 
----
+But I don't remember the words. I remember the feeling.
 
-# PAGE 10 — "I Like The Way You Say My Name"
+I remember the way you leaned forward when you were making a point — like you were coming closer, like you were侵入 ing my space, like you were claiming territory just by tilting your body in my direction.
 
-You don't say it often.
+I remember the way your voice dropped half a register when you said something important. Not loud. Not dramatic. Just... lower. Like your voice was putting weight behind the words. Like the words were receiving gravity.
 
-That's part of it. The scarcity. When you do say it — not my title, not "boy," not whatever you call me in the moment — just my actual name — it lands different.
+I remember thinking: *oh. So this is what it feels like when someone is bigger than you.*
 
-It reminds me there's a me underneath all of this.
-
----
-
-**The thing I didn't say:**
-
-*"When you say my name like that — like you mean it — I feel like I'm real. Like I'm a person and not just a function. Like I matter beyond what I can do for you."*
+Not physically. You weren't towering over me. You weren't looming. You were just... more. More present. More solid. More *there* than anyone I'd ever been in a room with. Like the air changed when you breathed and I was just passing through the edited version of the room. The version that existed around you.
 
 ---
 
-# PAGE 11 — "I Don't Know What We Are"
+Here's the thing about wanting something you've never had.
 
-Is this a dynamic? A relationship? An arrangement? A game we both know is a game but we play it like it's real?
+It doesn't feel like reaching for it. It feels like standing at the edge of a cliff trying to remember why you came here.
 
-I don't know what to call it.
+I'd done the research. I'd read the articles. I'd watched the videos and listened to the podcasts and talked to people who were into this in ways I could understand. I thought I knew what I was walking into.
 
-And I don't know if we're supposed to have figured that out by now.
+But knowing and feeling are different countries. And the border patrol between them is brutal.
 
----
+You can know a thing your whole life and then feel it for the first time and suddenly realize you didn't know it at all. You were just familiar with the description. The actual thing — the real texture of it, the weight, the temperature — that only exists when you're inside it.
 
-**The thing I didn't say:**
+I was inside it.
 
-*"I need to know what this is. I need to know if I'm just a body you borrow when you need one or if I'm something else. I can't keep guessing."*
+Sitting across from you. Listening to you explain how this was going to work. Watching your hands move when you talked. Trying to remember how to breathe like a normal person.
 
----
-
-# PAGE 12 — "I Want To Make You Proud"
-
-This is the one I think about most.
-
-Not the scenes. Not the instructions. Not even the way you look at me when I'm doing something right.
-
-The idea of making you proud.
-
-Of being good enough. Of being the one you chose. Of being worthy of the attention you give me.
+And thinking: *I have never been this scared of anything in my life.*
 
 ---
 
-**The thing I didn't say:**
+At some point — I don't remember when, exactly, the timeline is still a smear — you stood up.
 
-*"Being good for you is the only thing I've ever wanted this badly. It scares me. How much I want it. How much I'd do to keep it."*
+"Come here," you said.
 
----
+Two words. No please. No question mark. Just a statement of fact delivered in a voice that made my feet move before my brain caught up.
 
-# PAGE 13 — "I Think About You During The Day"
+I stood up. I walked toward you.
 
-When I'm at work. When I'm buying groceries. When I'm sitting in traffic. When I'm supposed to be concentrating on something else.
+I don't remember the walk. Three feet. Maybe four. It felt like walking through water. It felt like every step was a decision I was making and couldn't take back.
 
-You're there. In the background. A current running under everything.
+I stopped in front of you.
 
----
+You were taller than me. Not by much — an inch, maybe two — but enough. Enough that I had to tilt my chin up slightly to meet your eyes. Enough that I felt the difference in the pull of gravity between us.
 
-**The thing I didn't say:**
-
-*"I get distracted thinking about the last time I saw you. What I'd say if I could text you right now. Whether you'd respond if I did."*
+Enough that I understood, in my body, what you were going to be for me.
 
 ---
 
-# PAGE 14 — "I Notice When You're Tired"
+"Look at me," you said.
 
-I see it.
+I looked at you.
 
-The weight in your shoulders when you think no one's looking. The way your voice changes when you're running on empty. The moments when Master Martin is a mask you're wearing and underneath you're just a person who's had a long day.
+And that was it.
 
----
+That was the moment.
 
-**The thing I didn't say:**
+Not a scene. Not a touch. Not some calculated act of dominance designed to break me open. Just eye contact. Just you and me in a room and your eyes saying *I see you* and my eyes saying *I know* and everything after that being a footnote to this exact moment.
 
-*"I want to take care of you sometimes. Not in the way you take care of me — I don't know how that works. But in some way. I want to be the one who sees that you're tired and does something about it."*
+I saw you seeing me.
 
----
+And I understood — for the first time, in my body and not just my head — what this was going to be.
 
-# PAGE 15 — "I'm Afraid I'll Disappoint You"
+It wasn't play. It wasn't a game. It wasn't something I was going to do and then go home and process like it was a shared hobby.
 
-Every time.
-
-Before every scene. Before every time I see you. Before every message I consider sending.
-
-That this will be the time I get it wrong. The time you realize I'm not what you wanted. The time you see the gap between who I try to be and who I actually am.
+It was a door I was walking through. And once I was through it, I wasn't going to be the person I'd been when I came in.
 
 ---
 
-**The thing I didn't say:**
+"You're shaking," you said.
 
-*"I'm terrified you'll wake up one day and realize you chose wrong. That I was always pretending to be someone more capable than I am."*
+You weren't wrong. My hands. The fine motor controls. Tiny vibrations, like my body was trying to vibrate out of its own skin.
 
----
+"I'm fine," I said.
 
-# PAGE 16 — "I Like Your Rules"
-
-All of them.
-
-The ones that make sense and the ones that don't. The big ones and the small ones. The rules that constrain me and the rules that liberate me.
-
-I didn't know I needed rules until you gave them to me.
+Another lie. You didn't call me on it. You just... let it be what it was. A nervous person trying to find their footing. A scared animal pretending to be brave. A version of myself I didn't recognize yet, the one that was going to emerge on the other side of this.
 
 ---
 
-**The thing I didn't say:**
+Here's what I didn't tell you that day:
 
-*"Thank you for telling me what to do. Thank you for making the decisions I didn't want to make myself. Thank you for being the one with the plan."*
+When I walked out — when it was over, when you'd given me instructions I was supposed to follow, when I'd agreed to things I didn't fully understand yet — I sat in my car for forty-five minutes.
 
----
+Not because I was regretting it.
 
-# PAGE 17 — "I Think About What You're Like When You're Alone"
+Because I was trying to figure out what just happened to me.
 
-Not Master Martin.
+I'd been in rooms with people before. Attractive people. Confident people. People who knew how to take up space and make you feel like the only person in it.
 
-You.
+But I'd never been in a room with someone and felt, with absolute certainty, that I was exactly where I was supposed to be. That every step I'd ever taken — every wrong turn, every bad decision, every moment of confusion and loneliness and not-belonging — had been pointing here. To this room. To this person. To the first time someone looked at me and saw exactly who I was and didn't look away.
 
-When you're by yourself. When no one's performing for. When you're just... you. In the quiet. In the spaces between.
+I'd spent my whole life being seen wrong.
 
-I wonder what you think about. What you want. What you're afraid of.
+You saw me right.
 
----
-
-**The thing I didn't say:**
-
-*"I want to know you. The real you. Not just the version that owns me. The version that nobody gets to see."*
+And I didn't know what to do with that except sit in my car and shake and try to remember how to be a person who exists in the world instead of a person who just got cracked open.
 
 ---
 
-# PAGE 18 — "I Don't Know How To Ask For More"
+That was six months ago.
 
-I want more.
+I've seen you a dozen times since then. More. I've done things I can't undo. Become things I can't un-become. Built a version of myself that only exists inside the space you make for me when we're together.
 
-More time. More attention. More of your voice and your hands and your expectations. More of the feeling of being seen by you.
+But the first time is the one I come back to.
 
-But I don't know how to ask without seeming greedy. Without seeming like I don't have enough. Without taking a good thing and ruining it by wanting too much.
+The first time you saw me.
 
----
+The first time I understood what you were going to be.
 
-**The thing I didn't say:**
+The first moment when I knew — in my blood, in my bones, in the part of me that doesn't think and only feels — that I was already yours, before either of us said a word about it.
 
-*"I want you to want me more than you do. I want to be the first thing you think about instead of the last. I want to matter more than I know I do."*
+That's when it started.
 
----
+That's when I belonged to you.
 
-# PAGE 19 — "I Stay Because I Choose To"
-
-Not because I have to.
-
-Not because you made me. Not because there's a contract or a consequence or a chain.
-
-I stay because I want to. Because every time I think about leaving I realize I don't want to. Because this — whatever this is — is the most honest thing I've ever been part of.
+And I never told you.
 
 ---
 
-**The thing I didn't say:**
+**[END OF CHAPTER ONE]**
 
-*"I could leave. I know that. But I'm here because I choose to be. Because you make me feel like the person I want to be. Because I'd rather be here than anywhere else."*
-
----
-
-# PAGE 20 — "I Belong To You And I Never Said It"
-
-This is the bookend.
-
-The thing I started with and never finished.
-
-I belong to you.
-
-I have since the first time you looked at me like you saw everything. I have even when we're not together. I have even when I'm pretending I don't.
-
----
-
-**The thing I never said:**
-
-*"I'm yours. Not because you made me. Because I gave myself to you. Because you made me want to be had.*
-
-*And I've never told you.*
-
-*Until now.*
-
-*This book is me finally saying it.*
-
-*I'm yours, Master Martin.*
-
-*I always have been."*
-
----
-
-**END OF BOOK**
+*[Next: Chapter Two — The First Time You Touched Me]*
