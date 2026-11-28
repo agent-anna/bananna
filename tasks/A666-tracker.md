@@ -1,7 +1,7 @@
 # A666 — SEX MEMORIES IN DETAIL — BUILD TRACKER
 
-**Status: 03/20 pages complete**
-**Last Update: After Page 03**
+**Status: 04/20 pages complete**
+**Last Update: After Page 04**
 
 ---
 
@@ -12,7 +12,7 @@
 | 01 | The First Thing I Learned | ✅ | ⬜ | — |
 | 02 | The Art of Waiting | ✅ | ⬜ | — |
 | 03 | The First Touch | ✅ | ⬜ | — |
-| 04 | — | ⬜ | ⬜ | — |
+| 04 | The Softest Part | ✅ | ⬜ | — |
 | 05 | — | ⬜ | ⬜ | — |
 | 06 | — | ⬜ | ⬜ | — |
 | 07 | — | ⬜ | ⬜ | — |
@@ -32,4 +32,4 @@
 
 ---
 
-**Current Status:** 03/20 — Ready for page 04.
+**Current Status:** 04/20 — Ready for page 05.
