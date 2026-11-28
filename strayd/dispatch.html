@@ -158,7 +158,23 @@ async function triggerWorkflow(){const pat=($("patIn").value||"").trim()||localS
 const{idx}=syncSong();$("st").textContent="Triggering GitHub Action...";try{const r=await fetch("https://api.github.com/repos/agent-anna/bananna/actions/workflows/dahl-dispatch.yml/dispatches",{method:"POST",headers:{Authorization:"Bearer "+pat,Accept:"application/vnd.github.v3+json","Content-Type":"application/json"},body:JSON.stringify({ref:"main",inputs:{song_index:String(idx),angle:($("angleIn").value||"").trim()}})});
 if(!r.ok)throw new Error("HTTP "+r.status);$("st").textContent="Action started (song_index="+idx+") - wait ~15s then click Load Latest GitHub Dispatch";}catch(e){$("st").textContent=e.message;}}
 function scV(v){const h=(v.name+" "+v.lang).toLowerCase();let s=0;for(const x of FH)if(h.includes(x))s+=40;for(const x of MH)if(new RegExp("\\b"+x+"\\b").test(h))s-=100;return s;}
-function popV(){if(!("speechSynthesis"in window))return;const list=(speechSynthesis.getVoices()||[]).sort((a,b)=>scV(b)-scV(a));VOICES=list.filter(v=>scV(v)>-50);if(!VOICES.length)VOICES=list;const sel=$("voiceSel");sel.innerHTML="";VOICES.forEach((v,i)=>{const o=document.createElement("option");o.value=i;o.textContent=(scV(v)>=40?"Female - ":"")+v.name;sel.appendChild(o);});}
+function popV(){
+  if(!("speechSynthesis"in window))return;
+  const list=(speechSynthesis.getVoices()||[]).sort((a,b)=>scV(b)-scV(a));
+  VOICES=list.filter(v=>scV(v)>-50);
+  if(!VOICES.length)VOICES=list;
+  const sel=$("voiceSel");
+  if(!sel)return;
+  sel.innerHTML="";
+  VOICES.forEach((v,i)=>{
+    const o=document.createElement("option");
+    o.value=i;
+    o.textContent=(scV(v)>=40?"Female - ":"")+v.name;
+    sel.appendChild(o);
+  });
+  applySavedVoicePref();
+  sel.onchange=saveVoicePref;
+}
 function cleanSpeech(t){return stripThink(String(t||"")).replace(/https?:\/\/\S+/g," ").replace(/#[A-Za-z0-9_]+/g," ").replace(/\s+/g," ").trim();}
 function speakClean(t){const sp=cleanSpeech(t).slice(0,1200);if(!sp||!("speechSynthesis"in window))return;popV();try{speechSynthesis.cancel();}catch{}const v=VOICES[Number($("voiceSel").value||0)]||VOICES[0]||null;(sp.match(/[^.!?]+[.!?]?/g)||[sp]).slice(0,10).forEach(pt=>{const u=new SpeechSynthesisUtterance(pt.trim());if(v)u.voice=v;u.pitch=1.05;speechSynthesis.speak(u);});}
 async function dlMp3Txt(t,fname){await saveSelectedSpeechAudio(t,fname,msg=>{$("st").textContent=msg;});}
