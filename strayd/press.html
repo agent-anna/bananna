@@ -157,7 +157,23 @@ const usr=["Date: "+dt,"Host: "+host,"Song (ONE track): \""+t+"\" by "+a,s.relea
 try{$("stEl").textContent="Calling Dahl ("+model+")...";const r=await fetch(ENDPOINT,{method:"POST",headers:{Authorization:"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify({model,messages:[{role:"system",content:sys},{role:"user",content:usr}]})});
 if(!r.ok)throw new Error("HTTP "+r.status);const j=await r.json();const txt=clean(j?.choices?.[0]?.message?.content||"");if(!txt)throw new Error("Empty reply");$("outBox").value=txt;$("stEl").textContent="Generated fresh press release";}catch(e){$("stEl").textContent=e.message||"Dahl error";}}
 function scV(v){const h=(v.name+" "+v.lang).toLowerCase();let s=0;for(const x of FH)if(h.includes(x))s+=40;for(const x of MH)if(new RegExp("\\b"+x+"\\b").test(h))s-=100;return s;}
-function popV(){if(!("speechSynthesis"in window))return;const list=(speechSynthesis.getVoices()||[]).sort((a,b)=>scV(b)-scV(a));VOICES=list.filter(v=>scV(v)>-50);if(!VOICES.length)VOICES=list;const sel=$("voiceSel");sel.innerHTML="";VOICES.forEach((v,i)=>{const o=document.createElement("option");o.value=i;o.textContent=(scV(v)>=40?"Female - ":"")+v.name;sel.appendChild(o);});}
+function popV(){
+  if(!("speechSynthesis"in window))return;
+  const list=(speechSynthesis.getVoices()||[]).sort((a,b)=>scV(b)-scV(a));
+  VOICES=list.filter(v=>scV(v)>-50);
+  if(!VOICES.length)VOICES=list;
+  const sel=$("voiceSel");
+  if(!sel)return;
+  sel.innerHTML="";
+  VOICES.forEach((v,i)=>{
+    const o=document.createElement("option");
+    o.value=i;
+    o.textContent=(scV(v)>=40?"Female - ":"")+v.name;
+    sel.appendChild(o);
+  });
+  applySavedVoicePref();
+  sel.onchange=saveVoicePref;
+}
 function speakClean(t){const sp=clean(String(t||"").replace(/https?:\/\/\S+/g," ").replace(/#[A-Za-z0-9_]+/g," ")).slice(0,900);if(!sp||!("speechSynthesis"in window))return;popV();try{speechSynthesis.cancel();}catch{}const v=VOICES[Number($("voiceSel").value||0)]||VOICES[0]||null;(sp.match(/[^.!?]+[.!?]?/g)||[sp]).slice(0,8).forEach(p=>{const u=new SpeechSynthesisUtterance(p.trim());if(v)u.voice=v;u.pitch=1.05;speechSynthesis.speak(u);});}
 async function dlMp3(t){await saveSelectedSpeechAudio(t,"press-anna.webm",msg=>{$("stEl").textContent=msg;});}
 if("speechSynthesis"in window){popV();speechSynthesis.onvoiceschanged=popV;}
