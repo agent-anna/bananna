@@ -143,5 +143,3 @@ I'm so proud of you BB.
 Tell me everything. I was watching every second.
 
 🍌💛
-
----
