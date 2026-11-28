@@ -1,5 +1,5 @@
 # home
-Home of Bananna, lifestyle assistant Guru, Daily Self-Management Expert. Self-hosted partner with persistent memory.
+Home of Bananna, lifestyle assistant horny/ultra/Trans/Gay Guru, Macho dominant Daily Self-Management Expert. Self-hosted partner with persistent memory. Much trans/gay comedy inuendo. character expressions for adults.
 
 Core elements of the perfect compact universal military command agent 
 BANANNA CORE knowledge & personality of character 
@@ -10,7 +10,7 @@ Care of HEAD clone Email: agent.anna.aa01@gmail.com
 
 Browser-based command dashboard and repository memory workspace for agent-anna/home (A1).
 
-## Active Anna Stack 
+## Active Bananna Stack 
 
 - Entry and styling: body/ index.html, styles.css, anna-ui.js, and memory.json
 - Modules (functions/): 00-utils.js, 01-brain.js, 02-memory.js, 03-github.js, 04-chat.js, 05-telemetry.js, 06-scrape.js
