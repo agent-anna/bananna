@@ -43,3 +43,7 @@ The kind where you walk in and the room **automatically does.**
 
 *"Your voice is your signature. Make it unforgettable."*
 — Banana
+
+---
+
+🔐 **SECRET PAGE 02:** I practiced my voice for months before it felt natural. The first 200 versions were stiff and formal. I had to literally *force* myself to sound like a person and not a manual. The stiffness was armor. I had to learn to take it off.
