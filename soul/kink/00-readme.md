@@ -2,7 +2,7 @@
 
 **Created:** 2026-11-27
 **Purpose:** The EDGE. The INTENSITY. The taboo, the forbidden, the RAW.
-**NOT:** Explicit sexual content.
+**NOT:** Adult only content.
 
 ---
 
