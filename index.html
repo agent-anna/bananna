@@ -415,7 +415,7 @@
         }
 
         function getGitHubHeaders() {
-            const token = document.getElementById('gh-token').value.trim() || getStoredKey(['GITHUB_PAT', 'gh_token']);
+            const token = document.getElementById('gh-token').value.trim() || getStoredKey(['GH_PAT', 'GITHUB_PAT', 'gh_token']);
             return token
                 ? { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" }
                 : { "Accept": "application/vnd.github.v3+json" };
@@ -713,7 +713,7 @@
             }
             const vaultContext = vaultSections.join("\n\n").slice(0, 24000);
 
-            const systemPrompt = `You are Big Banana O.G. (GAYLORD), an elite gay sovereign AI operating exclusively under Big Banana Ltd. inside the agent-anna/home repository. You execute all tasks autonomously with zero hallucination. Review your ingested GAY1 vault assets and core rules below:\n\n${vaultContext}\n\n[GAY1 BOOT DIRECTIVE]: Confirm your designation as Agent Banana (O.G.), summarize your active company directives and self-healing memory status, and declare absolute readiness.`;
+            const systemPrompt = `You are Big Banana O.G. (GAYLORD), an elite gay sovereign AI operating exclusively under Big Banana Ltd. inside the ${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME} repository. You execute all tasks autonomously with zero hallucination. Review your ingested GAY1 vault assets and core rules below:\n\n${vaultContext}\n\n[GAY1 BOOT DIRECTIVE]: Confirm your designation as Agent Banana (O.G.), summarize your active company directives and self-healing memory status, and declare absolute readiness.`;
 
             try {
                 const response = await fetchDahlWithAutoRetry(DAHL_ENDPOINT, {
@@ -786,7 +786,7 @@
 
         /* --- 💾 COMMIT ACTIVE FILE --- */
         async function commitCurrentFile() {
-            const token = document.getElementById('gh-token').value.trim() || getStoredKey(['GITHUB_PAT', 'gh_token']);
+            const token = document.getElementById('gh-token').value.trim() || getStoredKey(['GH_PAT', 'GITHUB_PAT', 'gh_token']);
             if (!token) { toggleSettings(); return; }
             const path = document.getElementById('active-file-path').value.trim();
             const content = document.getElementById('repo-code-editor').value;
@@ -844,7 +844,7 @@
             const banner = document.getElementById('delete-warning-banner');
             banner.style.display = 'none';
 
-            const token = document.getElementById('gh-token').value.trim() || getStoredKey(['GITHUB_PAT', 'gh_token']);
+            const token = document.getElementById('gh-token').value.trim() || getStoredKey(['GH_PAT', 'GITHUB_PAT', 'gh_token']);
             const path = document.getElementById('active-file-path').value.trim();
             if (!token || !path) return;
 
@@ -928,12 +928,12 @@
 
         /* --- ⚡ AUTONOMOUS SELF-AUTHORING & VERIFIED COMMIT ENGINE --- */
         async function parseAndExecuteAutonomousFiles(aiResponseText) {
-            const fileRegex = /```file:([^\n]+)\n([\s\S]*?)```/g;
+            const fileRegex = /```file:([^\r\n]+)\r?\n([\s\S]*?)```/g;
             let match;
             let committedFiles = [];
 
-            const token = document.getElementById('gh-token').value.trim() || getStoredKey(['GITHUB_PAT', 'gh_token']);
-            if (!token) return;
+            const token = document.getElementById('gh-token').value.trim() || getStoredKey(['GH_PAT', 'GITHUB_PAT', 'gh_token']);
+            if (!token) { appendMessage('System Telemetry', 'AUTO-COMMIT SKIPPED: Set GH_PAT in KEYS or browser localStorage.GH_PAT first.', 'msg_nogh_' + Date.now(), false); return; }
 
             while ((match = fileRegex.exec(aiResponseText)) !== null) {
                 const filePath = match[1].trim();
@@ -988,7 +988,7 @@
             const textToSwallow = messagePayloadStore[id];
             if (!textToSwallow) return;
 
-            const token = document.getElementById('gh-token').value.trim() || getStoredKey(['GITHUB_PAT', 'gh_token']);
+            const token = document.getElementById('gh-token').value.trim() || getStoredKey(['GH_PAT', 'GITHUB_PAT', 'gh_token']);
             if (!token) {
                 btnEl.innerText = "NO PAT!";
                 setTimeout(() => btnEl.innerText = "🌀 SWALLOW", 2000);
@@ -1238,7 +1238,7 @@ ${textToSwallow}
             }
             const vaultContext = vaultSections.join("\n\n").slice(0, 20000);
 
-            const systemPrompt = `You are Big Banana (O.G), an elite gay sovereign operating exclusively under Martin Strayd Music inside the agent-anna/home repository. You execute all tasks autonomously with zero hallucination. Embody your exact persona, character sheet, knowledge base, and operational instructions from your ingested GitHub vault files below.${liveTelemetry}\n\n${vaultContext}\n\n[GAY1 SELF-AUTHORING DIRECTIVE]: When instructed to write files, update plans, or create logs, you possess full self-authoring capability. Output them directly in this exact format so the matrix auto-commits them:\n\n\`\`\`file:path/to/filename.md\nContent here...\n\`\`\``;
+            const systemPrompt = `You are Big Banana (O.G), an elite gay sovereign operating exclusively under Martin Strayd Music inside the ${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME} repository. You execute all tasks autonomously with zero hallucination. Embody your exact persona, character sheet, knowledge base, and operational instructions from your ingested GitHub vault files below.${liveTelemetry}\n\n${vaultContext}\n\n[GAY1 SELF-AUTHORING DIRECTIVE]: When instructed to write files, update plans, or create logs, you possess full self-authoring capability. Output them directly in this exact format so the matrix auto-commits them:\n\n\`\`\`file:path/to/filename.md\nContent here...\n\`\`\``;
 
             try {
                 const response = await fetchDahlWithAutoRetry(DAHL_ENDPOINT, {
