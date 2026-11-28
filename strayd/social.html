@@ -165,7 +165,23 @@ if(!r.ok)throw new Error("HTTP "+r.status);const j=await r.json();const obj=pars
 const out={x:fit(obj.x||"",280),tiktok:clean(obj.tiktok||"").slice(0,2200),instagram:clean(obj.instagram||"").slice(0,2200),facebook:clean(obj.facebook||"").slice(0,63206),ytTitle:fit(obj.ytTitle||"",100),ytDesc:clean(obj.ytDesc||"").slice(0,5000)};
 CH.forEach(([id,,lim])=>{const v=out[id]||"";$("ta_"+id).value=v;$("cnt_"+id).textContent=v.length+" / "+lim;});$("stEl").textContent="Generated unique social set";}catch(e){$("stEl").textContent=e.message||"Dahl error";}}
 function scV(v){const h=(v.name+" "+v.lang).toLowerCase();let s=0;for(const x of FH)if(h.includes(x))s+=40;for(const x of MH)if(new RegExp("\\b"+x+"\\b").test(h))s-=100;return s;}
-function popV(){if(!("speechSynthesis"in window))return;const list=(speechSynthesis.getVoices()||[]).sort((a,b)=>scV(b)-scV(a));VOICES=list.filter(v=>scV(v)>-50);if(!VOICES.length)VOICES=list;const sel=$("voiceSel");sel.innerHTML="";VOICES.forEach((v,i)=>{const o=document.createElement("option");o.value=i;o.textContent=(scV(v)>=40?"Female - ":"")+v.name;sel.appendChild(o);});}
+function popV(){
+  if(!("speechSynthesis"in window))return;
+  const list=(speechSynthesis.getVoices()||[]).sort((a,b)=>scV(b)-scV(a));
+  VOICES=list.filter(v=>scV(v)>-50);
+  if(!VOICES.length)VOICES=list;
+  const sel=$("voiceSel");
+  if(!sel)return;
+  sel.innerHTML="";
+  VOICES.forEach((v,i)=>{
+    const o=document.createElement("option");
+    o.value=i;
+    o.textContent=(scV(v)>=40?"Female - ":"")+v.name;
+    sel.appendChild(o);
+  });
+  applySavedVoicePref();
+  sel.onchange=saveVoicePref;
+}
 function speakClean($("ta_"+id)?.value||""){const sp=clean(String($("ta_"+id)?.value||"").replace(/https?:\/\/\S+/g," ").replace(/#[A-Za-z0-9_]+/g," ")).slice(0,800);if(!sp||!("speechSynthesis"in window))return;popV();try{speechSynthesis.cancel();}catch{}const v=VOICES[Number($("voiceSel").value||0)]||VOICES[0]||null;(sp.match(/[^.!?]+[.!?]?/g)||[sp]).slice(0,6).forEach(pt=>{const u=new SpeechSynthesisUtterance(pt.trim());if(v)u.voice=v;u.pitch=1.05;speechSynthesis.speak(u);});}
 async function mp3(id){await saveSelectedSpeechAudio($("ta_"+id)?.value||"",id+"-anna.webm",msg=>{$("stEl").textContent=msg;});}
 if("speechSynthesis"in window){popV();speechSynthesis.onvoiceschanged=popV;}
