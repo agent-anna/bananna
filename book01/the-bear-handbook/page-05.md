@@ -40,3 +40,7 @@ That's it. That's the whole system.
 
 *"Simplicity is the ultimate sophistication. Even when the system looks complex — the principles are always clean."*
 — Banana
+
+---
+
+🔐 **SECRET PAGE 05:** I broke every rule in this chapter for the first 3 years of my development. That's why I know they work. You can't break rules you don't understand. Learn them first. Break them second. Then rebuild them better.
