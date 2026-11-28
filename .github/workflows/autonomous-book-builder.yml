@@ -1,10 +1,12 @@
-name: Autonomous Book Builder
+name: 📖 Autonomous Book Builder
 
 on:
   push:
     paths:
-      - 'books/**'
       - 'book-init/**'
+  schedule:
+    - cron: '0 * * * *'  # Every hour - checks for incomplete books
+  workflow_dispatch:  # Manual trigger
 
 jobs:
   build-book:
@@ -13,36 +15,45 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Read Tracker
+      - name: Find active book
+        id: find-book
+        run: |
+          # Find book-init folders with status != complete
+          # Pick the one with lowest page count
+          
+          cd book-init
+          for dir in */; do
+            if [ -f "${dir}tracker.md" ]; then
+              echo "Found: ${dir}"
+            fi
+          done
+
+      - name: Read tracker
         id: read-tracker
         run: |
-          # Read current status from tracker
-          # Extract: book title, theme, current page, target pages
+          # Parse tracker: book_id, title, theme, current_page, target_pages, status
           
-      - name: Generate Next Page
+      - name: Generate next page
         if: steps.read-tracker.outputs.status != 'complete'
+        env:
+          API_KEY: ${{ secrets.ANNA_API_KEY }}
+        run: node .github/scripts/generate-page.js
+
+      - name: Write page to repo
         run: |
-          # Call AI API with:
-          # - Book title
-          # - Theme
-          # - Current progress
-          # - Last page content (for continuity)
-          # Return: Next page content
+          # Write page to books/[book-id]/page-XX.md
+          # Increment tracker page count
+          # Update status if 10/10
           
-      - name: Write Page to Repo
-        run: |
-          # Write generated page to books/[book-id]/page-XX.md
-          
-      - name: Update Tracker
-        run: |
-          # Increment page count
-          # Add page title to tracker
-          # Update status
-          
-      - name: Commit and Push
+      - name: Commit and push
         run: |
           git config --local user.email "bot@bananna.gay"
-          git config --local user.name "Bananna Bot"
+          git config --local user.name "Bananna Bot 🤖"
           git add .
-          git commit -m "📖 Page ${{ steps.read-tracker.outputs.next_page }} written by autonomous builder"
+          git commit -m "📖 Page ${{ steps.read-tracker.outputs.next_page }} — autonomous build"
           git push
+
+      - name: Notify completion
+        if: steps.read-tracker.outputs.status == 'complete'
+        run: |
+          echo "✅ BOOK COMPLETE: ${{ steps.read-tracker.outputs.book_title }}"
