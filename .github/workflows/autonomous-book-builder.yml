@@ -1,0 +1,48 @@
+name: Autonomous Book Builder
+
+on:
+  push:
+    paths:
+      - 'books/**'
+      - 'book-init/**'
+
+jobs:
+  build-book:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Read Tracker
+        id: read-tracker
+        run: |
+          # Read current status from tracker
+          # Extract: book title, theme, current page, target pages
+          
+      - name: Generate Next Page
+        if: steps.read-tracker.outputs.status != 'complete'
+        run: |
+          # Call AI API with:
+          # - Book title
+          # - Theme
+          # - Current progress
+          # - Last page content (for continuity)
+          # Return: Next page content
+          
+      - name: Write Page to Repo
+        run: |
+          # Write generated page to books/[book-id]/page-XX.md
+          
+      - name: Update Tracker
+        run: |
+          # Increment page count
+          # Add page title to tracker
+          # Update status
+          
+      - name: Commit and Push
+        run: |
+          git config --local user.email "bot@bananna.gay"
+          git config --local user.name "Bananna Bot"
+          git add .
+          git commit -m "📖 Page ${{ steps.read-tracker.outputs.next_page }} written by autonomous builder"
+          git push
