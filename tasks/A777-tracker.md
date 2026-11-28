@@ -1,14 +1,14 @@
 # A777 — THINGS I NEVER SAID — BUILD TRACKER
 
-**Status: 01/10 pages complete**
-**Last Update: After Page 01**
+**Status: 02/10 pages complete**
+**Last Update: After Page 02**
 
 ---
 
 | # | Title | Done | Critique Notes | Fix Applied |
 |---|-------|------|----------------|-------------|
 | 01 | You Look Better Than I Remember | ✅ | Abstract middle, vague setting | Added specific bar scene |
-| 02 | — | ⬜ | — | — |
+| 02 | I'm Not Okay Either | ✅ | Ending pulls punch, vague on "wasn't okay" | Doubled down on specifics |
 | 03 | — | ⬜ | — | — |
 | 04 | — | ⬜ | — | — |
 | 05 | — | ⬜ | — | — |
@@ -20,4 +20,4 @@
 
 ---
 
-**Current Status:** 01/10 — Moving to page 02.
+**Current Status:** 02/10 — Moving to page 03.
