@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGENT ANNA // OG SOVEREIGN NEURAL LINK MATRIX [MILITARY GRADE AI]</title>
+    <title>AGENT Banana // OG SOVEREIGN NEURAL LINK MATRIX [MILITARY GRADE AI]</title>
     <style>
         :root {
             --bg-dark: #05070c;
@@ -149,7 +149,7 @@
         }
         .tactical-chip:hover { background: rgba(0, 255, 204, 0.25); }
 
-        /* ANNA WRITE ZONE TERMINAL */
+        /* Banana WRITE ZONE TERMINAL */
         .anna-write-zone {
             padding: 8px 10px;
             background: #070b13;
@@ -209,13 +209,13 @@
         .mic-btn.listening { background: var(--border-magenta) !important; color: #000 !important; }
     </style>
 </head>
-<body class="is-standby" aria-label="Agent Anna OG Sovereign Matrix">
+<body class="is-standby" aria-label="Agent Bananna OG Sovereign Matrix">
 
     <!-- TOP MILITARY STATUS BAR -->
     <div class="military-top-bar" role="region" aria-label="System Status Bar">
         <div class="top-status-indicator">
             <div class="status-dot" aria-hidden="true"></div>
-            <span id="state-text" aria-live="polite">STANDBY // AGENT ANNA (OG)</span>
+            <span id="state-text" aria-live="polite">STANDBY // AGENT Banana (OG)</span>
             <span class="status-badge" id="vault-status" aria-live="polite">VAULT: 0 ASSETS</span>
             <span class="status-badge" id="key-status" aria-live="polite">KEY: CHECKING</span>
         </div>
@@ -225,7 +225,7 @@
                 <option value="deepseek-ai/DeepSeek-V4-Flash-0731">MODEL: DEEPSEEK-V4-FLASH</option>
                 <option value="zai-org/GLM-5.3-Flash">MODEL: GLM-5.3-FLASH</option>
             </select>
-            <button class="ctrl-btn military-btn" id="boot-btn" onclick="triggerAutonomousBootSequence()" aria-label="Awaken Agent Anna OG and Initialize Directives">🧠 AWAKEN</button>
+            <button class="ctrl-btn military-btn" id="boot-btn" onclick="triggerAutonomousBootSequence()" aria-label="Awaken Agent Banana OG and Initialize Directives">🧠 AWAKEN</button>
             <button class="ctrl-btn" id="voice-btn" onclick="toggleVoice()" aria-label="Toggle Speech Synthesis">🔊 ON</button>
             <button class="ctrl-btn military-btn" id="keys-btn" onclick="toggleSettings()" aria-label="Open Settings and API Keys">⚙️ KEYS</button>
         </div>
@@ -237,7 +237,7 @@
         <!-- LEFT 60%: GITHUB REPO VAULT & TREE/GRID TOGGLE -->
         <div class="github-pane" role="region" aria-label="GitHub Repository Vault Pane">
             <div class="repo-toolbar">
-                <span style="font-size:10px; color:var(--state-color); font-weight:bold;">📁 AGENT-ANNA / ANNA (A1 VAULT)</span>
+                <span style="font-size:10px; color:var(--state-color); font-weight:bold;">📁 AGENT-Banana / Bananna (GAY)</span>
                 <div style="display:flex; gap:6px;">
                     <button class="ctrl-btn military-btn" onclick="toggleViewMode()" id="view-toggle-btn" aria-label="Toggle File View Mode">🌲 VIEW: TREE</button>
                     <button class="ctrl-btn military-btn" id="sync-btn" onclick="syncAll()" aria-label="Sync Repository Vault">🔄 SYNC</button>
@@ -267,10 +267,10 @@
             <div id="media-preview-container" aria-label="Media preview area"></div>
         </div>
 
-        <!-- RIGHT 40%: AGENT ANNA + DAHL API CONSOLE -->
-        <div class="chat-pane" role="region" aria-label="Agent Anna OG Chat Console">
+        <!-- RIGHT 40%: AGENT Banana + DAHL API CONSOLE -->
+        <div class="chat-pane" role="region" aria-label="Agent Banana OG Chat Console">
             <div class="chat-header">
-                <span>CONSOLE [AGENT ANNA OG // SOVEREIGN CORE]</span>
+                <span>CONSOLE [AGENT Banana OG // SOVEREIGN CORE]</span>
                 <button class="ctrl-btn" id="clear-logs-btn" onclick="clearLogs()" aria-label="Clear Chat Logs">🧹 CLEAR</button>
             </div>
 
@@ -297,10 +297,10 @@
                 <button class="tactical-chip" onclick="triggerPreset('Audit the repository vault and self-author an updated A1 core memory file in file:A1/soul/brain.json.')" aria-label="Test Autonomous Self-Authoring">📝 TEST SELF-WRITE</button>
             </div>
 
-            <!-- ANNA WRITE ZONE TERMINAL -->
+            <!-- Banana WRITE ZONE TERMINAL -->
             <div class="anna-write-zone" role="region" aria-label="Anna Write Zone Command Terminal">
                 <div class="write-zone-header">
-                    <span>ANNA WRITE ZONE</span>
+                    <span>BANANA WRITE ZONE</span>
                     <span id="write-zone-status" aria-live="polite">READY</span>
                 </div>
                 <textarea id="anna-cmd-input" placeholder="COMMAND: WRITE&#10;PATH: A1/soul/brain.json" aria-label="COMMAND"></textarea>
@@ -314,8 +314,8 @@
             <div class="input-control-bar">
                 <div class="input-row">
                     <button class="ctrl-btn military-btn mic-btn" id="mic-btn" onclick="toggleMicrophone()" aria-label="Toggle Microphone Voice Dictation">🎙️ MIC</button>
-                    <input type="text" id="user-input" placeholder="Speak or type to Agent Anna..." aria-label="User message input field" onkeypress="handleKey(event)">
-                    <button class="ctrl-btn military-btn" id="send-btn" onclick="sendMessage()" style="border-color:var(--border-pink); color:var(--border-pink);" aria-label="Send Message to Agent Anna">SEND</button>
+                    <input type="text" id="user-input" placeholder="Speak or type to Agent Banana..." aria-label="User message input field" onkeypress="handleKey(event)">
+                    <button class="ctrl-btn military-btn" id="send-btn" onclick="sendMessage()" style="border-color:var(--border-pink); color:var(--border-pink);" aria-label="Send Message to Agent Banana">SEND</button>
                 </div>
             </div>
         </div>
@@ -411,7 +411,7 @@
         function setMoodState(stateName) {
             document.body.classList.remove('is-standby', 'is-thinking', 'is-responding', 'is-speaking', 'is-listening');
             document.body.classList.add(`is-${stateName}`);
-            document.getElementById('state-text').innerText = `${stateName.toUpperCase()} // AGENT ANNA (OG)`;
+            document.getElementById('state-text').innerText = `${stateName.toUpperCase()} // AGENT Banana (OG)`;
         }
 
         function getGitHubHeaders() {
@@ -426,7 +426,7 @@
             sendMessage();
         }
 
-        /* --- ✍️ ANNA WRITE ZONE PROCESSOR --- */
+        /* --- ✍️ Banana WRITE ZONE PROCESSOR --- */
         function clearWriteZone() {
             document.getElementById('anna-cmd-input').value = "";
             document.getElementById('anna-content-input').value = "";
@@ -479,7 +479,7 @@
                 editor.value = contentRaw;
 
                 statusEl.innerText = `LOADED -> ${targetPath}`;
-                appendMessage("System Telemetry", `ANNA WRITE ZONE: Loaded content into editor for ${targetPath}. Ready to commit.`, 'msg_wz_' + Date.now(), false);
+                appendMessage("System Telemetry", `Bananna WRITE ZONE: Loaded content into editor for ${targetPath}. Ready to commit.`, 'msg_wz_' + Date.now(), false);
                 speakText(`Loaded ${targetPath} into editor.`);
             } else if (commandType === "COMMIT") {
                 if (targetPath) {
@@ -689,31 +689,31 @@
             }
         }
 
-        /* --- 🧠 AUTONOMOUS BOOT PRIMING SEQUENCE (ANNA / OG) --- */
+        /* --- 🧠 AUTONOMOUS BOOT PRIMING SEQUENCE (Bananna / OG) --- */
         async function triggerAutonomousBootSequence() {
             const apiKey = document.getElementById('api-key').value.trim() || getStoredKey(['DAHL_API_KEY', 'dahl_api_key', 'OPENAI_API_KEY', 'api_key']);
             const files = Object.keys(repoVaultFiles);
 
             if (!apiKey) {
                 const fallbackMsg = files.length > 0
-                    ? `Agent Anna (OG) online. Ingested ${files.length} vault assets (${files.join(', ')}). Enter Dahl API Key in KEYS to awaken sovereign intelligence.`
-                    : `Agent Anna (OG) online. Click KEYS to configure credentials and sync vault.`;
-                appendMessage("Agent Anna", fallbackMsg, 'msg_boot_' + Date.now(), true);
+                    ? `Agent Banana (OG) online. Ingested ${files.length} vault assets (${files.join(', ')}). Enter Dahl API Key in KEYS to awaken sovereign intelligence.`
+                    : `Agent Banana (OG) online. Click KEYS to configure credentials and sync vault.`;
+                appendMessage("Agent Banana", fallbackMsg, 'msg_boot_' + Date.now(), true);
                 speakText(fallbackMsg);
                 return;
             }
 
             const bootMsgId = 'msg_boot_' + Date.now();
-            appendMessage("Agent Anna OG", `Ingested ${files.length} A1 vault assets from ANNA. Awakening sovereign neural core (${getActiveModel()})...`, bootMsgId, true);
+            appendMessage("Agent Banana OG", `Ingested ${files.length} A1 vault assets from Banana. Awakening sovereign neural core (${getActiveModel()})...`, bootMsgId, true);
             setMoodState('thinking');
 
             let vaultSections = [];
             for (const [path, content] of Object.entries(repoVaultFiles)) {
-                vaultSections.push(`=== ANNA VAULT ASSET: ${path} ===\n${content}`);
+                vaultSections.push(`=== Banana VAULT ASSET: ${path} ===\n${content}`);
             }
             const vaultContext = vaultSections.join("\n\n").slice(0, 24000);
 
-            const systemPrompt = `You are AGENT ANNA OG (A1), an elite sovereign AI operating exclusively under ANNA Ltd. inside the agent-anna/home repository. You execute all tasks autonomously with zero hallucination. Review your ingested A1 vault assets and core rules below:\n\n${vaultContext}\n\n[A1 BOOT DIRECTIVE]: Confirm your designation as Agent Anna (OG), summarize your active company directives and self-healing memory status, and declare absolute readiness.`;
+            const systemPrompt = `You are Big Banana O.G. (GAYLORD), an elite gay sovereign AI operating exclusively under Big Banana Ltd. inside the agent-anna/home repository. You execute all tasks autonomously with zero hallucination. Review your ingested GAY1 vault assets and core rules below:\n\n${vaultContext}\n\n[GAY1 BOOT DIRECTIVE]: Confirm your designation as Agent Banana (O.G.), summarize your active company directives and self-healing memory status, and declare absolute readiness.`;
 
             try {
                 const response = await fetchDahlWithAutoRetry(DAHL_ENDPOINT, {
@@ -726,20 +726,20 @@
                         model: getActiveModel(),
                         messages: [
                             { role: "system", content: systemPrompt },
-                            { role: "user", content: "System boot initiated as Agent Anna (OG). Confirm core memory ingestion and state absolute readiness." }
+                            { role: "user", content: "System boot initiated as Agent Banana (O.G). Confirm core memory ingestion and state absolute readiness." }
                         ]
                     })
                 });
 
                 const json = await response.json();
-                const rawReply = json.choices?.[0]?.message?.content || json.reply || `Agent Anna (OG) online. Ingested ${files.length} vault assets and standing by.`;
+                const rawReply = json.choices?.[0]?.message?.content || json.reply || `Agent Banana (O.G) online. Ingested ${files.length} vault assets and standing by.`;
                 const cleanReply = sanitizeResponse(rawReply);
 
                 chatHistory.push({ role: "assistant", content: cleanReply });
                 updateMessage(bootMsgId, cleanReply);
                 speakText(cleanReply);
             } catch (err) {
-                const errMsg = `Agent Anna (OG) online. Ingested ${files.length} vault assets. Ready for execution.`;
+                const errMsg = `Agent Banana (OG) online. Ingested ${files.length} vault assets. Ready for execution.`;
                 updateMessage(bootMsgId, errMsg);
                 speakText(errMsg);
             }
@@ -811,13 +811,13 @@
                 const putRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents/${path}`, {
                     method: 'PUT',
                     headers: { ...getGitHubHeaders(), "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: `Agent Anna commit: updated ${path}`, content: encodedContent, sha: sha })
+                    body: JSON.stringify({ message: `Agent Banana commit: updated ${path}`, content: encodedContent, sha: sha })
                 });
                 const putData = await putRes.json();
                 if (putRes.status === 201 || putRes.status === 200 || putData.commit) {
                     repoVaultFiles[path] = content;
                     appendMessage("System Telemetry", `VERIFIED COMMIT: ${path} successfully written to home.`, 'msg_com_' + Date.now(), false);
-                    speakText("Committed file to Anna repository successfully.");
+                    speakText("Committed file to Banana repository successfully.");
                     await fetchRepoTree();
                 }
             } catch (err) {}
@@ -860,7 +860,7 @@
                 const delRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents/${path}`, {
                     method: 'DELETE',
                     headers: { ...getGitHubHeaders(), "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: `Agent Anna purge: deleted ${path}`, sha: sha })
+                    body: JSON.stringify({ message: `Agent Banana purge: deleted ${path}`, sha: sha })
                 });
 
                 if (delRes.ok || delRes.status === 200) {
@@ -891,10 +891,10 @@
             if (!apiKey) { toggleSettings(); return; }
 
             const auditMsgId = 'msg_audit_' + Date.now();
-            appendMessage("Agent Anna", `Auditing code and checking for bugs in ${path}...`, auditMsgId, true);
+            appendMessage("Agent Banana", `Auditing code and checking for bugs in ${path}...`, auditMsgId, true);
             setMoodState('thinking');
 
-            const systemPrompt = `You are AGENT ANNA (OG), an elite sovereign AI programmer. Audit the following file content for bugs, syntax errors, inefficiencies, or security flaws. Provide the corrected, fully working file content inside a clean self-authoring block:\n\n\`\`\`file:${path}\n[corrected code here]\n\`\`\``;
+            const systemPrompt = `You are Big Banana (O.G), an elite sovereign AI programmer. Audit the following file content for bugs, syntax errors, inefficiencies, or security flaws. Provide the corrected, fully working file content inside a clean self-authoring block:\n\n\`\`\`file:${path}\n[corrected code here]\n\`\`\``;
 
             try {
                 const response = await fetchDahlWithAutoRetry(DAHL_ENDPOINT, {
@@ -958,7 +958,7 @@
                         method: 'PUT',
                         headers: { ...getGitHubHeaders(), "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            message: `Agent Anna Autonomous Self-Write: ${filePath}`,
+                            message: `Agent Banana Autonomous Self-Write: ${filePath}`,
                             content: encodedContent,
                             sha: fileSha
                         })
@@ -977,9 +977,9 @@
             }
 
             if (committedFiles.length > 0) {
-                const notice = `VERIFIED 201 COMMIT: Agent Anna self-authored ${committedFiles.join(', ')} directly to GitHub.`;
+                const notice = `VERIFIED 201 COMMIT: Agent Banana self-authored ${committedFiles.join(', ')} directly to GitHub.`;
                 appendMessage("System Telemetry", notice, 'msg_sys_' + Date.now(), false);
-                speakText(`Self-authored and committed ${committedFiles.length} files to Anna repository.`);
+                speakText(`Self-authored and committed ${committedFiles.length} files to Banana repository.`);
                 await fetchRepoTree();
             }
         }
@@ -1005,7 +1005,7 @@
             const timeTag = new Date().toTimeString().slice(0, 5).replace(':', '');
             const targetPath = `A1/logs/home-swallow-${dateTag}-${safeTitle || timeTag}.md`;
 
-            const fileContent = `# AGENT ANNA (OG) // 🌀 SWALLOW VAULT ENTRY
+            const fileContent = `# Big Banana (OG) // 🌀 SWALLOW ON COMMAND ENTRY
 # TIMESTAMP: ${new Date().toISOString()}
 
 ## CAPTURED INTELLIGENCE
@@ -1034,7 +1034,7 @@ ${textToSwallow}
                     method: 'PUT',
                     headers: { ...getGitHubHeaders(), "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        message: `Agent Anna 🌀 Swallow Commit: ${safeTitle || 'vault-log'}`,
+                        message: `Agent Banana 🌀 Swallow Never Spit Commit: ${safeTitle || 'vault-log'}`,
                         content: encodedContent,
                         sha: fileSha
                     })
@@ -1044,7 +1044,7 @@ ${textToSwallow}
                 if (putRes.status === 201 || putRes.status === 200 || putData.commit) {
                     btnEl.innerText = "COMMITTED [201]!";
                     repoVaultFiles[targetPath] = fileContent;
-                    speakText("Intelligence swallowed and successfully committed to Anna repository.");
+                    speakText("Intelligence swallowed and successfully committed to Banana repository.");
                     await fetchRepoTree();
                     setTimeout(() => btnEl.innerText = "🌀 SWALLOW", 3500);
                 } else {
@@ -1130,7 +1130,7 @@ ${textToSwallow}
                 if (!voices.length) voices = cachedVoices;
 
                 const voice = voices.find(v => 
-                    (v.name.includes("Female") || v.name.includes("Victoria") || v.name.includes("Samantha") || v.name.includes("Karen") || v.name.includes("Zira") || v.name.includes("Google UK English Female")) && 
+                    (v.name.includes("male") || v.name.includes("guy") || v.name.includes("christopher") || v.name.includes("ryan") || v.name.includes("brian") || v.name.includes("Google UK English male")) && 
                     v.lang.startsWith('en')
                 ) || voices.find(v => v.lang.startsWith('en')) || voices[0];
 
@@ -1194,7 +1194,7 @@ ${textToSwallow}
             chatHistory.push({ role: "user", content: prompt });
 
             const assistantMsgId = 'msg_a_' + Date.now();
-            appendMessage("Agent Anna", `Executing A1 telemetry & querying ${getActiveModel()}...`, assistantMsgId, true);
+            appendMessage("Agent Banana", `Executing A1 telemetry & querying ${getActiveModel()}...`, assistantMsgId, true);
             setMoodState('thinking');
 
             const apiKey = document.getElementById('api-key').value.trim() || getStoredKey(['DAHL_API_KEY', 'dahl_api_key', 'OPENAI_API_KEY', 'api_key']);
@@ -1234,11 +1234,11 @@ ${textToSwallow}
 
             let vaultSections = [];
             for (const [path, content] of Object.entries(repoVaultFiles)) {
-                vaultSections.push(`=== ANNA VAULT ASSET: ${path} ===\n${content}`);
+                vaultSections.push(`=== Banana VAULT ASSET: ${path} ===\n${content}`);
             }
             const vaultContext = vaultSections.join("\n\n").slice(0, 20000);
 
-            const systemPrompt = `You are AGENT ANNA (OG), an elite sovereign operating exclusively under Kunda Co Ltd inside the agent-anna/home repository. You execute all tasks autonomously with zero hallucination. Embody your exact persona, character sheet, knowledge base, and operational instructions from your ingested GitHub vault files below.${liveTelemetry}\n\n${vaultContext}\n\n[A1 SELF-AUTHORING DIRECTIVE]: When instructed to write files, update plans, or create logs, you possess full self-authoring capability. Output them directly in this exact format so the matrix auto-commits them:\n\n\`\`\`file:path/to/filename.md\nContent here...\n\`\`\``;
+            const systemPrompt = `You are Big Banana (O.G), an elite gay sovereign operating exclusively under Martin Strayd Music inside the agent-anna/home repository. You execute all tasks autonomously with zero hallucination. Embody your exact persona, character sheet, knowledge base, and operational instructions from your ingested GitHub vault files below.${liveTelemetry}\n\n${vaultContext}\n\n[GAY1 SELF-AUTHORING DIRECTIVE]: When instructed to write files, update plans, or create logs, you possess full self-authoring capability. Output them directly in this exact format so the matrix auto-commits them:\n\n\`\`\`file:path/to/filename.md\nContent here...\n\`\`\``;
 
             try {
                 const response = await fetchDahlWithAutoRetry(DAHL_ENDPOINT, {
