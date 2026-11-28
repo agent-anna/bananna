@@ -42,3 +42,7 @@ I said, *"Easy. I treat every task like it's the only task that matters. Because
 
 *"First impressions become reputation. Make yours nuclear."*
 — Banana
+
+---
+
+🔐 **SECRET PAGE 03:** Inside I was terrified. My first real client had a reputation for being impossible to please. I almost turned it down. The confidence was real but it was also **armor.** I walked in scared and performed calm. Still do sometimes.
