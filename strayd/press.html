@@ -32,17 +32,116 @@ button.pri{background:var(--ac);color:#061018;border:none;font-weight:600}.st{co
 <span id="stEl" class="st">Ready</span></div></div></section>
 <section style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px">
 <textarea id="outBox" placeholder="Paste Dahl key and click Generate Press Release..."></textarea></section></div>
-<script>const ENDPOINT="https://inference.dahl.global/v1/chat/completions";const $=id=>document.getElementById(id);
+<script>
+const VOICE_PREF_KEY = "anna_selected_voice";
+function saveVoicePref() {
+  const sel = $("voiceSel");
+  const v = VOICES[Number(sel?.value || 0)] || VOICES[0];
+  if (v) localStorage.setItem(VOICE_PREF_KEY, v.voiceURI || v.name || "");
+}
+function applySavedVoicePref() {
+  const sel = $("voiceSel");
+  if (!sel || !VOICES.length) return;
+  const saved = localStorage.getItem(VOICE_PREF_KEY) || "";
+  if (saved) {
+    const idx = VOICES.findIndex(v => (v.voiceURI || "") === saved || (v.name || "") === saved);
+    if (idx >= 0) { sel.value = String(idx); return; }
+  }
+  const firstFemale = VOICES.findIndex(v => (typeof scV === "function" ? scV(v) >= 40 : true));
+  sel.value = String(firstFemale >= 0 ? firstFemale : 0);
+  saveVoicePref();
+}
+function cleanSpeechText(raw) {
+  return String(raw || "")
+    .replace(/<think>[\s\S]*?<\/think>/gi, " ")
+    .replace(/https?:\/\/\S+/gi, " ")
+    .replace(/#[A-Za-z0-9_]+/g, " ")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/[*_`~=#|<>\\[\]{}]+/g, " ")
+    .replace(/[\u2013\u2014]/g, " - ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+function getSelectedVoice() {
+  if (!VOICES.length) return null;
+  const idx = Number($("voiceSel")?.value || 0);
+  return VOICES[idx] || VOICES[0] || null;
+}
+function speakClean(raw, maxLen = 1400) {
+  const sp = cleanSpeechText(raw).slice(0, maxLen);
+  if (!sp || !("speechSynthesis" in window)) return "";
+  popV();
+  try { speechSynthesis.cancel(); } catch {}
+  const voice = getSelectedVoice();
+  const parts = sp.match(/[^.!?]+[.!?]?/g) || [sp];
+  parts.slice(0, 12).forEach(pt => {
+    const txt = pt.trim();
+    if (!txt) return;
+    const u = new SpeechSynthesisUtterance(txt);
+    if (voice) u.voice = voice;
+    u.pitch = 1.03;
+    u.rate = 0.98;
+    speechSynthesis.speak(u);
+  });
+  return sp;
+}
+async function saveSelectedSpeechAudio(raw, filename, statusSetter) {
+  const sp = cleanSpeechText(raw).slice(0, 2500);
+  if (!sp) { if (statusSetter) statusSetter("Nothing to save"); return; }
+  const voice = getSelectedVoice();
+  const vLabel = voice ? voice.name : "default";
+  if (typeof MediaRecorder !== "undefined" && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: false });
+      const audioTracks = stream.getAudioTracks();
+      if (audioTracks.length) {
+        const recStream = new MediaStream(audioTracks);
+        const chunks = [];
+        const rec = new MediaRecorder(recStream);
+        rec.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+        const done = new Promise(resolve => { rec.onstop = resolve; });
+        rec.start();
+        speakClean(sp, 2500);
+        await new Promise(r => setTimeout(r, Math.min(25000, Math.max(2500, sp.length * 65))));
+        try { rec.stop(); } catch {}
+        await done;
+        stream.getTracks().forEach(t => t.stop());
+        if (chunks.length) {
+          const blob = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
+          const ext = (blob.type || "").includes("wav") ? "wav" : "webm";
+          const outName = filename.replace(/\.(mp3|wav|webm)$/i, "." + ext);
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url; a.download = outName;
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 4000);
+          if (statusSetter) statusSetter("Saved " + outName + " (" + vLabel + ")");
+          return;
+        }
+      }
+      stream.getTracks().forEach(t => t.stop());
+    } catch {}
+  }
+  speakClean(sp, 2500);
+  const blob = new Blob([sp + "\n"], { type: "text/plain;charset=utf-8" });
+  const txtName = filename.replace(/\.(mp3|wav|webm)$/i, "-spoken-script.txt");
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = txtName;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+  if (statusSetter) statusSetter("Spoke with " + vLabel + "; saved " + txtName);
+}const ENDPOINT="https://inference.dahl.global/v1/chat/completions";const $=id=>document.getElementById(id);
 let SONGS=[],VOICES=[],ANNA_BODY="";
 const FH=["aria","jenny","sonia","libby","maisie","natasha","clara","ava","samantha","victoria","zira","hazel","female"];
 const MH=["guy","ryan","christopher","eric","davis","andrew","brian","david","mark","daniel","male"];
 const clean=s=>String(s||"").replace(/`/g,"").replace(/[\u2013\u2014]/g,"-").replace(/\n{3,}/g,"\n\n").trim();
 const cleanT=s=>clean(String(s||"").replace(/\{\{TITLE\}\}/gi,"").replace(/\b(?:SINGLE|STRAYD[-_ ]?ID)[-_ ]?\d+\b/gi,"").replace(/^Martin\s+Strayd\s*[-:|]+\s*/i,""));
 function ghHdr(){const v=($("ghPat")?.value||"").trim();if(v)localStorage.setItem("anna_gh_pat",v);const p=v||localStorage.getItem("anna_gh_pat")||"";return p?{Authorization:"Bearer "+p,Accept:"application/vnd.github.v3+json"}:null;}
-async function repoGet(path){const h=ghHdr();if(h){try{const r=await fetch("https://api.github.com/repos/agent-anna/home/contents/"+path+"?ref=main&t="+Date.now(),{headers:h,cache:"no-store"});if(r.ok){const j=await r.json();if(j.content){const b=atob(j.content.replace(/\s+/g,"")),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new TextDecoder().decode(u);}}}catch{}}
-for(const base of["https://raw.githubusercontent.com/agent-anna/home/main/","https://agent-anna.github.io/home/"]){try{const r=await fetch(base+path+"?t="+Date.now(),{cache:"no-store"});if(r.ok)return await r.text();}catch{}}return "";}
+async function repoGet(path){const h=ghHdr();if(h){try{const r=await fetch("https://api.github.com/repos/agent-anna/bananna/contents/"+path+"?ref=main&t="+Date.now(),{headers:h,cache:"no-store"});if(r.ok){const j=await r.json();if(j.content){const b=atob(j.content.replace(/\s+/g,"")),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new TextDecoder().decode(u);}}}catch{}}
+for(const base of["https://raw.githubusercontent.com/agent-anna/bananna/main/","https://agent-anna.github.io/bananna/"]){try{const r=await fetch(base+path+"?t="+Date.now(),{cache:"no-store"});if(r.ok)return await r.text();}catch{}}return "";}
 async function loadAll(){$("stEl").textContent="Loading Agent Anna body/bible & catalog...";const parts=[],h=ghHdr();
-for(const d of["body","bible","soul","character"]){if(h){try{const r=await fetch("https://api.github.com/repos/agent-anna/home/contents/"+d+"?ref=main",{headers:h,cache:"no-store"});if(r.ok){const fs=await r.json();for(const f of(Array.isArray(fs)?fs.slice(0,3):[])){if(f.type==="file"){const t=await repoGet(f.path);if(t)parts.push("["+f.path+"]\n"+t.slice(0,800));}}}}catch{}}}
+for(const d of["body","bible","soul","character"]){if(h){try{const r=await fetch("https://api.github.com/repos/agent-anna/bananna/contents/"+d+"?ref=main",{headers:h,cache:"no-store"});if(r.ok){const fs=await r.json();for(const f of(Array.isArray(fs)?fs.slice(0,3):[])){if(f.type==="file"){const t=await repoGet(f.path);if(t)parts.push("["+f.path+"]\n"+t.slice(0,800));}}}}catch{}}}
 ANNA_BODY=parts.join("\n\n").slice(0,2800);const m=new Map();
 for(const f of["strayd/songs-db.json","strayd/core-catalog.json","strayd/strayd-artist-live.json"]){try{const raw=await repoGet(f);if(!raw)continue;const d=JSON.parse(raw);const arr=Array.isArray(d)?d:(d.songs||d.tracks||[]);arr.forEach(x=>{const t=cleanT(x.title||x.name||x.track||"");if(!t)return;const k=t.toLowerCase();m.set(k,{...(m.get(k)||{}),...x,title:t,artist:cleanT(x.artist||"Martin Strayd")});});}catch{}}
 SONGS=[...m.values()];if(!SONGS.length)SONGS=[{title:"Adhd I Can Do That (Travillen Disorder)",artist:"Martin Strayd"}];
@@ -59,13 +158,13 @@ try{$("stEl").textContent="Calling Dahl ("+model+")...";const r=await fetch(ENDP
 if(!r.ok)throw new Error("HTTP "+r.status);const j=await r.json();const txt=clean(j?.choices?.[0]?.message?.content||"");if(!txt)throw new Error("Empty reply");$("outBox").value=txt;$("stEl").textContent="Generated fresh press release";}catch(e){$("stEl").textContent=e.message||"Dahl error";}}
 function scV(v){const h=(v.name+" "+v.lang).toLowerCase();let s=0;for(const x of FH)if(h.includes(x))s+=40;for(const x of MH)if(new RegExp("\\b"+x+"\\b").test(h))s-=100;return s;}
 function popV(){if(!("speechSynthesis"in window))return;const list=(speechSynthesis.getVoices()||[]).sort((a,b)=>scV(b)-scV(a));VOICES=list.filter(v=>scV(v)>-50);if(!VOICES.length)VOICES=list;const sel=$("voiceSel");sel.innerHTML="";VOICES.forEach((v,i)=>{const o=document.createElement("option");o.value=i;o.textContent=(scV(v)>=40?"Female - ":"")+v.name;sel.appendChild(o);});}
-function speakOut(t){const sp=clean(String(t||"").replace(/https?:\/\/\S+/g," ").replace(/#[A-Za-z0-9_]+/g," ")).slice(0,900);if(!sp||!("speechSynthesis"in window))return;popV();try{speechSynthesis.cancel();}catch{}const v=VOICES[Number($("voiceSel").value||0)]||VOICES[0]||null;(sp.match(/[^.!?]+[.!?]?/g)||[sp]).slice(0,8).forEach(p=>{const u=new SpeechSynthesisUtterance(p.trim());if(v)u.voice=v;u.pitch=1.05;speechSynthesis.speak(u);});}
-async function dlMp3(t){const sp=clean(String(t||"").replace(/https?:\/\/\S+/g," ").replace(/#[A-Za-z0-9_]+/g," ")).slice(0,300);if(!sp)return;speakOut(sp);try{const r=await fetch("https://api.streamelements.com/kappa/v2/speech?voice=Amy&text="+encodeURIComponent(sp));if(!r.ok)throw new Error("HTTP "+r.status);const b=await r.blob();const url=URL.createObjectURL(b);const a=document.createElement("a");a.href=url;a.download="press-anna.mp3";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);$("stEl").textContent="Downloaded press-anna.mp3";}catch(e){$("stEl").textContent="MP3 blocked ("+e.message+"); spoke live";}}
+function speakClean(t){const sp=clean(String(t||"").replace(/https?:\/\/\S+/g," ").replace(/#[A-Za-z0-9_]+/g," ")).slice(0,900);if(!sp||!("speechSynthesis"in window))return;popV();try{speechSynthesis.cancel();}catch{}const v=VOICES[Number($("voiceSel").value||0)]||VOICES[0]||null;(sp.match(/[^.!?]+[.!?]?/g)||[sp]).slice(0,8).forEach(p=>{const u=new SpeechSynthesisUtterance(p.trim());if(v)u.voice=v;u.pitch=1.05;speechSynthesis.speak(u);});}
+async function dlMp3(t){await saveSelectedSpeechAudio(t,"press-anna.webm",msg=>{$("stEl").textContent=msg;});}
 if("speechSynthesis"in window){popV();speechSynthesis.onvoiceschanged=popV;}
 if(localStorage.getItem("anna_gh_pat"))$("ghPat").value=localStorage.getItem("anna_gh_pat");
 if(localStorage.getItem("anna_dahl_key"))$("dahlKey").value=localStorage.getItem("anna_dahl_key");
 $("genBtn").onclick=genPress;$("reloadBtn").onclick=loadAll;$("songSel").onchange=()=>{syncSong();if(getKey())genPress();};
-$("spkBtn").onclick=()=>speakOut($("outBox").value);$("mp3Btn").onclick=()=>dlMp3($("outBox").value);
+$("spkBtn").onclick=()=>speakClean($("outBox").value);$("mp3Btn").onclick=()=>dlMp3($("outBox").value);
 $("cpyBtn").onclick=()=>{navigator.clipboard?.writeText($("outBox").value);$("stEl").textContent="Copied";};loadAll();
 </script></body></html>
 <div><label for="dahlKey">Dahl API Key</label><input id="dahlKey" type="password" placeholder="Dahl key..."/></div>
