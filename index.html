@@ -971,7 +971,7 @@
                         document.getElementById('active-file-path').value = filePath;
                         document.getElementById('repo-code-editor').value = fileContent;
                     } else {
-                        appendMessage('System Telemetry', COMMIT FAILED () for : , 'msg_cerr_' + Date.now(), false);
+                        appendMessage("System Telemetry", `COMMIT FAILED (${putRes.status}) for ${filePath}: ${putData.message || "Check GH_PAT permissions"}`, "msg_cerr_" + Date.now(), false);
                     }
                 } catch (err) {
                     console.error(`Autonomous write failed for ${filePath}:`, err);
@@ -1173,7 +1173,7 @@ ${textToSwallow}
             const settingsSelect = document.getElementById('settings-model-select').value;
 
             if (apiKey) localStorage.setItem('DAHL_API_KEY', apiKey);
-            if (ghToken) localStorage.setItem('GITHUB_PAT', ghToken);
+            if (ghToken) { localStorage.setItem('GH_PAT', ghToken); localStorage.setItem('GITHUB_PAT', ghToken); }
             if (settingsSelect) localStorage.setItem('DAHL_MODEL', settingsSelect);
 
             const topSelect = document.getElementById('model-select');
