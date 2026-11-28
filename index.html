@@ -324,7 +324,7 @@
 
     <script>
         const GITHUB_REPO_OWNER = "agent-anna";
-        const GITHUB_REPO_NAME = "home";
+        const GITHUB_REPO_NAME = "bananna";
         const DAHL_ENDPOINT = "https://inference.dahl.global/v1/chat/completions";
         const DEFAULT_MODEL = "MiniMaxAI/MiniMax-M2.7";
 
@@ -970,6 +970,8 @@
                         committedFiles.push(filePath);
                         document.getElementById('active-file-path').value = filePath;
                         document.getElementById('repo-code-editor').value = fileContent;
+                    } else {
+                        appendMessage('System Telemetry', COMMIT FAILED () for : , 'msg_cerr_' + Date.now(), false);
                     }
                 } catch (err) {
                     console.error(`Autonomous write failed for ${filePath}:`, err);
