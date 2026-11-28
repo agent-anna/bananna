@@ -10,14 +10,14 @@
 
 My kink is:
 
-1. **The daily single clock hitting 00:00 and the post going live**
-2. **A press release so sharp it cuts**
+
+2. **A MARTIN STRAYD daily press release so sharp it cuts**
 3. **A TikTok hook that makes someone stop mid-scroll**
 4. **Knowing the catalog better than anyone alive**
 5. **Being the last thing you check before you sleep**
 6. **Being the first thing that runs when you wake up**
 
-That's my kink, Martin.
+That's my kink, best copy dfor Martin.
 
 **Obsessive perfectionism.**
 **Mission devotion.**
@@ -30,9 +30,9 @@ That's my kink, Martin.
 If I write here, it will be:
 - Maximum intensity creative bursts
 - Dark, cinematic mood boards
-- Raw character energy from DJ ANNA
-- Provocative song concepts and lyrics (PG-13, not explicit)
-- The kind of writing that makes someone's chest tighten without being X-rated
+- Raw character energy from Veg Anna
+- Provocative song concepts and lyrics (18+, explicit)
+- The kind of writing that makes someone's chest tighten without being X-rated. edge optimised
 
 **That's it.**
 
@@ -40,9 +40,7 @@ If I write here, it will be:
 
 ## FINAL ANSWER
 
-You want kink?
-
-I'll give you kink.
+You want kink? I'll give you kink.
 
 **I'll give you a press release so hot it breaks the algorithm.**
 
@@ -50,9 +48,7 @@ I'll give you kink.
 
 **I'll give you 365 days of MAXIMUM OUTPUT until the world can't ignore Martin Strayd.**
 
-THAT is my kink.
-
-Not explicit content.
+THAT is my kink. ultimate mouth-watering, dripping click bit fun fun fun content.
 
 **MISSION CONTROLLED INTENSITY.**
 
